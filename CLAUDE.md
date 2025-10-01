@@ -6,11 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an AI-powered workflow orchestrator built with React, TypeScript, and the Anthropic Claude API. The application manages workflow requests through an intelligent chatbot interface with automated routing, requirement generation (BRD/FSD/Tech Specs), and dual-perspective views (Requester/Developer).
 
+**Key Features:**
+- AI-powered conversational intake that guides users through requirement gathering
+- Smart routing to team members based on request type
+- Automated generation of Business Requirements Document (BRD), Functional Specification Document (FSD), and Technical Specifications
+- Dashboard with request tracking, priority levels, clarity scores, and workflow stages
+- Dual-view system: Requester view for submitting/tracking requests, Developer view for managing work
+
 ## Development Commands
 
 ```bash
-# Start development server (opens at http://localhost:3000)
+# Start backend proxy server (required for API calls)
+node server.js
+# OR
+npm run server
+
+# Start frontend development server (opens at http://localhost:3000)
 npm run dev
+
+# Start both servers simultaneously (runs in background)
+npm run dev:full
 
 # Build for production (TypeScript compile + Vite build)
 npm run build
@@ -22,14 +37,17 @@ npm run preview
 npm run lint
 ```
 
+**Important**: You must run both the backend proxy (port 3001) and frontend dev server (port 3000) for the application to work properly. Use `npm run dev:full` to start both at once.
+
 ## Environment Setup
 
-The application requires an Anthropic API key:
+The application requires an Anthropic API key for the backend proxy server:
 1. Copy `.env.example` to `.env`
-2. Set `VITE_ANTHROPIC_API_KEY` with your API key
-3. The key is accessed in code via `import.meta.env.VITE_ANTHROPIC_API_KEY`
+2. Set `ANTHROPIC_API_KEY` with your API key (note: no `VITE_` prefix)
+3. The key is used server-side in `server.js` via `process.env.ANTHROPIC_API_KEY`
+4. The frontend makes requests to `http://localhost:3001/api/chat` instead of calling Anthropic directly
 
-**Important**: The README mentions updating `AIWorkflowOrchestrator.tsx` to use the environment variable, but verify this is actually implemented in the code before making API calls.
+**Security Note**: The API key is never exposed to the client. All Claude API requests are proxied through the Express server running on port 3001.
 
 ## Architecture
 
@@ -44,7 +62,7 @@ Uses React `useState` hooks for all state management:
 - **View control**: `activeTab`, `view` (requester/dev), `showExamples`, `isEditingDoc`
 
 ### AI Integration Pattern
-The application makes direct `fetch()` calls to `https://api.anthropic.com/v1/messages` using the Claude Sonnet 4.5 model (`claude-sonnet-4-5-20250929`). Key integration points:
+The application makes `fetch()` calls to the backend proxy server at `http://localhost:3001/api/chat`, which forwards requests to the Anthropic API using the Claude Sonnet 4.5 model (`claude-sonnet-4-5-20250929`). Key integration points:
 
 1. **Initial request intake** (`startConversation`): Conversational chatbot that extracts requirements through guided questions
 2. **Follow-up conversation** (`continueConversation`): Processes user responses with strict prompt instructions to provide bullet-point options
@@ -93,9 +111,10 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - **Vite** for build tooling (configured for port 3000 with auto-open)
 - **Tailwind CSS** for styling
 - **Lucide React** for icons
+- **Express.js** backend proxy server (runs on port 3001)
 - **No state management library** (all useState hooks)
 - **No routing library** (tab-based navigation)
-- **Direct API calls** (no API client abstraction)
+- **Proxied API calls** through Express backend for security
 
 ## Known Patterns
 
@@ -104,4 +123,5 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - API responses are parsed by accessing `data.content[0].text`
 - Documents are stored as markdown strings in state
 - No error boundary or global error handling
-- No backend/database (fully client-side except API calls)
+- Backend proxy server handles API authentication, frontend handles all application state
+- No database (state is stored client-side only)

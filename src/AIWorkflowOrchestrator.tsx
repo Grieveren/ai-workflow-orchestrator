@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Send, Bot, CheckCircle, Clock, AlertCircle, Users, Lightbulb, ArrowRight } from 'lucide-react';
 
-const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
-
 export default function AIWorkflowOrchestrator() {
   const [activeTab, setActiveTab] = useState('submit');
   const [view, setView] = useState('requester'); // 'requester' or 'dev'
@@ -93,12 +91,10 @@ export default function AIWorkflowOrchestrator() {
     setShowExamples(false);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-5-20250929",
@@ -238,12 +234,10 @@ Your response (ask next question with 2-4 selectable ANSWER options using "•")
         }
       ];
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-5-20250929",
@@ -269,12 +263,10 @@ Your response (ask next question with 2-4 selectable ANSWER options using "•")
 
       if (aiResponse.includes('COMPLETE') || updatedMessages.length >= 10) {
         try {
-          const summaryResponse = await fetch("https://api.anthropic.com/v1/messages", {
+          const summaryResponse = await fetch("http://localhost:3001/api/chat", {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              "x-api-key": ANTHROPIC_API_KEY,
-              "anthropic-version": "2023-06-01"
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
               model: "claude-sonnet-4-5-20250929",
@@ -343,12 +335,10 @@ RESPOND ONLY WITH VALID JSON. NO OTHER TEXT.`
     setIsProcessing(true);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-5-20250929",
@@ -431,12 +421,10 @@ NO OTHER TEXT.`
         expert: `You are helping a senior Product Owner. Be detailed and technical.`
       };
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-5-20250929",
@@ -532,12 +520,10 @@ RESPOND ONLY WITH VALID JSON.`
         techSpec: 'Technical Specification'
       };
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("http://localhost:3001/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-5-20250929",

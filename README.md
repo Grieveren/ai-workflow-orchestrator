@@ -18,6 +18,7 @@ A modern React application for managing workflow requests with AI-powered assist
 - Vite
 - Tailwind CSS
 - Lucide React (icons)
+- Express.js (backend proxy server)
 - Anthropic Claude API
 
 ## Prerequisites
@@ -44,30 +45,35 @@ A modern React application for managing workflow requests with AI-powered assist
 
    Edit `.env` and add your Anthropic API key:
    ```
-   VITE_ANTHROPIC_API_KEY=your_actual_api_key_here
+   ANTHROPIC_API_KEY=your_actual_api_key_here
    ```
 
-4. **Update the component to use environment variable**
-
-   In `src/AIWorkflowOrchestrator.tsx`, replace hardcoded API calls with:
-   ```typescript
-   const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
-
-   // Then in fetch headers:
-   headers: {
-     "Content-Type": "application/json",
-     "x-api-key": ANTHROPIC_API_KEY,
-     "anthropic-version": "2023-06-01"
-   }
-   ```
+   **Security Note**: The API key is used server-side only. The application uses an Express proxy server to keep your API key secure and never exposes it to the browser.
 
 ## Running the Application
 
 ### Development Mode
+
+You need to run both the backend proxy server and the frontend:
+
+**Option 1: Run both servers simultaneously (recommended)**
+```bash
+npm run dev:full
+```
+
+**Option 2: Run servers in separate terminals**
+
+Terminal 1 - Backend proxy server:
+```bash
+npm run server
+```
+
+Terminal 2 - Frontend dev server:
 ```bash
 npm run dev
 ```
-The app will open at `http://localhost:3000`
+
+The backend proxy runs on `http://localhost:3001` and the frontend opens at `http://localhost:3000`
 
 ### Build for Production
 ```bash
@@ -87,6 +93,7 @@ ai-workflow-orchestrator/
 │   ├── AIWorkflowOrchestrator.tsx  # Main component
 │   ├── main.tsx                     # App entry point
 │   └── index.css                    # Global styles
+├── server.js                        # Express proxy server (port 3001)
 ├── index.html                       # HTML template
 ├── package.json                     # Dependencies
 ├── tsconfig.json                    # TypeScript config
@@ -94,6 +101,7 @@ ai-workflow-orchestrator/
 ├── tailwind.config.js               # Tailwind CSS config
 ├── postcss.config.js                # PostCSS config
 ├── .env.example                     # Environment template
+├── CLAUDE.md                        # Documentation for Claude Code
 └── README.md                        # This file
 ```
 
@@ -121,8 +129,17 @@ ai-workflow-orchestrator/
 - **Requester View**: Submit and track your requests
 - **Dev View**: Accept work, update progress, mark complete
 
-## Notes
+## Architecture Notes
 
-- The API key is required for AI functionality
-- All API calls use Claude Sonnet 4.5 model
+- The application uses a **backend proxy server** (`server.js`) to securely handle Anthropic API calls
+- The API key is stored server-side only and never exposed to the browser
+- All Claude API requests from the frontend are routed through `http://localhost:3001/api/chat`
+- Uses Claude Sonnet 4.5 model (`claude-sonnet-4-5-20250929`)
+- Single-component React architecture with all state managed via `useState` hooks
+- No database - all state is stored client-side only
+
+## Security
+
 - Keep your `.env` file secure and never commit it to version control
+- The `.env` file is already in `.gitignore`
+- API key is only accessible server-side via the Express proxy
