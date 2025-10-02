@@ -206,34 +206,37 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 
 ## Critical Architecture Patterns
 
-### Dual-Server Architecture
-The application requires **both servers running** to function:
-- **Backend (port 3001)**: Express proxy that securely forwards Claude API requests
-- **Frontend (port 3000)**: Vite dev server with HMR
-- API calls flow: Frontend → `localhost:3001/api/chat` → Anthropic API
-- The `server.js` injects the model name (`claude-sonnet-4-5-20250929`) and API key server-side
+The application follows strict architectural patterns. **Detailed documentation** is available in the [`docs/architecture/`](docs/architecture/) directory:
 
-### State Flow & Data Ownership
-- **AppContext** (`src/contexts/AppContext.tsx`) composes three custom hooks:
-  - `useChat`: Manages chatbot conversation state (messages, options, input)
-  - `useRequests`: Manages request CRUD operations and mock data (REQ-001, REQ-002, REQ-003)
-  - `useDocuments`: Manages document generation state (BRD/FSD/Tech Spec)
-- All state is **client-side only** - no database or persistence layer
-- Each hook is independent and can be tested in isolation
+- **[Dual-Server Architecture](docs/architecture/dual-server.md)** - Backend proxy for secure API key handling
+- **[State Management](docs/architecture/state-management.md)** - React Context with composable hooks
+- **[Component Strategy](docs/architecture/component-strategy.md)** - Component location rules
+- **[Testing Philosophy](docs/architecture/testing.md)** - Testing approach and patterns
 
-### Component Location Strategy
-When adding/modifying components, follow these rules:
-- **Generic UI components** (`src/components/ui/`): Button, Card, Badge, Input, Skeleton - no business logic
-- **Layout components** (`src/components/layout/`): Header, TabNavigation - app-wide structure
-- **Feature components** (`src/features/[feature]/components/`): Tightly coupled to specific features (chat, dashboard, documents)
-- **Pages** (`src/pages/`): Route-level components that compose features
+### Quick Reference
 
-### Testing Philosophy
-- Test setup in `src/test/setup.ts` configures jsdom and @testing-library/jest-dom
-- Co-locate tests with components: `Button.test.tsx` next to `Button.tsx`
-- Run single test file: `npm test -- Button.test.tsx`
-- Mock API calls in tests - the service layer (`api.ts`) makes testing easier
+**Dual-Server** (both must run):
+- Backend (port 3001): Express proxy with API key
+- Frontend (port 3000): Vite dev server
+- Start both: `npm run dev:full`
+
+**State Management**:
+- `useChat` → Chatbot conversation state
+- `useRequests` → Request CRUD operations
+- `useDocuments` → Document generation state
+- Composed in `AppContext`, no external state libraries
+
+**Component Locations**:
+- `src/components/ui/` → Generic, no business logic
+- `src/components/layout/` → App-wide structure
+- `src/features/[feature]/components/` → Feature-specific
+- `src/pages/` → Route-level composition
+
+**Testing**:
+- Co-locate: `Component.test.tsx` next to `Component.tsx`
+- Run single test: `npm test -- Component.test.tsx`
+- See [testing docs](docs/architecture/testing.md) for patterns
 
 ## Migration Status
 
-All architectural phases complete (see [MIGRATION_PLAN.md](MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
+All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/history/MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.

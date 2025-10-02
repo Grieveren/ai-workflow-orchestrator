@@ -195,14 +195,19 @@ describe('Button', () => {
 
 ## Documentation
 
-- [MIGRATION_PLAN.md](MIGRATION_PLAN.md) - Complete refactoring strategy
-- [PHASE1_COMPLETE.md](PHASE1_COMPLETE.md) - Type definitions & API layer
-- [PHASE2_COMPLETE.md](PHASE2_COMPLETE.md) - Hooks & Context
-- [PHASE3_COMPLETE.md](PHASE3_COMPLETE.md) - Component extraction
-- [COMPONENT_INTEGRATION_COMPLETE.md](COMPONENT_INTEGRATION_COMPLETE.md) - Component integration
-- [PHASE4_COMPLETE.md](PHASE4_COMPLETE.md) - Routing & Testing
-- [PHASE5_COMPLETE.md](PHASE5_COMPLETE.md) - Advanced Features
-- [CLAUDE.md](CLAUDE.md) - AI assistant instructions
+### Quick Links
+- **[Documentation Index](docs/README.md)** - Complete documentation guide
+- **[CLAUDE.md](CLAUDE.md)** - Claude Code instructions
+
+### Architecture
+- [Dual-Server Architecture](docs/architecture/dual-server.md) - Backend proxy pattern
+- [State Management](docs/architecture/state-management.md) - React Context + hooks
+- [Component Strategy](docs/architecture/component-strategy.md) - Component organization
+- [Testing Philosophy](docs/architecture/testing.md) - Testing approach
+
+### Migration History
+- [Migration Plan](docs/history/MIGRATION_PLAN.md) - Complete refactoring roadmap
+- [Phase Completions](docs/history/) - Detailed phase reports
 
 ## Key Improvements
 
