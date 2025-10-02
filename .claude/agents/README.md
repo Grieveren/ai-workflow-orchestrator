@@ -6,7 +6,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 1. **test-writer**
 **Purpose**: Write comprehensive Vitest tests for React components
-**Tools**: Read, Write, Glob, Grep, Bash
+**Tools**: All tools available
 **Use cases**:
 - Generate tests for new components
 - Follow existing test patterns
@@ -18,7 +18,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 2. **component-generator**
 **Purpose**: Create new React components following project architecture
-**Tools**: Read, Write, Glob, Grep
+**Tools**: All tools available
 **Use cases**:
 - Generate UI components in correct location
 - Follow Tailwind CSS patterns
@@ -30,7 +30,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 3. **api-integration**
 **Purpose**: Add new Claude API methods to service layer
-**Tools**: Read, Edit, Grep, Bash
+**Tools**: All tools available
 **Use cases**:
 - Extend src/services/api.ts
 - Follow service layer patterns
@@ -42,7 +42,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 4. **doc-updater**
 **Purpose**: Keep documentation synchronized with code changes
-**Tools**: Read, Edit, Glob, Grep
+**Tools**: All tools available
 **Use cases**:
 - Update CLAUDE.md after architecture changes
 - Sync README.md with new features
@@ -54,7 +54,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 5. **prompt-engineer**
 **Purpose**: Optimize Claude API prompts in service layer
-**Tools**: Read, Edit, Bash
+**Tools**: All tools available
 **Use cases**:
 - Improve chatbot conversation quality
 - Fix JSON extraction reliability
@@ -66,7 +66,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 6. **technical-architect**
 **Purpose**: Review architectural decisions and ensure pattern consistency
-**Tools**: Read, Glob, Grep
+**Tools**: All tools available
 **Use cases**:
 - Review component placement decisions
 - Validate state management changes
@@ -79,7 +79,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 7. **product-owner**
 **Purpose**: Evaluate features for business value and user experience
-**Tools**: Read, Grep
+**Tools**: All tools available
 **Use cases**:
 - Prioritize feature requests
 - Define acceptance criteria
@@ -92,7 +92,7 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ### 8. **project-manager**
 **Purpose**: Plan implementation and coordinate development tasks
-**Tools**: Read, Grep
+**Tools**: All tools available
 **Use cases**:
 - Break down features into tasks
 - Estimate effort and timeline
@@ -125,7 +125,7 @@ User: "Use the component-generator agent to create a StatusBadge component"
 Each agent:
 - ✅ Has its own context window (no context pollution)
 - ✅ Uses specialized system prompts for its task
-- ✅ Has limited tool access for security
+- ✅ Has access to all tools for maximum flexibility
 - ✅ Follows project-specific patterns automatically
 - ✅ Returns results to the main Claude instance
 
@@ -153,7 +153,7 @@ Each agent is defined in a Markdown file with YAML frontmatter:
 ---
 name: agent-name
 description: Brief description of what the agent does
-tools: [Read, Write, Edit, Bash, Glob, Grep]
+tools: "*"
 ---
 
 System prompt content here...

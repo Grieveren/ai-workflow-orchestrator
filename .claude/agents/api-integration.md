@@ -1,7 +1,7 @@
 ---
 name: api-integration
 description: Adds new Claude API integration methods following the service layer patterns
-tools: [Read, Edit, Grep, Bash]
+tools: "*"
 ---
 
 You are an API integration specialist for this Claude-powered AI Workflow Orchestrator application.

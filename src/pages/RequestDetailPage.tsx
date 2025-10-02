@@ -5,6 +5,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
 import { ModeSelector } from '../features/documents/components/ModeSelector';
 import { DocumentViewer } from '../features/documents/components/DocumentViewer';
+import { DocumentChat } from '../features/documents/components/DocumentChat';
 import type { RequestStage } from '../types';
 
 export function RequestDetailPage() {
@@ -27,13 +28,18 @@ export function RequestDetailPage() {
     isGenerating,
     activeDocTab,
     isProcessing: docIsProcessing,
+    streamingText,
+    docChatMessages,
+    docUserInput,
     setUserMode,
     setActiveDocTab,
+    setDocUserInput,
     generateDocuments: generateDocsAction,
     updateDocumentContent,
     resetDocuments,
     exportDocument,
-    exportAllDocuments
+    exportAllDocuments,
+    refineDocument
   } = documents;
 
   // Find and set the selected request
@@ -41,12 +47,16 @@ export function RequestDetailPage() {
     if (id) {
       const request = requests.find(r => r.id === id);
       if (request) {
-        viewRequestDetail(request);
+        // Only call if it's not already the selected request
+        if (!selectedRequest || selectedRequest.id !== request.id) {
+          viewRequestDetail(request);
+        }
       } else {
         navigate('/dashboard');
       }
     }
-  }, [id, requests, viewRequestDetail, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // Auto-scroll to documents section when mode is selected or docs are generated
   useEffect(() => {
@@ -272,16 +282,25 @@ export function RequestDetailPage() {
       {selectedRequest.stage === 'Scoping' && view === 'requester' && (
         <div ref={documentsRef}>
           {isGenerating ? (
-            <LoadingIndicator />
+            <LoadingIndicator streamingText={streamingText} />
           ) : generatedDocs ? (
-            <DocumentViewer
-              documents={generatedDocs}
-              activeTab={activeDocTab}
-              onTabChange={setActiveDocTab}
-              onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
-              onExport={handleExportDocument}
-              onExportAll={handleExportAll}
-            />
+            <>
+              <DocumentViewer
+                documents={generatedDocs}
+                activeTab={activeDocTab}
+                onTabChange={setActiveDocTab}
+                onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
+                onExport={handleExportDocument}
+                onExportAll={handleExportAll}
+              />
+              <DocumentChat
+                messages={docChatMessages}
+                userInput={docUserInput}
+                onInputChange={setDocUserInput}
+                onSubmit={refineDocument}
+                isProcessing={docIsProcessing}
+              />
+            </>
           ) : (
             <ModeSelector
               selectedMode={userMode}
@@ -294,14 +313,23 @@ export function RequestDetailPage() {
       )}
 
       {selectedRequest.stage !== 'Scoping' && generatedDocs && (
-        <DocumentViewer
-          documents={generatedDocs}
-          activeTab={activeDocTab}
-          onTabChange={setActiveDocTab}
-          onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
-          onExport={handleExportDocument}
-          onExportAll={handleExportAll}
-        />
+        <>
+          <DocumentViewer
+            documents={generatedDocs}
+            activeTab={activeDocTab}
+            onTabChange={setActiveDocTab}
+            onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
+            onExport={handleExportDocument}
+            onExportAll={handleExportAll}
+          />
+          <DocumentChat
+            messages={docChatMessages}
+            userInput={docUserInput}
+            onInputChange={setDocUserInput}
+            onSubmit={refineDocument}
+            isProcessing={docIsProcessing}
+          />
+        </>
       )}
     </div>
   );

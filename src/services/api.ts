@@ -306,6 +306,159 @@ RESPOND ONLY WITH VALID JSON.`;
   },
 
   /**
+   * Generate requirement documents with streaming support
+   * @param onProgress Callback to receive progressive updates
+   */
+  generateDocumentsStream: async (
+    request: Request,
+    mode: UserMode,
+    onProgress: (partialText: string) => void
+  ): Promise<{ brd: string; fsd: string; techSpec: string }> => {
+    const modeInstructions = {
+      guided: 'You are a patient teacher helping a junior Product Owner. Keep explanations clear and concise.',
+      collaborative: 'You are helping an experienced Product Owner. Be professional and thorough.',
+      expert: 'You are helping a senior Product Owner. Be detailed and technical.'
+    };
+
+    const prompt = `${modeInstructions[mode]}
+
+Generate three requirement documents for this request:
+
+Request: "${request.title}"
+Priority: ${request.priority}
+Owner: ${request.owner}
+
+Create professional requirement documents with these sections:
+
+BUSINESS REQUIREMENTS DOCUMENT (BRD):
+- Executive Summary
+- Business Objectives
+- Current State & Pain Points
+- Desired Future State
+- Stakeholders
+- Scope
+- Success Criteria
+
+FUNCTIONAL SPECIFICATION DOCUMENT (FSD):
+- Overview
+- User Stories (2-3 stories)
+- Functional Requirements
+- Data Requirements
+- Business Rules
+
+TECHNICAL SPECIFICATION:
+- Technical Overview
+- Implementation Approach
+- Technical Requirements
+- Configuration Changes
+- Effort Estimate
+
+Output as JSON:
+{
+  "brd": "markdown content",
+  "fsd": "markdown content",
+  "techSpec": "markdown content"
+}
+
+Keep each document concise but complete. Use markdown headers (##) and bullet points.
+RESPOND ONLY WITH VALID JSON.`;
+
+    const response = await fetch('http://localhost:3001/api/chat/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('Response body is null');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedText = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+
+              // Handle different event types from Claude streaming API
+              if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                accumulatedText += parsed.delta.text;
+                onProgress(accumulatedText);
+              } else if (parsed.error) {
+                console.error('Streaming error from API:', parsed.error);
+                throw new Error(parsed.error.message || 'Streaming error');
+              }
+            } catch (e) {
+              // Skip invalid JSON chunks but log them
+              if (e instanceof SyntaxError) {
+                console.warn('Failed to parse streaming chunk:', data.substring(0, 100));
+              } else {
+                throw e;
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Stream reading error:', error);
+      // If we have accumulated text, try to use it
+      if (accumulatedText.length > 100) {
+        console.log('Attempting to parse partial response...');
+      } else {
+        throw error;
+      }
+    }
+
+    // Parse final accumulated text
+    if (!accumulatedText || accumulatedText.length < 10) {
+      throw new Error('No content received from streaming API');
+    }
+
+    console.log('Total accumulated text length:', accumulatedText.length);
+    console.log('First 100 chars:', accumulatedText.substring(0, 100));
+    console.log('Last 100 chars:', accumulatedText.substring(accumulatedText.length - 100));
+
+    const cleanedResponse = cleanJsonResponse(accumulatedText);
+    console.log('Cleaned response length:', cleanedResponse.length);
+    console.log('Cleaned first 100:', cleanedResponse.substring(0, 100));
+
+    try {
+      const parsed = JSON.parse(cleanedResponse);
+      console.log('Successfully parsed JSON with keys:', Object.keys(parsed));
+      return parsed;
+    } catch (error) {
+      console.error('Failed to parse final response.');
+      console.error('Cleaned response (first 500 chars):', cleanedResponse.substring(0, 500));
+      console.error('Parse error:', error);
+      throw new Error('Failed to parse generated documents. The response may be incomplete.');
+    }
+  },
+
+  /**
    * Refine/update a specific document based on feedback
    */
   refineDocument: async (currentDoc: string, docType: DocType, feedback: string): Promise<string> => {

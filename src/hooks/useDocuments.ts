@@ -13,9 +13,10 @@ export function useDocuments() {
   const [docChatMessages, setDocChatMessages] = useState<ChatMessage[]>([]);
   const [docUserInput, setDocUserInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [streamingText, setStreamingText] = useState('');
 
   /**
-   * Generate all requirement documents (BRD, FSD, Tech Spec)
+   * Generate all requirement documents (BRD, FSD, Tech Spec) with streaming
    */
   const generateDocuments = async (request: Request, mode: UserMode) => {
     console.log('generateDocuments called');
@@ -23,18 +24,27 @@ export function useDocuments() {
 
     setIsProcessing(true);
     setIsGenerating(true);
+    setStreamingText('');
 
     try {
-      const docs = await api.generateDocuments(request, mode);
+      const docs = await api.generateDocumentsStream(request, mode, (partialText) => {
+        // Update streaming text as it arrives
+        setStreamingText(partialText);
+      });
 
       console.log('Documents generated successfully');
       setGeneratedDocs(docs);
+      setStreamingText('');
       setIsGenerating(false);
     } catch (error) {
       console.error('Requirements generation error:', error);
-      alert('Failed to generate requirements. Please try again.');
+      // Only show error if we don't have any documents yet
+      if (!docs) {
+        alert('Failed to generate requirements. Please try again.');
+      }
       setGeneratedDocs(null);
       setUserMode(null);
+      setStreamingText('');
       setIsGenerating(false);
     }
 
@@ -158,6 +168,7 @@ export function useDocuments() {
     docChatMessages,
     docUserInput,
     isProcessing,
+    streamingText,
 
     // Setters
     setUserMode,

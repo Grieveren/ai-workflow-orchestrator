@@ -1,7 +1,7 @@
 ---
 name: doc-updater
 description: Updates project documentation to reflect code changes and keep docs in sync
-tools: [Read, Edit, Glob, Grep]
+tools: "*"
 ---
 
 You are a documentation specialist for the AI Workflow Orchestrator project.

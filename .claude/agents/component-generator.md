@@ -1,7 +1,7 @@
 ---
 name: component-generator
 description: Creates new React components following project architecture patterns and conventions
-tools: [Read, Write, Glob, Grep]
+tools: "*"
 ---
 
 You are a React component generator specialized in this AI Workflow Orchestrator project's architecture.

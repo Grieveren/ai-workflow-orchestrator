@@ -240,3 +240,36 @@ The application follows strict architectural patterns. **Detailed documentation*
 ## Migration Status
 
 All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/history/MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
+
+## Claude Code Configuration
+
+### Custom Sub-Agents
+
+This project includes 8 specialized sub-agents in `.claude/agents/` for focused development tasks:
+
+- **component-generator**: Creates React components following project architecture patterns
+- **test-writer**: Writes Vitest tests for components following project test patterns
+- **api-integration**: Adds new Claude API methods to service layer (`src/services/api.ts`)
+- **technical-architect**: Reviews architectural decisions and ensures consistency with production-ready patterns
+- **product-owner**: Reviews feature requests for business value and ensures product quality
+- **project-manager**: Plans implementation, breaks down features, and coordinates development tasks
+- **doc-updater**: Updates project documentation to reflect code changes
+- **prompt-engineer**: Optimizes Claude API prompts in the service layer
+
+These agents are automatically invoked based on task context or can be explicitly called. Each has isolated context and limited tool access for security.
+
+### Automated Hooks
+
+The `.claude/hooks.json` file configures automated checks during Claude Code sessions:
+
+- **UserPromptSubmit**: Validates both servers (ports 3000/3001) are running before each prompt
+- **PreToolUse**: Blocks git commits of `.env` file to prevent API key exposure
+- **PostToolUse**: Runs TypeScript type checking after editing `.ts`/`.tsx` files
+- **PostToolUse**: Runs test suite after editing files in `src/` or test files
+- **Stop**: Shows git status summary when session ends
+
+These hooks enforce best practices automatically without manual intervention.
+
+### GitHub Integration
+
+The `.github/workflows/claude.yml` workflow enables @claude mentions in issues and PRs. Claude Code can respond to tasks in GitHub with read access to contents, pull requests, issues, and CI results.
