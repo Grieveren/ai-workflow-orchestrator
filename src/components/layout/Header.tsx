@@ -1,0 +1,46 @@
+import { Lightbulb } from 'lucide-react';
+import type { ViewType } from '../../types';
+
+interface HeaderProps {
+  view: ViewType;
+  onViewChange: (view: ViewType) => void;
+}
+
+export function Header({ view, onViewChange }: HeaderProps) {
+  return (
+    <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white p-8 rounded-2xl mb-8 shadow-xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Lightbulb size={32} className="text-yellow-300" />
+            <h1 className="text-3xl font-bold">AI Workflow Orchestrator</h1>
+          </div>
+          <p className="text-purple-100">Tell me what you need, and I'll help you get things done</p>
+        </div>
+
+        <div className="flex gap-2 bg-white/20 backdrop-blur-sm rounded-xl p-1">
+          <button
+            onClick={() => onViewChange('requester')}
+            className={`px-6 py-2.5 rounded-lg font-medium transition ${
+              view === 'requester'
+                ? 'bg-white text-purple-600 shadow-md'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            Requester View
+          </button>
+          <button
+            onClick={() => onViewChange('dev')}
+            className={`px-6 py-2.5 rounded-lg font-medium transition ${
+              view === 'dev'
+                ? 'bg-white text-purple-600 shadow-md'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            Dev View
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
