@@ -1,0 +1,55 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! lsof -ti:3001 > /dev/null || ! lsof -ti:3000 > /dev/null; then echo '⚠️  Warning: Backend (3001) or Frontend (3000) not running. Start servers: npm run dev:full' >&2; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command // empty' | grep -qE '(git add|git commit).*\\.env\\b'; then echo '{\"block\": true, \"message\": \"🚫 Blocked: Attempting to commit .env file which contains ANTHROPIC_API_KEY. Remove .env from git staging.\"}'; exit 0; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🔍 Running TypeScript type check...'; cd /Users/brettgray/Coding/Claude && npx tsc --noEmit 2>&1 | head -30 || echo '✓ No type errors'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '(src/|test\\.tsx?$)' && [ -f \"$FILE_PATH\" ]; then echo '🧪 Running test suite...'; cd /Users/brettgray/Coding/Claude && npm run test:run 2>&1 | tail -20; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📊 Session complete. Project status:' && cd /Users/brettgray/Coding/Claude && (git status --short | head -10 || true)"
+          }
+        ]
+      }
+    ]
+  }
+}
