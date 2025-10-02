@@ -64,6 +64,45 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ---
 
+### 6. **technical-architect**
+**Purpose**: Review architectural decisions and ensure pattern consistency
+**Tools**: Read, Glob, Grep
+**Use cases**:
+- Review component placement decisions
+- Validate state management changes
+- Assess performance impact
+- Guard production-ready architecture
+
+**Invoke with**: "Review the architecture for adding WebSocket support"
+
+---
+
+### 7. **product-owner**
+**Purpose**: Evaluate features for business value and user experience
+**Tools**: Read, Grep
+**Use cases**:
+- Prioritize feature requests
+- Define acceptance criteria
+- Review BRD/FSD completeness
+- Ensure user-centric decisions
+
+**Invoke with**: "Evaluate this feature request for priority"
+
+---
+
+### 8. **project-manager**
+**Purpose**: Plan implementation and coordinate development tasks
+**Tools**: Read, Grep
+**Use cases**:
+- Break down features into tasks
+- Estimate effort and timeline
+- Identify dependencies and risks
+- Track progress
+
+**Invoke with**: "Create a project plan for adding authentication"
+
+---
+
 ## How to Use Agents
 
 ### Automatic Delegation
@@ -174,6 +213,29 @@ If an agent isn't working as expected:
 4. **Review agent output**
    - Check if the agent is following its instructions
    - Verify it's using project patterns correctly
+
+## Agent Collaboration Patterns
+
+These agents are designed to work together:
+
+### Feature Development Flow
+1. **product-owner** → Evaluates feature request, defines acceptance criteria
+2. **technical-architect** → Reviews architectural approach, approves design
+3. **project-manager** → Breaks down into tasks, estimates effort
+4. **component-generator** → Creates components following architecture
+5. **test-writer** → Writes comprehensive tests
+6. **doc-updater** → Updates documentation
+
+### Optimization Flow
+1. **prompt-engineer** → Optimizes AI prompts in service layer
+2. **test-writer** → Adds tests to verify improvements
+3. **doc-updater** → Documents prompt changes
+
+### API Integration Flow
+1. **technical-architect** → Reviews API design approach
+2. **api-integration** → Implements service layer method
+3. **test-writer** → Tests API integration
+4. **doc-updater** → Documents new API method
 
 ## Future Agent Ideas
 
