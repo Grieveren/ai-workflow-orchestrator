@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
@@ -11,6 +11,7 @@ export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { view, requests: requestsHook, documents } = useAppContext();
+  const documentsRef = useRef<HTMLDivElement>(null);
 
   const {
     requests,
@@ -46,6 +47,15 @@ export function RequestDetailPage() {
       }
     }
   }, [id, requests, viewRequestDetail, navigate]);
+
+  // Auto-scroll to documents section when mode is selected or docs are generated
+  useEffect(() => {
+    if (userMode || isGenerating || generatedDocs) {
+      setTimeout(() => {
+        documentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [userMode, isGenerating, generatedDocs]);
 
   const handleClose = () => {
     closeRequestDetail();
@@ -260,25 +270,27 @@ export function RequestDetailPage() {
       </div>
 
       {selectedRequest.stage === 'Scoping' && view === 'requester' && (
-        isGenerating ? (
-          <LoadingIndicator />
-        ) : generatedDocs ? (
-          <DocumentViewer
-            documents={generatedDocs}
-            activeTab={activeDocTab}
-            onTabChange={setActiveDocTab}
-            onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
-            onExport={handleExportDocument}
-            onExportAll={handleExportAll}
-          />
-        ) : (
-          <ModeSelector
-            selectedMode={userMode}
-            onModeSelect={setUserMode}
-            onGenerate={generateRequirements}
-            isGenerating={docIsProcessing}
-          />
-        )
+        <div ref={documentsRef}>
+          {isGenerating ? (
+            <LoadingIndicator />
+          ) : generatedDocs ? (
+            <DocumentViewer
+              documents={generatedDocs}
+              activeTab={activeDocTab}
+              onTabChange={setActiveDocTab}
+              onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
+              onExport={handleExportDocument}
+              onExportAll={handleExportAll}
+            />
+          ) : (
+            <ModeSelector
+              selectedMode={userMode}
+              onModeSelect={setUserMode}
+              onGenerate={generateRequirements}
+              isGenerating={docIsProcessing}
+            />
+          )}
+        </div>
       )}
 
       {selectedRequest.stage !== 'Scoping' && generatedDocs && (

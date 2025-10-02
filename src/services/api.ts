@@ -25,10 +25,18 @@ async function callClaude(request: ApiRequest): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    console.error('API error response:', errorData);
+    throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
   }
 
   const data: ClaudeApiResponse = await response.json();
+
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    console.error('Unexpected API response structure:', data);
+    throw new Error('Invalid API response structure');
+  }
+
   return data.content[0].text;
 }
 

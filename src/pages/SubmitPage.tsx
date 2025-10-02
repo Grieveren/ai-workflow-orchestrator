@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Bot, Lightbulb } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { ChatMessage } from '../features/chat/components/ChatMessage';
@@ -17,6 +18,7 @@ const exampleRequests = [
 export function SubmitPage() {
   const navigate = useNavigate();
   const { chat, requests: requestsHook } = useAppContext();
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const {
     chatMessages,
@@ -36,6 +38,15 @@ export function SubmitPage() {
   } = chat;
 
   const { submitRequest: submitRequestAction } = requestsHook;
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [chatMessages]);
 
   const submitRequest = async () => {
     const newRequest = await submitRequestAction(requestData);
@@ -111,6 +122,7 @@ export function SubmitPage() {
                 <ChatMessage key={idx} message={msg} />
               ))}
               {chatIsProcessing && <LoadingIndicator />}
+              <div ref={chatEndRef} />
             </>
           )}
         </div>
