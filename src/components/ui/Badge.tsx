@@ -43,7 +43,7 @@ export function StageBadge({ stage, className = '' }: StageBadgeProps) {
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-medium ${stageColors[stage]} ${className}`}>
+    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${stageColors[stage]} ${className}`}>
       {stage}
     </span>
   );

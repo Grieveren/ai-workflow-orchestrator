@@ -52,16 +52,16 @@ export function RequestDetailPage() {
     if (id) {
       const request = requests.find(r => r.id === id);
       if (request) {
-        // Only call if it's not already the selected request
-        if (!selectedRequest || selectedRequest.id !== request.id) {
-          viewRequestDetail(request);
-        }
+        // Reset documents when switching to a different request
+        resetDocuments();
+        viewRequestDetail(request);
       } else {
+        console.error('Request not found:', id);
         navigate('/dashboard');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, requests]);
 
   // Auto-scroll to documents section when mode is selected or docs are generated
   useEffect(() => {
@@ -71,6 +71,15 @@ export function RequestDetailPage() {
       }, 100);
     }
   }, [userMode, isGenerating, generatedDocs]);
+
+  // Cleanup when unmounting
+  useEffect(() => {
+    return () => {
+      closeRequestDetail();
+      resetDocuments();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleClose = () => {
     closeRequestDetail();

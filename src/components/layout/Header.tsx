@@ -21,23 +21,33 @@ export function Header({ view, onViewChange }: HeaderProps) {
         <div className="flex gap-2 bg-white/20 backdrop-blur-sm rounded-xl p-1">
           <button
             onClick={() => onViewChange('requester')}
-            className={`px-6 py-2.5 rounded-lg font-medium transition ${
+            className={`px-4 py-2.5 rounded-lg font-medium transition text-sm ${
               view === 'requester'
                 ? 'bg-white text-purple-600 shadow-md'
                 : 'text-white hover:bg-white/10'
             }`}
           >
-            Requester View
+            Requester
           </button>
           <button
             onClick={() => onViewChange('dev')}
-            className={`px-6 py-2.5 rounded-lg font-medium transition ${
+            className={`px-4 py-2.5 rounded-lg font-medium transition text-sm ${
               view === 'dev'
                 ? 'bg-white text-purple-600 shadow-md'
                 : 'text-white hover:bg-white/10'
             }`}
           >
-            Dev View
+            Developer
+          </button>
+          <button
+            onClick={() => onViewChange('management')}
+            className={`px-4 py-2.5 rounded-lg font-medium transition text-sm ${
+              view === 'management'
+                ? 'bg-white text-purple-600 shadow-md'
+                : 'text-white hover:bg-white/10'
+            }`}
+          >
+            Management
           </button>
         </div>
       </div>

@@ -4,14 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an AI-powered workflow orchestrator built with React, TypeScript, and the Anthropic Claude API. The application manages workflow requests through an intelligent chatbot interface with automated routing, requirement generation (BRD/FSD/Tech Specs), and dual-perspective views (Requester/Developer).
+This is an AI-powered workflow orchestrator built with React, TypeScript, and the Anthropic Claude API. The application manages workflow requests through an intelligent chatbot interface with automated routing, requirement generation (BRD/FSD/Tech Specs), and **three distinct role-based views** (Requester/Developer/Management).
 
 **Key Features:**
 - AI-powered conversational intake that guides users through requirement gathering
 - Smart routing to team members based on request type
 - Automated generation of Business Requirements Document (BRD), Functional Specification Document (FSD), and Technical Specifications
 - Dashboard with request tracking, priority levels, clarity scores, and workflow stages
-- Dual-view system: Requester view for submitting/tracking requests, Developer view for managing work
+- **Three-view system with role-based access control:**
+  - **Requester View**: Submit and track personal requests
+  - **Developer View**: Manage assigned work and team workflow
+  - **Management View**: Full portfolio oversight with analytics
 - **RevOps Optimization Features:**
   - SLA tracking with visual status badges (on-time/at-risk/overdue)
   - Team capacity monitoring with utilization indicators
@@ -117,8 +120,8 @@ src/
 
 ### Type System
 All data structures are defined in `src/types/index.ts`:
-- **Domain types**: `Request`, `ChatMessage`, `RequestData`, `GeneratedDocs`, `TeamMember`
-- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType`, `TabType`, `SLAStatus`
+- **Domain types**: `Request` (includes `submittedBy` for requester tracking), `ChatMessage`, `RequestData`, `GeneratedDocs`, `TeamMember`
+- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType` (`'requester' | 'dev' | 'management'`), `TabType`, `SLAStatus`
 - **API types**: `ClaudeApiRequest`, `ClaudeApiResponse`, `RoutingInfo`
 - **RevOps types**: `SLAData`, `DocumentApproval`
 
@@ -146,8 +149,8 @@ Uses React Context (`AppProvider`) with custom hooks:
 - **`useChat` hook**: `chatMessages`, `userInput`, `isProcessing`, `currentOptions`
 - **`useRequests` hook**: `requests`, `selectedRequest`, `requestData`
 - **`useDocuments` hook**: `generatedDocs`, `userMode`, `isGenerating`, `activeDocTab`, `docChatMessages`
-- **View control**: `view` (requester/dev)
-- **Navigation**: React Router DOM for URL-based routing
+- **View control**: `view` (requester/dev/management) - controls role-based access and filtering
+- **Navigation**: React Router DOM for URL-based routing with auto-navigation on view change
 
 ### AI Integration Pattern
 The application uses the API service layer for all Claude interactions:
@@ -175,7 +178,32 @@ Page-based routing with React Router:
 - **`/request/:id`**: Individual request detail (RequestDetailPage) with document generation and approval workflow
 - **`*`**: 404 error page (NotFoundPage)
 
-The application toggles between Requester and Developer perspectives (`view` state).
+### Role-Based View System
+The application provides three distinct user experiences with automatic filtering and navigation control:
+
+**👤 Requester View** (Demo user: Jessica Martinez)
+- **Navigation**: Dashboard → New Request
+- **Filtering**: Shows only requests submitted by the user
+- **Capabilities**: Submit requests, generate documents, review completed work
+- **Auto-navigation**: Switches to Dashboard when view changes
+
+**💻 Developer View** (Demo user: Sarah Chen)
+- **Navigation**: Dashboard → Kanban Board → Analytics
+- **Filtering**: Shows assigned requests + "Ready for Dev" stage requests
+- **Capabilities**: Accept work, update status, complete requests
+- **Auto-navigation**: Switches to Dashboard when view changes
+
+**📊 Management View** (Full oversight)
+- **Navigation**: Dashboard → Kanban Board → Analytics
+- **Filtering**: Shows ALL requests (no filtering)
+- **Capabilities**: Read-only oversight, team capacity monitoring, SLA tracking
+- **Auto-navigation**: Switches to Dashboard when view changes
+
+**Implementation Details**:
+- View state managed in `AppContext` (src/contexts/AppContext.tsx)
+- Filtering logic in `DashboardPage.tsx`, `KanbanPage.tsx`, and `App.tsx`
+- Request count updates dynamically based on filtered results
+- Stage badges use `whitespace-nowrap` to prevent text wrapping
 
 Features lazy loading with code splitting, error boundaries, skeleton loaders, and toast notifications for optimal performance and UX.
 

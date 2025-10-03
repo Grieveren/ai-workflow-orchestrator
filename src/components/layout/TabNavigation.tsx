@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
+import type { ViewType } from '../../types';
 
 interface TabNavigationProps {
   requestCount: number;
+  view: ViewType;
 }
 
-export function TabNavigation({ requestCount }: TabNavigationProps) {
+export function TabNavigation({ requestCount, view }: TabNavigationProps) {
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -22,18 +24,32 @@ export function TabNavigation({ requestCount }: TabNavigationProps) {
 
   return (
     <div className="flex gap-3 justify-center mb-6">
-      <Link to="/" className={getClassName('/')}>
-        New Request
-      </Link>
-      <Link to="/dashboard" className={getClassName('/dashboard')}>
-        Dashboard ({requestCount})
-      </Link>
-      <Link to="/kanban" className={getClassName('/kanban')}>
-        Kanban Board
-      </Link>
-      <Link to="/analytics" className={getClassName('/analytics')}>
-        Analytics
-      </Link>
+      {/* Requester View: Dashboard first, then New Request */}
+      {view === 'requester' && (
+        <>
+          <Link to="/dashboard" className={getClassName('/dashboard')}>
+            Dashboard ({requestCount})
+          </Link>
+          <Link to="/" className={getClassName('/')}>
+            New Request
+          </Link>
+        </>
+      )}
+
+      {/* Developer and Management Views */}
+      {(view === 'dev' || view === 'management') && (
+        <>
+          <Link to="/dashboard" className={getClassName('/dashboard')}>
+            Dashboard ({requestCount})
+          </Link>
+          <Link to="/kanban" className={getClassName('/kanban')}>
+            Kanban Board
+          </Link>
+          <Link to="/analytics" className={getClassName('/analytics')}>
+            Analytics
+          </Link>
+        </>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ export type RequestStage = 'Intake' | 'Scoping' | 'Ready for Dev' | 'In Progress
 export type Priority = 'High' | 'Medium' | 'Low';
 export type UserMode = 'guided' | 'collaborative' | 'expert';
 export type DocType = 'brd' | 'fsd' | 'techSpec';
-export type ViewType = 'requester' | 'dev';
+export type ViewType = 'requester' | 'dev' | 'management';
 export type TabType = 'submit' | 'dashboard' | 'kanban' | 'detail' | 'analytics';
 export type SLAStatus = 'on-time' | 'at-risk' | 'overdue';
 
@@ -28,7 +28,8 @@ export interface Request {
   id: string;
   title: string;
   status: string;
-  owner: string;
+  owner: string; // Developer assigned to work on this
+  submittedBy?: string; // Requester who submitted this
   priority: Priority;
   clarityScore: number;
   daysOpen: number;

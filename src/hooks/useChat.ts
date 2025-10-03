@@ -60,6 +60,7 @@ export function useChat() {
     try {
       const { message, options, isComplete } = await api.continueConversation(updatedMessages);
 
+      console.log('Continue conversation response:', { message, options, isComplete });
       setCurrentOptions(options);
 
       if (isComplete) {
@@ -73,6 +74,13 @@ export function useChat() {
           }]);
           setCurrentOptions([]);
         } catch (e) {
+          console.error('Failed to extract request data:', e);
+          // Even if extraction fails, set a minimal requestData so Submit button appears
+          setRequestData({
+            title: 'New Request',
+            problem: 'See conversation above',
+            success: 'To be determined'
+          });
           setChatMessages([...updatedMessages, {
             role: 'assistant',
             content: message + '\n\nI think I have enough information now! Click "Submit Request" to continue.'

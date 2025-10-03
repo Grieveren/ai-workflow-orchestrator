@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AppProvider } from './contexts/AppContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -25,14 +25,38 @@ function PageLoader() {
   );
 }
 
+// For demo purposes, using mock user names
+const MOCK_REQUESTER = 'Jessica Martinez';
+const MOCK_DEV = 'Sarah Chen';
+
 function AppContent() {
+  const navigate = useNavigate();
   const { view, setView, requests } = useAppContext();
+
+  const handleViewChange = (newView: any) => {
+    setView(newView);
+    navigate('/dashboard');
+  };
+
+  // Calculate filtered request count based on view
+  const getFilteredRequestCount = () => {
+    return requests.requests.filter(request => {
+      if (view === 'requester') {
+        return request.submittedBy === MOCK_REQUESTER;
+      } else if (view === 'dev') {
+        return request.owner === MOCK_DEV || request.stage === 'Ready for Dev';
+      } else if (view === 'management') {
+        return true;
+      }
+      return true;
+    }).length;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-5xl mx-auto">
-        <Header view={view} onViewChange={setView} />
-        <TabNavigation requestCount={requests.requests.length} />
+        <Header view={view} onViewChange={handleViewChange} />
+        <TabNavigation requestCount={getFilteredRequestCount()} view={view} />
 
         <Suspense fallback={<PageLoader />}>
           <Routes>
