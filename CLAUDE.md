@@ -12,6 +12,12 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
 - Automated generation of Business Requirements Document (BRD), Functional Specification Document (FSD), and Technical Specifications
 - Dashboard with request tracking, priority levels, clarity scores, and workflow stages
 - Dual-view system: Requester view for submitting/tracking requests, Developer view for managing work
+- **RevOps Optimization Features:**
+  - SLA tracking with visual status badges (on-time/at-risk/overdue)
+  - Team capacity monitoring with utilization indicators
+  - Analytics dashboard with portfolio funnel and cycle time metrics
+  - Document approval workflow with quality gates
+  - Modern toast notifications for all user feedback
 
 ## Development Commands
 
@@ -76,6 +82,7 @@ src/
 │   │   ├── Badge.tsx
 │   │   ├── Input.tsx
 │   │   ├── Skeleton.tsx
+│   │   ├── SLABadge.tsx
 │   │   └── index.ts
 │   └── layout/                  # Layout components
 │       ├── Header.tsx
@@ -85,7 +92,7 @@ src/
 │   ├── chat/
 │   │   └── components/          # Chat-specific components
 │   ├── dashboard/
-│   │   └── components/          # Dashboard-specific components
+│   │   └── components/          # Dashboard + TeamCapacityWidget
 │   └── documents/
 │       └── components/          # Document-specific components
 ├── hooks/                       # Custom React hooks
@@ -98,6 +105,8 @@ src/
 │   └── index.ts
 ├── services/                    # API service layer
 │   └── api.ts
+├── utils/                       # Utility functions
+│   └── slaCalculator.ts         # SLA calculation logic
 ├── test/                        # Test setup
 │   └── setup.ts
 ├── App.tsx                      # Main router component
@@ -108,9 +117,10 @@ src/
 
 ### Type System
 All data structures are defined in `src/types/index.ts`:
-- **Domain types**: `Request`, `ChatMessage`, `RequestData`, `GeneratedDocs`
-- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType`, `TabType`
+- **Domain types**: `Request`, `ChatMessage`, `RequestData`, `GeneratedDocs`, `TeamMember`
+- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType`, `TabType`, `SLAStatus`
 - **API types**: `ClaudeApiRequest`, `ClaudeApiResponse`, `RoutingInfo`
+- **RevOps types**: `SLAData`, `DocumentApproval`
 
 ### API Service Layer
 All Claude API interactions are centralized in `src/services/api.ts`:
@@ -118,10 +128,18 @@ All Claude API interactions are centralized in `src/services/api.ts`:
 - `api.continueConversation()` - Multi-turn conversation
 - `api.extractRequestData()` - Extract structured data from chat
 - `api.routeRequest()` - Route to team member
-- `api.generateDocuments()` - Create BRD/FSD/Tech Spec
+- `api.generateDocuments()` - Create BRD/FSD/Tech Spec (sequential, 3 separate API calls)
+- `api.generateSingleDocument()` - Create one document (BRD, FSD, or Tech Spec)
 - `api.refineDocument()` - Update documents based on feedback
 
 The service layer handles all HTTP requests to the backend proxy at `http://localhost:3001/api/chat`, which forwards to Claude Sonnet 4.5 (`claude-sonnet-4-5-20250929`).
+
+**Document Generation Strategy**: Documents are generated sequentially using 3 smaller API calls (1000 tokens each) instead of 1 large call (4000 tokens). This provides:
+- Faster individual responses (~3-5s per document)
+- Better error recovery (single doc failure doesn't lose all docs)
+- Real-time progress tracking (user sees which document is being generated)
+- No JSON parsing errors (returns markdown directly)
+- Concise, demo-friendly content (<200 words per document)
 
 ### State Management
 Uses React Context (`AppProvider`) with custom hooks:
@@ -151,23 +169,27 @@ Each request includes:
 ### UI Structure
 Page-based routing with React Router:
 - **`/`**: New request submission (SubmitPage) with AI chatbot interface
-- **`/dashboard`**: Request list (DashboardPage) with stats and filtering
-- **`/kanban`**: Kanban board (KanbanPage) with drag-and-drop workflow
-- **`/request/:id`**: Individual request detail (RequestDetailPage) with document generation
+- **`/dashboard`**: Request list (DashboardPage) with stats, filtering, SLA badges, and team capacity widget
+- **`/kanban`**: Kanban board (KanbanPage) with drag-and-drop workflow and SLA badges
+- **`/analytics`**: Analytics dashboard (AnalyticsPage) with portfolio funnel, bottleneck detection, and cycle time trends
+- **`/request/:id`**: Individual request detail (RequestDetailPage) with document generation and approval workflow
 - **`*`**: 404 error page (NotFoundPage)
 
 The application toggles between Requester and Developer perspectives (`view` state).
 
-Features lazy loading with code splitting, error boundaries, and skeleton loaders for optimal performance.
+Features lazy loading with code splitting, error boundaries, skeleton loaders, and toast notifications for optimal performance and UX.
 
 ## Key Functions
 
 - `startConversation()`: Initiates new request with AI
 - `continueConversation()`: Handles multi-turn conversation with strict prompt engineering for bullet-point options
-- `generateRequirements(mode)`: Creates all three specification documents based on user experience level
+- `generateRequirements(mode)`: Creates all three specification documents sequentially based on user experience level
 - `refineDocument()`: Updates documents based on user feedback
 - `viewRequestDetail(request)`: Opens request detail view (resets generation state)
 - `updateRequestStage(requestId, newStage, note)`: Manages request workflow transitions
+- `calculateSLA(request)`: Calculates SLA status based on complexity and creation date
+- `approveDocument(docType, approver)`: Approves a document and enables stage transitions
+- `areAllDocsApproved()`: Checks if all three documents are approved before allowing "Ready for Dev"
 
 ## Prompt Engineering Notes
 
@@ -186,6 +208,7 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - **React Router DOM v7** for URL-based navigation
 - **Tailwind CSS** for styling
 - **Lucide React** for icons
+- **React Hot Toast** for modern toast notifications
 - **Express.js** backend proxy server (runs on port 3001)
 - **React Context** for state management with custom hooks
 - **Vitest** for testing with React Testing Library
@@ -245,7 +268,7 @@ All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/his
 
 ### Custom Sub-Agents
 
-This project includes 8 specialized sub-agents in `.claude/agents/` for focused development tasks:
+This project includes 9 specialized sub-agents in `.claude/agents/` for focused development tasks:
 
 - **component-generator**: Creates React components following project architecture patterns
 - **test-writer**: Writes Vitest tests for components following project test patterns
@@ -255,6 +278,7 @@ This project includes 8 specialized sub-agents in `.claude/agents/` for focused 
 - **project-manager**: Plans implementation, breaks down features, and coordinates development tasks
 - **doc-updater**: Updates project documentation to reflect code changes
 - **prompt-engineer**: Optimizes Claude API prompts in the service layer
+- **revops-expert**: Provides strategic consultation on Revenue Operations workflow optimization, bottleneck detection, and process improvements
 
 These agents are automatically invoked based on task context or can be explicitly called. Each has isolated context and limited tool access for security.
 

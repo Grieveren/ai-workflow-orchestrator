@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAppContext } from '../contexts/AppContext';
 import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
 import { ModeSelector } from '../features/documents/components/ModeSelector';
@@ -161,7 +162,9 @@ export function RequestDetailPage() {
                   <div className="mt-2 flex gap-2">
                     <button
                       onClick={() => {
-                        alert('In production, AI would send: "Hi Jennifer, REQ-003 hasn\'t been updated in 3 days. Do you need help or should we reprioritize?"');
+                        toast.success('Reminder sent to Jennifer Kim', {
+                          icon: '📧',
+                        });
                       }}
                       className="text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                     >
@@ -197,7 +200,9 @@ export function RequestDetailPage() {
               <button
                 onClick={() => {
                   handleUpdateRequestStage(selectedRequest.id, 'In Progress', 'Dev accepted and started work');
-                  alert('You accepted the request. Status changed to "In Progress"');
+                  toast.success('Request accepted! Status changed to "In Progress"', {
+                    icon: '✅',
+                  });
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
@@ -208,7 +213,9 @@ export function RequestDetailPage() {
                   const reason = prompt('Why are you rejecting this request?');
                   if (reason) {
                     handleUpdateRequestStage(selectedRequest.id, 'Scoping', `Dev rejected: ${reason}`);
-                    alert('Request sent back to Product Owner for clarification');
+                    toast('Request sent back to Product Owner for clarification', {
+                      icon: '↩️',
+                    });
                   }
                 }}
                 className="px-4 py-2 bg-white text-blue-700 border border-blue-300 rounded-lg hover:bg-blue-50"
@@ -237,7 +244,9 @@ export function RequestDetailPage() {
               <button
                 onClick={() => {
                   handleUpdateRequestStage(selectedRequest.id, 'Review', 'Dev completed work - ready for review');
-                  alert('Request moved to Review stage. Product Owner will be notified.');
+                  toast.success('Request moved to Review. Product Owner will be notified.', {
+                    icon: '🎯',
+                  });
                 }}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
               >
@@ -254,7 +263,10 @@ export function RequestDetailPage() {
               <button
                 onClick={() => {
                   handleUpdateRequestStage(selectedRequest.id, 'Completed', 'Review approved - request completed');
-                  alert('Request marked as complete! 🎉');
+                  toast.success('Request completed successfully!', {
+                    icon: '🎉',
+                    duration: 4000,
+                  });
                 }}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
@@ -265,7 +277,9 @@ export function RequestDetailPage() {
                   const feedback = prompt('What needs to be changed?');
                   if (feedback) {
                     handleUpdateRequestStage(selectedRequest.id, 'In Progress', `Feedback from review: ${feedback}`);
-                    alert('Feedback sent to dev. Status changed back to "In Progress"');
+                    toast('Feedback sent to dev. Status changed back to "In Progress"', {
+                      icon: '💬',
+                    });
                   }
                 }}
                 className="px-4 py-2 bg-white text-green-700 border border-green-300 rounded-lg hover:bg-green-50"
@@ -329,7 +343,10 @@ export function RequestDetailPage() {
                   <button
                     onClick={() => {
                       handleUpdateRequestStage(selectedRequest.id, 'Ready for Dev', 'All documents approved - ready for development');
-                      alert('Request moved to "Ready for Dev". Developers will be notified.');
+                      toast.success('Request moved to "Ready for Dev". Developers will be notified.', {
+                        icon: '🚀',
+                        duration: 4000,
+                      });
                     }}
                     className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
                   >

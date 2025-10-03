@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Bot, Lightbulb } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAppContext } from '../contexts/AppContext';
 import { ChatMessage } from '../features/chat/components/ChatMessage';
 import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
@@ -51,10 +52,18 @@ export function SubmitPage() {
   const submitRequest = async () => {
     const newRequest = await submitRequestAction(requestData);
     if (newRequest) {
-      navigate('/dashboard');
-      resetChat();
+      toast.success('Request submitted successfully!', {
+        icon: '✅',
+        duration: 2000,
+      });
+      setTimeout(() => {
+        navigate('/dashboard');
+        resetChat();
+      }, 500);
     } else {
-      alert('Routing failed. Please try again.');
+      toast.error('Routing failed. Please try again.', {
+        icon: '⚠️',
+      });
     }
   };
 

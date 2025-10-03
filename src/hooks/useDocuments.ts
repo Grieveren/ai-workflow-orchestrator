@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import type { UserMode, DocType, GeneratedDocs, ChatMessage, Request } from '../types';
 import { api } from '../services/api';
 
@@ -63,7 +64,10 @@ export function useDocuments() {
     } catch (error) {
       console.error('Requirements generation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Failed to generate requirements: ${errorMessage}\n\nPlease try again or use a different mode.`);
+      toast.error(`Failed to generate requirements: ${errorMessage}`, {
+        duration: 5000,
+        icon: '⚠️',
+      });
       setGeneratedDocs(null);
       setUserMode(null);
       setStreamingText('');
