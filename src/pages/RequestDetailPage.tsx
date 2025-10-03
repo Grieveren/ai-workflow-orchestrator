@@ -6,7 +6,9 @@ import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
 import { ModeSelector } from '../features/documents/components/ModeSelector';
 import { DocumentViewer } from '../features/documents/components/DocumentViewer';
 import { DocumentChat } from '../features/documents/components/DocumentChat';
-import type { RequestStage } from '../types';
+import { SLABadge } from '../components/ui';
+import { calculateSLA } from '../utils/slaCalculator';
+import type { RequestStage, DocType } from '../types';
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -39,7 +41,9 @@ export function RequestDetailPage() {
     resetDocuments,
     exportDocument,
     exportAllDocuments,
-    refineDocument
+    refineDocument,
+    approveDocument,
+    areAllDocsApproved
   } = documents;
 
   // Find and set the selected request
@@ -93,6 +97,12 @@ export function RequestDetailPage() {
     exportAllDocuments(selectedRequest);
   };
 
+  const handleApprove = (docType: DocType) => {
+    approveDocument(docType, 'Product Owner');
+  };
+
+  const allDocsApproved = areAllDocsApproved();
+
   const getStageColor = (stage: RequestStage): string => {
     const colors: Record<RequestStage, string> = {
       'Intake': 'bg-gray-100 text-gray-700',
@@ -113,6 +123,8 @@ export function RequestDetailPage() {
     );
   }
 
+  const sla = selectedRequest.sla || calculateSLA(selectedRequest);
+
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -129,6 +141,7 @@ export function RequestDetailPage() {
               }`}>
                 {selectedRequest.priority}
               </span>
+              <SLABadge sla={sla} />
             </div>
             <h3 className="text-xl text-gray-700 mb-2">{selectedRequest.title}</h3>
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -292,6 +305,8 @@ export function RequestDetailPage() {
                 onDocumentChange={(content) => updateDocumentContent(activeDocTab, content)}
                 onExport={handleExportDocument}
                 onExportAll={handleExportAll}
+                onApprove={handleApprove}
+                showApprovalUI={true}
               />
               <DocumentChat
                 messages={docChatMessages}
@@ -300,6 +315,28 @@ export function RequestDetailPage() {
                 onSubmit={refineDocument}
                 isProcessing={docIsProcessing}
               />
+
+              {/* Move to Ready for Dev button */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-4">
+                <h4 className="font-semibold text-gray-800 mb-3">Ready to hand off to development?</h4>
+                {!allDocsApproved ? (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+                    <p className="text-sm text-yellow-800">
+                      ⚠️ All documents must be approved before moving to development
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleUpdateRequestStage(selectedRequest.id, 'Ready for Dev', 'All documents approved - ready for development');
+                      alert('Request moved to "Ready for Dev". Developers will be notified.');
+                    }}
+                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+                  >
+                    Move to Ready for Dev
+                  </button>
+                )}
+              </div>
             </>
           ) : (
             <ModeSelector

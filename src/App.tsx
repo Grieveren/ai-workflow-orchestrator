@@ -12,6 +12,7 @@ const SubmitPage = lazy(() => import('./pages/SubmitPage').then(m => ({ default:
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const KanbanPage = lazy(() => import('./pages/KanbanPage').then(m => ({ default: m.KanbanPage })));
 const RequestDetailPage = lazy(() => import('./pages/RequestDetailPage').then(m => ({ default: m.RequestDetailPage })));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 function PageLoader() {
@@ -37,6 +38,7 @@ function AppContent() {
             <Route path="/" element={<SubmitPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/kanban" element={<KanbanPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/request/:id" element={<RequestDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

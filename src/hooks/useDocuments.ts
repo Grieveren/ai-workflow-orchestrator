@@ -16,7 +16,7 @@ export function useDocuments() {
   const [streamingText, setStreamingText] = useState('');
 
   /**
-   * Generate all requirement documents (BRD, FSD, Tech Spec) with streaming
+   * Generate all requirement documents (BRD, FSD, Tech Spec) - sequential generation
    */
   const generateDocuments = async (request: Request, mode: UserMode) => {
     console.log('generateDocuments called');
@@ -27,21 +27,43 @@ export function useDocuments() {
     setStreamingText('');
 
     try {
-      const docs = await api.generateDocumentsStream(request, mode, (partialText) => {
-        // Update streaming text as it arrives
-        setStreamingText(partialText);
+      // Step 0: Preparing context
+      setStreamingText('step:0');
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Steps 1-3: Generate each document sequentially with progress updates
+      const docs = await api.generateDocuments(request, mode, (docType) => {
+        // Map docType to step number
+        const stepMap: Record<DocType, number> = {
+          brd: 1,
+          fsd: 2,
+          techSpec: 3
+        };
+        setStreamingText(`step:${stepMap[docType]}`);
       });
 
+      // Step 4: Initializing approval workflow
+      setStreamingText('step:4');
       console.log('Documents generated successfully');
-      setGeneratedDocs(docs);
+
+      // Initialize with approval state
+      const docsWithApprovals: GeneratedDocs = {
+        ...docs,
+        approvals: {
+          brd: { approved: false },
+          fsd: { approved: false },
+          techSpec: { approved: false }
+        }
+      };
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setGeneratedDocs(docsWithApprovals);
       setStreamingText('');
       setIsGenerating(false);
     } catch (error) {
       console.error('Requirements generation error:', error);
-      // Only show error if we don't have any documents yet
-      if (!docs) {
-        alert('Failed to generate requirements. Please try again.');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to generate requirements: ${errorMessage}\n\nPlease try again or use a different mode.`);
       setGeneratedDocs(null);
       setUserMode(null);
       setStreamingText('');
@@ -49,6 +71,48 @@ export function useDocuments() {
     }
 
     setIsProcessing(false);
+  };
+
+  /**
+   * Approve a document
+   */
+  const approveDocument = (docType: DocType, approver: string) => {
+    if (!generatedDocs) return;
+
+    const updatedApprovals = {
+      brd: generatedDocs.approvals?.brd || { approved: false },
+      fsd: generatedDocs.approvals?.fsd || { approved: false },
+      techSpec: generatedDocs.approvals?.techSpec || { approved: false }
+    };
+
+    updatedApprovals[docType] = {
+      approved: true,
+      approver,
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    };
+
+    setGeneratedDocs({
+      ...generatedDocs,
+      approvals: updatedApprovals
+    });
+  };
+
+  /**
+   * Check if all documents are approved
+   */
+  const areAllDocsApproved = (): boolean => {
+    if (!generatedDocs?.approvals) return false;
+    return (
+      generatedDocs.approvals.brd.approved &&
+      generatedDocs.approvals.fsd.approved &&
+      generatedDocs.approvals.techSpec.approved
+    );
   };
 
   /**
@@ -181,6 +245,8 @@ export function useDocuments() {
     updateDocumentContent,
     resetDocuments,
     exportDocument,
-    exportAllDocuments
+    exportAllDocuments,
+    approveDocument,
+    areAllDocsApproved
   };
 }

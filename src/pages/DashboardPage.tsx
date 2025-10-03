@@ -1,6 +1,7 @@
 import { useAppContext } from '../contexts/AppContext';
 import { StatsBar } from '../features/dashboard/components/StatsBar';
 import { RequestTable } from '../features/dashboard/components/RequestTable';
+import { TeamCapacityWidget } from '../features/dashboard/components/TeamCapacityWidget';
 import { useNavigate } from 'react-router-dom';
 
 export function DashboardPage() {
@@ -16,9 +17,14 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <StatsBar requests={requests} />
-      <RequestTable requests={requests} onRequestClick={handleViewRequestDetail} />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 space-y-4">
+        <StatsBar requests={requests} />
+        <RequestTable requests={requests} onRequestClick={handleViewRequestDetail} />
+      </div>
+      <div className="lg:col-span-1">
+        <TeamCapacityWidget />
+      </div>
     </div>
   );
 }

@@ -31,6 +31,9 @@ export function TabNavigation({ requestCount }: TabNavigationProps) {
       <Link to="/kanban" className={getClassName('/kanban')}>
         Kanban Board
       </Link>
+      <Link to="/analytics" className={getClassName('/analytics')}>
+        Analytics
+      </Link>
     </div>
   );
 }

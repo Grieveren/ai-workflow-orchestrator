@@ -14,6 +14,8 @@ const initialRequests: Request[] = [
     daysOpen: 3,
     stage: 'In Progress',
     lastUpdate: '2 hours ago',
+    complexity: 'medium',
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     activity: [
       { timestamp: '3 days ago', action: 'Request submitted', user: 'Jessica Martinez' },
       { timestamp: '3 days ago', action: 'Auto-routed to Sarah Chen', user: 'AI Agent' },
@@ -32,6 +34,8 @@ const initialRequests: Request[] = [
     daysOpen: 1,
     stage: 'Ready for Dev',
     lastUpdate: '1 day ago',
+    complexity: 'simple',
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     activity: [
       { timestamp: '1 day ago', action: 'Request submitted', user: 'Tom Wilson' },
       { timestamp: '1 day ago', action: 'Auto-routed to Mike Torres', user: 'AI Agent' },
@@ -48,6 +52,8 @@ const initialRequests: Request[] = [
     daysOpen: 5,
     stage: 'Scoping',
     lastUpdate: '3 days ago',
+    complexity: 'complex',
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     activity: [
       { timestamp: '5 days ago', action: 'Request submitted', user: 'Mark Stevens' },
       { timestamp: '5 days ago', action: 'Auto-routed to Jennifer Kim', user: 'AI Agent' },
@@ -88,7 +94,9 @@ export function useRequests() {
         daysOpen: 0,
         stage: 'Scoping' as RequestStage,
         lastUpdate: 'Just now',
-        timeline: routing.timeline
+        timeline: routing.timeline,
+        complexity: routing.complexity as 'simple' | 'medium' | 'complex',
+        createdAt: new Date().toISOString()
       };
 
       addRequest(newRequest);

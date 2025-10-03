@@ -244,65 +244,90 @@ NO OTHER TEXT.`;
   },
 
   /**
-   * Generate requirement documents (BRD, FSD, Tech Spec)
+   * Generate a single document (BRD, FSD, or Tech Spec)
    */
-  generateDocuments: async (request: Request, mode: UserMode): Promise<{ brd: string; fsd: string; techSpec: string }> => {
+  generateSingleDocument: async (request: Request, mode: UserMode, docType: DocType): Promise<string> => {
     const modeInstructions = {
-      guided: 'You are a patient teacher helping a junior Product Owner. Keep explanations clear and concise.',
-      collaborative: 'You are helping an experienced Product Owner. Be professional and thorough.',
-      expert: 'You are helping a senior Product Owner. Be detailed and technical.'
+      guided: 'Keep language simple and explanations clear.',
+      collaborative: 'Be professional and thorough.',
+      expert: 'Be detailed and technical.'
     };
 
-    const prompt = `${modeInstructions[mode]}
-
-Generate three requirement documents for this request:
+    const documentPrompts = {
+      brd: `Create a concise Business Requirements Document (BRD) for this request:
 
 Request: "${request.title}"
 Priority: ${request.priority}
 Owner: ${request.owner}
 
-Create professional requirement documents with these sections:
+Include ONLY these sections (keep each section to 2-4 bullet points):
+## Executive Summary
+## Business Objectives
+## Success Criteria
 
-BUSINESS REQUIREMENTS DOCUMENT (BRD):
-- Executive Summary
-- Business Objectives
-- Current State & Pain Points
-- Desired Future State
-- Stakeholders
-- Scope
-- Success Criteria
+${modeInstructions[mode]} Use markdown headers (##) and bullet points. Keep it under 200 words total.
+RESPOND ONLY WITH THE MARKDOWN CONTENT. NO JSON.`,
 
-FUNCTIONAL SPECIFICATION DOCUMENT (FSD):
-- Overview
-- User Stories (2-3 stories)
-- Functional Requirements
-- Data Requirements
-- Business Rules
+      fsd: `Create a concise Functional Specification Document (FSD) for this request:
 
-TECHNICAL SPECIFICATION:
-- Technical Overview
-- Implementation Approach
-- Technical Requirements
-- Configuration Changes
-- Effort Estimate
+Request: "${request.title}"
+Priority: ${request.priority}
 
-Output as JSON:
-{
-  "brd": "markdown content",
-  "fsd": "markdown content",
-  "techSpec": "markdown content"
-}
+Include ONLY these sections (keep each section to 2-3 bullet points):
+## Overview
+## User Stories (2 stories maximum)
+## Key Requirements
 
-Keep each document concise but complete. Use markdown headers (##) and bullet points.
-RESPOND ONLY WITH VALID JSON.`;
+${modeInstructions[mode]} Use markdown headers (##) and bullet points. Keep it under 200 words total.
+RESPOND ONLY WITH THE MARKDOWN CONTENT. NO JSON.`,
 
-    const response = await callClaude({
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 4000
+      techSpec: `Create a concise Technical Specification for this request:
+
+Request: "${request.title}"
+Priority: ${request.priority}
+
+Include ONLY these sections (keep each section to 2-3 bullet points):
+## Implementation Approach
+## Technical Requirements
+## Effort Estimate
+
+${modeInstructions[mode]} Use markdown headers (##) and bullet points. Keep it under 150 words total.
+RESPOND ONLY WITH THE MARKDOWN CONTENT. NO JSON.`
+    };
+
+    return await callClaude({
+      messages: [{ role: 'user', content: documentPrompts[docType] }],
+      max_tokens: 1000
     });
+  },
 
-    const cleanedResponse = cleanJsonResponse(response);
-    return JSON.parse(cleanedResponse);
+  /**
+   * Generate all three documents sequentially with progress tracking
+   */
+  generateDocuments: async (
+    request: Request,
+    mode: UserMode,
+    onProgress?: (docType: DocType) => void
+  ): Promise<{ brd: string; fsd: string; techSpec: string }> => {
+    const docs = {
+      brd: '',
+      fsd: '',
+      techSpec: ''
+    };
+
+    // Generate BRD
+    if (onProgress) onProgress('brd');
+    docs.brd = await api.generateSingleDocument(request, mode, 'brd');
+
+    // Generate FSD
+    if (onProgress) onProgress('fsd');
+    docs.fsd = await api.generateSingleDocument(request, mode, 'fsd');
+
+    // Generate Tech Spec
+    if (onProgress) onProgress('techSpec');
+    docs.techSpec = await api.generateSingleDocument(request, mode, 'techSpec');
+
+    return docs;
   },
 
   /**

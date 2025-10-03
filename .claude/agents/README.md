@@ -103,6 +103,20 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 
 ---
 
+### 9. **revops-expert**
+**Purpose**: Revenue Operations expert for workflow optimization and business process improvement
+**Tools**: All tools available
+**Use cases**:
+- Analyze and optimize workflow stages
+- Identify process bottlenecks and inefficiencies
+- Recommend automation opportunities
+- Define success metrics and KPIs
+- Provide RevOps strategy consultation
+
+**Invoke with**: "Consult on our workflow optimization strategy"
+
+---
+
 ## How to Use Agents
 
 ### Automatic Delegation
