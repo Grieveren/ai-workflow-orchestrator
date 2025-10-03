@@ -66,7 +66,7 @@ describe('SLABadge', () => {
   });
 
   it('returns null when SLA is undefined', () => {
-    const { container } = render(<SLABadge sla={undefined as any} />);
+    const { container } = render(<SLABadge sla={undefined as unknown as SLAData} />);
     expect(container.firstChild).toBeNull();
   });
 

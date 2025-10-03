@@ -44,6 +44,11 @@ export function KanbanBoard({ requests, onRequestClick }: KanbanBoardProps) {
                       <span className="font-mono">{req.id}</span>
                       <span>{req.daysOpen}d</span>
                     </div>
+                    {req.submittedBy && (
+                      <div className="text-xs text-gray-500 mb-2">
+                        <span className="text-gray-400">By:</span> {req.submittedBy}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 mt-2">
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                         req.priority === 'High' ? 'bg-red-100 text-red-700' :

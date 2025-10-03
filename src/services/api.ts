@@ -413,6 +413,7 @@ RESPOND ONLY WITH VALID JSON.`;
     let accumulatedText = '';
 
     try {
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -452,7 +453,7 @@ RESPOND ONLY WITH VALID JSON.`;
       console.error('Stream reading error:', error);
       // If we have accumulated text, try to use it
       if (accumulatedText.length > 100) {
-        console.log('Attempting to parse partial response...');
+        // console.log('Attempting to parse partial response...');
       } else {
         throw error;
       }
@@ -463,17 +464,17 @@ RESPOND ONLY WITH VALID JSON.`;
       throw new Error('No content received from streaming API');
     }
 
-    console.log('Total accumulated text length:', accumulatedText.length);
-    console.log('First 100 chars:', accumulatedText.substring(0, 100));
-    console.log('Last 100 chars:', accumulatedText.substring(accumulatedText.length - 100));
+    // console.log('Total accumulated text length:', accumulatedText.length);
+    // console.log('First 100 chars:', accumulatedText.substring(0, 100));
+    // console.log('Last 100 chars:', accumulatedText.substring(accumulatedText.length - 100));
 
     const cleanedResponse = cleanJsonResponse(accumulatedText);
-    console.log('Cleaned response length:', cleanedResponse.length);
-    console.log('Cleaned first 100:', cleanedResponse.substring(0, 100));
+    // console.log('Cleaned response length:', cleanedResponse.length);
+    // console.log('Cleaned first 100:', cleanedResponse.substring(0, 100));
 
     try {
       const parsed = JSON.parse(cleanedResponse);
-      console.log('Successfully parsed JSON with keys:', Object.keys(parsed));
+      // console.log('Successfully parsed JSON with keys:', Object.keys(parsed));
       return parsed;
     } catch (error) {
       console.error('Failed to parse final response.');

@@ -54,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
  * Hook to access app context
  * Throws error if used outside of AppProvider
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAppContext() {
   const context = useContext(AppContext);
   if (!context) {

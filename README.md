@@ -11,9 +11,11 @@ A modern React application for managing workflow requests with AI-powered assist
 - **Requirement Generation**: AI generates BRD, FSD, and Technical Specifications
 - **Dashboard**: Track all requests with status, priority, and clarity scores
 - **Kanban Board**: Visual workflow management across stages
-- **Dual View**: Switch between Requester and Developer perspectives
+- **Three-View System**: Requester, Developer, and Management perspectives
+- **Analytics Dashboard**: Portfolio funnel, bottleneck detection, cycle time metrics
+- **SLA Tracking**: Visual status badges (on-time/at-risk/overdue)
 - **URL-Based Navigation**: Shareable links for any view or request
-- **Comprehensive Testing**: Vitest setup with example tests
+- **Comprehensive Testing**: Vitest setup with 11 test files and 119 tests
 
 ## Tech Stack
 
@@ -44,6 +46,7 @@ src/
 │   ├── SubmitPage.tsx
 │   ├── DashboardPage.tsx
 │   ├── KanbanPage.tsx
+│   ├── AnalyticsPage.tsx
 │   ├── RequestDetailPage.tsx
 │   ├── NotFoundPage.tsx
 │   └── index.ts
@@ -73,6 +76,11 @@ src/
 │   └── api.ts
 ├── types/                # TypeScript types
 │   └── index.ts
+├── utils/                # Utility functions
+│   ├── slaCalculator.ts
+│   └── requestFilters.ts
+├── constants/            # Application constants
+│   └── users.ts
 ├── test/                 # Test setup
 │   └── setup.ts
 ├── ErrorBoundary.tsx     # Error boundary wrapper
@@ -213,15 +221,16 @@ describe('Button', () => {
 
 ### From Monolith to Modular
 - **Before**: 1,544-line monolithic component
-- **After**: 17 reusable components, 5 route pages, 3 custom hooks
+- **After**: 17 reusable components, 6 route pages, 3 custom hooks
 - **Result**: 68% reduction in main component size
 - **Bundle**: 227 KB total (75 KB gzipped), split into 6 chunks for optimal loading
+- **Testing**: 11 test files with 119 comprehensive tests
 
 ### Architecture Benefits
 - ✅ Type-safe with TypeScript
 - ✅ Modular and reusable components
 - ✅ Clean separation of concerns
-- ✅ Testable with Vitest (20 tests, 100% passing)
+- ✅ Testable with Vitest (11 test files, 119 tests)
 - ✅ URL-based navigation with React Router
 - ✅ State management with React Context
 - ✅ API service layer
@@ -229,6 +238,7 @@ describe('Button', () => {
 - ✅ Error boundaries for graceful error handling
 - ✅ Lazy loading with code splitting (30% faster initial load)
 - ✅ Production-ready with optimized builds
+- ✅ Code quality enforced with ESLint and Prettier
 
 ## License
 

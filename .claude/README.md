@@ -9,30 +9,31 @@ This directory contains Claude Code configuration for the AI Workflow Orchestrat
 
 ## Configured Hooks
 
-### 1. Server Status Check (UserPromptSubmit)
-**When**: Before processing each user prompt
-**What**: Checks if both backend (port 3001) and frontend (port 3000) are running
-**Why**: Prevents confusing errors from missing servers in dual-server architecture
+The project has **16 automated hooks** configured in `hooks.json`:
 
-### 2. Environment File Protection (PreToolUse - Bash)
-**When**: Before running git commands
-**What**: Blocks commits that include `.env` file
-**Why**: Prevents accidental exposure of `ANTHROPIC_API_KEY`
+### UserPromptSubmit Hooks (3)
+1. **Server Status Check**: Checks if both backend (port 3001) and frontend (port 3000) are running
+2. **API Key Validation**: Verifies `.env` file exists with valid `ANTHROPIC_API_KEY`
+3. **Workflow Reminder**: Displays workflow requirements (TodoWrite, agent invocation, testing)
 
-### 3. TypeScript Type Check (PostToolUse - Write/Edit)
-**When**: After modifying `.ts` or `.tsx` files
-**What**: Runs `tsc --noEmit` to check for type errors
-**Why**: Catches type errors immediately instead of at build time
+### PreToolUse Hooks (2)
+4. **Enhanced Secret Detection**: Blocks commits of `.env`, `.key`, `.pem` files
+5. **Port Conflict Warning**: Warns if ports already in use before starting servers
 
-### 4. Automated Test Runner (PostToolUse - Write/Edit)
-**When**: After modifying files in `src/` or test files
-**What**: Runs test suite with `npm run test:run`
-**Why**: Ensures changes don't break existing tests (20 tests)
+### PostToolUse Hooks (9)
+6. **TypeScript Type Check**: Runs `tsc --noEmit` after `.ts`/`.tsx` edits
+7. **Test Suite Execution**: Runs tests after `src/` file changes
+8. **Prettier Auto-Formatting**: Formats files automatically after Write/Edit
+9. **ESLint Validation**: Lints TypeScript files with zero warnings allowed
+10. **Hook Isolation Check**: Ensures custom hooks don't call each other directly
+11. **Breaking Change Detection**: Detects export signature changes in core files
+12. **Test Coverage Reminder**: Warns when new components lack test files
+13. **Documentation Sync Reminder**: Prompts doc updates for core architecture files
+14. **Secret Scanning**: Detects hardcoded API keys or secrets in code
 
-### 5. Session Summary (Stop)
-**When**: When Claude finishes responding
-**What**: Shows git status summary
-**Why**: Quick overview of what changed during the session
+### Stop Hooks (2)
+15. **Session Summary**: Shows git status and files changed
+16. **Workflow Compliance Check**: Displays checklist for workflow verification
 
 ## Testing Hooks
 

@@ -60,7 +60,7 @@ export function useChat() {
     try {
       const { message, options, isComplete } = await api.continueConversation(updatedMessages);
 
-      console.log('Continue conversation response:', { message, options, isComplete });
+      // console.log('Continue conversation response:', { message, options, isComplete });
       setCurrentOptions(options);
 
       if (isComplete) {

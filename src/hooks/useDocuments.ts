@@ -20,7 +20,7 @@ export function useDocuments() {
    * Generate all requirement documents (BRD, FSD, Tech Spec) - sequential generation
    */
   const generateDocuments = async (request: Request, mode: UserMode) => {
-    console.log('generateDocuments called');
+    // console.log('generateDocuments called');
     if (!request || !mode) return;
 
     setIsProcessing(true);
@@ -45,7 +45,7 @@ export function useDocuments() {
 
       // Step 4: Initializing approval workflow
       setStreamingText('step:4');
-      console.log('Documents generated successfully');
+      // console.log('Documents generated successfully');
 
       // Initialize with approval state
       const docsWithApprovals: GeneratedDocs = {

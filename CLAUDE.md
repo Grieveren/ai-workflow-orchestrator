@@ -22,6 +22,82 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
   - Document approval workflow with quality gates
   - Modern toast notifications for all user feedback
 
+## Claude Code Workflow - MANDATORY PROCESS
+
+**CRITICAL**: This section defines the REQUIRED workflow for Claude Code when working in this repository. Non-compliance is NOT acceptable.
+
+### Pre-Work Phase (REQUIRED)
+
+Before starting ANY task, Claude Code MUST:
+
+1. **Use TodoWrite**: Create a todo list for any multi-step task (3+ distinct actions) or any complex task
+2. **Identify Relevant Agents**: Review `.claude/agents/` to determine which specialized agents apply
+3. **Review Hooks**: Check `.claude/hooks.json` to understand what automated validation will run
+
+**Exception: Documentation-Only Changes**
+For pure documentation updates (`*.md` files only, no code changes):
+- TodoWrite is optional if making <3 distinct changes
+- Skip `technical-architect` unless architectural documentation changed
+- Skip test/TypeScript/ESLint checks (not applicable to markdown)
+- Still use `doc-updater` for cross-file consistency verification
+
+### During Work Phase (REQUIRED)
+
+Claude Code MUST proactively invoke specialized agents WITHOUT asking permission:
+
+**Auto-Invoke Triggers:**
+- **`technical-architect`**: ANY file in `src/` with >20 lines changed, architectural decisions, or pattern changes
+- **`test-writer`**: New component created in `src/components/` or `src/features/`
+- **`security-reviewer`**: Modifications to `src/services/api.ts`, `server.js`, authentication, or user input handling
+- **`doc-updater`**: Changes to files listed in "Critical Architecture Patterns" section
+- **`dependency-auditor`**: `package.json` modified or new npm packages requested
+- **`route-optimizer`**: New routes added or `src/App.tsx` router modified
+- **`prompt-engineer`**: Modifying prompts in `src/services/api.ts`
+
+**Hook Compliance:**
+- Trust hooks to run automatically (they execute via `.claude/hooks.json`)
+- Address hook feedback immediately - do NOT ignore warnings or errors
+- If a hook blocks an action, determine root cause before proceeding
+
+**Hook Failure Protocol:**
+When hooks fail or produce warnings:
+- **TypeScript errors** → Fix immediately, do not proceed with other work
+- **Test failures** → Debug and resolve before continuing to next task
+- **ESLint warnings** → Address all warnings (zero-warning policy enforced)
+- **Git commit blocks** → Review files being committed, fix security issues, retry
+- If errors persist → Document in chat, seek user guidance
+
+**Agent Invocation Failure:**
+If a specialized agent fails or times out:
+1. Review the agent's output for specific error messages
+2. Fix any environmental issues (missing files, incorrect paths, etc.)
+3. Re-invoke the agent with corrected context
+4. If persistent failure → Document the issue in chat and proceed with manual review
+5. Never skip agent review silently - always acknowledge when manual review replaces agent review
+
+### Post-Work Phase (REQUIRED)
+
+After completing ANY code changes, Claude Code MUST:
+
+1. **Run Tests**: Execute `npm run test:run` to verify no regressions
+2. **TypeScript Check**: Run `npx tsc --noEmit` to ensure type safety
+3. **ESLint**: Execute `npm run lint` to verify code quality standards
+4. **Agent Review**: Invoke `technical-architect` for final architectural review
+
+### Workflow Enforcement
+
+**These are NOT suggestions - they are REQUIREMENTS:**
+- Specialized agents must be used proactively, not reactively
+- Tests, TypeScript, and ESLint checks are MANDATORY after changes
+- TodoWrite must be used for task tracking and transparency
+- Documentation must be updated when architectural patterns change
+
+**Rationale**: This workflow ensures:
+- Consistency with established architectural patterns
+- Prevention of regressions through automated testing
+- Knowledge transfer through documentation
+- Quality standards through automated reviews
+
 ## Development Commands
 
 ```bash
@@ -75,6 +151,7 @@ src/
 │   ├── SubmitPage.tsx
 │   ├── DashboardPage.tsx
 │   ├── KanbanPage.tsx
+│   ├── AnalyticsPage.tsx
 │   ├── RequestDetailPage.tsx
 │   ├── NotFoundPage.tsx
 │   └── index.ts
@@ -109,7 +186,10 @@ src/
 ├── services/                    # API service layer
 │   └── api.ts
 ├── utils/                       # Utility functions
-│   └── slaCalculator.ts         # SLA calculation logic
+│   ├── slaCalculator.ts         # SLA calculation logic
+│   └── requestFilters.ts        # Request filtering and sorting
+├── constants/                   # Application constants
+│   └── users.ts                 # Mock user definitions
 ├── test/                        # Test setup
 │   └── setup.ts
 ├── App.tsx                      # Main router component
@@ -179,23 +259,41 @@ Page-based routing with React Router:
 - **`*`**: 404 error page (NotFoundPage)
 
 ### Role-Based View System
-The application provides three distinct user experiences with automatic filtering and navigation control:
+The application provides three distinct user experiences with automatic filtering, scoped data display, and navigation control:
 
 **👤 Requester View** (Demo user: Jessica Martinez)
 - **Navigation**: Dashboard → New Request
-- **Filtering**: Shows only requests submitted by the user
+- **Request Filtering**: Shows only requests submitted by the user (`submittedBy` match)
+- **Stats Display**:
+  - "Needs Attention" shows only their own alerts
+  - Standard request counts (by stage and priority)
+- **Widget Visibility**: TeamCapacityWidget is hidden (not relevant to requesters)
+- **Table Columns**: "Requester" column hidden (viewing only own requests)
 - **Capabilities**: Submit requests, generate documents, review completed work
 - **Auto-navigation**: Switches to Dashboard when view changes
 
 **💻 Developer View** (Demo user: Sarah Chen)
 - **Navigation**: Dashboard → Kanban Board → Analytics
-- **Filtering**: Shows assigned requests + "Ready for Dev" stage requests
+- **Request Filtering**: Shows assigned requests + "Ready for Dev" stage requests (available work pool)
+- **Stats Display**:
+  - "My Active Requests" shows currently assigned work
+  - "My Completed Today" shows requests completed today
+  - "Needs Attention" shows alerts only for assigned requests
+- **Widget Visibility**: TeamCapacityWidget displayed
+- **Table Columns**: "Requester" column visible (shows request origins)
+- **Kanban Cards**: Display `submittedBy` for context
 - **Capabilities**: Accept work, update status, complete requests
 - **Auto-navigation**: Switches to Dashboard when view changes
 
 **📊 Management View** (Full oversight)
 - **Navigation**: Dashboard → Kanban Board → Analytics
-- **Filtering**: Shows ALL requests (no filtering)
+- **Request Filtering**: Shows ALL requests (no filtering)
+- **Stats Display**:
+  - "Needs Attention" shows all alerts across portfolio
+  - Full portfolio statistics
+- **Widget Visibility**: TeamCapacityWidget displayed
+- **Table Columns**: "Requester" column visible (full transparency)
+- **Kanban Cards**: Display `submittedBy` for context
 - **Capabilities**: Read-only oversight, team capacity monitoring, SLA tracking
 - **Auto-navigation**: Switches to Dashboard when view changes
 
@@ -203,6 +301,9 @@ The application provides three distinct user experiences with automatic filterin
 - View state managed in `AppContext` (src/contexts/AppContext.tsx)
 - Filtering logic in `DashboardPage.tsx`, `KanbanPage.tsx`, and `App.tsx`
 - Request count updates dynamically based on filtered results
+- StatsBar component adapts displayed metrics based on `view` prop
+- TeamCapacityWidget conditionally rendered based on view type
+- RequestTable adjusts column visibility based on view context
 - Stage badges use `whitespace-nowrap` to prevent text wrapping
 
 Features lazy loading with code splitting, error boundaries, skeleton loaders, and toast notifications for optimal performance and UX.
@@ -240,6 +341,8 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - **Express.js** backend proxy server (runs on port 3001)
 - **React Context** for state management with custom hooks
 - **Vitest** for testing with React Testing Library
+- **ESLint** with TypeScript plugin for code quality (zero warnings policy)
+- **Prettier** for consistent code formatting
 - **Proxied API calls** through Express backend for security
 - **Code splitting** with lazy loading for optimal performance
 
@@ -253,7 +356,9 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - Backend proxy server handles API authentication, frontend handles all application state
 - No database (state is stored client-side only)
 - Lazy loading with Suspense for code splitting
-- Test coverage for UI components (Button, Card, Badge, ChatMessage)
+- Test coverage for UI components and features (20 test files)
+- ESLint configuration with TypeScript and React hooks rules (.eslintrc.json)
+- Prettier configuration for code formatting (.prettierrc.json)
 
 ## Critical Architecture Patterns
 
@@ -296,31 +401,71 @@ All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/his
 
 ### Custom Sub-Agents
 
-This project includes 9 specialized sub-agents in `.claude/agents/` for focused development tasks:
+**IMPORTANT**: This project has 14 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
 
+#### Development Agents
 - **component-generator**: Creates React components following project architecture patterns
+  - Auto-invoke when: User requests new UI components
 - **test-writer**: Writes Vitest tests for components following project test patterns
+  - Auto-invoke when: New components created OR user requests tests
 - **api-integration**: Adds new Claude API methods to service layer (`src/services/api.ts`)
-- **technical-architect**: Reviews architectural decisions and ensures consistency with production-ready patterns
-- **product-owner**: Reviews feature requests for business value and ensures product quality
-- **project-manager**: Plans implementation, breaks down features, and coordinates development tasks
-- **doc-updater**: Updates project documentation to reflect code changes
-- **prompt-engineer**: Optimizes Claude API prompts in the service layer
-- **revops-expert**: Provides strategic consultation on Revenue Operations workflow optimization, bottleneck detection, and process improvements
+  - Auto-invoke when: New API functionality needed
 
-These agents are automatically invoked based on task context or can be explicitly called. Each has isolated context and limited tool access for security.
+#### Quality & Architecture Agents
+- **technical-architect**: Reviews architectural decisions and ensures consistency with production-ready patterns
+  - Auto-invoke when: Major architectural changes, new patterns introduced, performance concerns
+- **security-reviewer**: Audits code for vulnerabilities (prompt injection, API key exposure, XSS)
+  - Auto-invoke when: `src/services/api.ts`, `server.js`, or user input handling modified
+- **dependency-auditor**: Reviews npm package additions for security, bundle size, and architectural fit
+  - Auto-invoke when: User requests new dependencies OR `package.json` modified
+- **route-optimizer**: Manages React Router configuration, lazy loading, and navigation patterns
+  - Auto-invoke when: New routes added OR `src/App.tsx` modified
+- **code-reviewer**: Performs code quality reviews, identifies anti-patterns, and ensures best practices
+  - Auto-invoke when: Large code changes (>50 lines) or user requests code review
+- **workflow-enforcer**: Ensures compliance with project workflow defined in CLAUDE.md
+  - Auto-invoke when: Session starts or user requests workflow verification
+
+#### Planning & Documentation Agents
+- **product-owner**: Reviews feature requests for business value and ensures product quality
+  - Auto-invoke when: User requests new features (evaluate before implementing)
+- **project-manager**: Plans implementation, breaks down features, and coordinates development tasks
+  - Auto-invoke when: Complex multi-step features requested
+- **doc-updater**: Updates project documentation to reflect code changes
+  - Auto-invoke when: Architectural changes made, new features completed
+- **prompt-engineer**: Optimizes Claude API prompts in the service layer
+  - Auto-invoke when: Modifying prompts in `src/services/api.ts`
+- **revops-expert**: Provides strategic consultation on Revenue Operations workflow optimization
+  - Auto-invoke when: User asks about process improvements or workflow optimization
+
+**Agent Usage Philosophy**: Be proactive, not reactive. If a task matches an agent's expertise, delegate to that agent immediately without asking. This provides better focused context and follows the pattern the agent system was designed for.
 
 ### Automated Hooks
 
-The `.claude/hooks.json` file configures automated checks during Claude Code sessions:
+The `.claude/hooks.json` file configures **16 automated checks** during Claude Code sessions. These hooks execute automatically - trust them to catch issues.
 
-- **UserPromptSubmit**: Validates both servers (ports 3000/3001) are running before each prompt
-- **PreToolUse**: Blocks git commits of `.env` file to prevent API key exposure
-- **PostToolUse**: Runs TypeScript type checking after editing `.ts`/`.tsx` files
-- **PostToolUse**: Runs test suite after editing files in `src/` or test files
-- **Stop**: Shows git status summary when session ends
+#### UserPromptSubmit Hooks (run before each response)
+- **Server validation**: Checks ports 3000/3001 are running
+- **API key validation**: Verifies `.env` file exists with valid ANTHROPIC_API_KEY
 
-These hooks enforce best practices automatically without manual intervention.
+#### PreToolUse Hooks (run before tool execution)
+- **Enhanced secret detection**: Blocks commits of `.env`, `.key`, `.pem` files
+- **Port conflict warning**: Warns if ports already in use before starting servers
+
+#### PostToolUse Hooks (run after file edits)
+- **TypeScript type checking**: Runs `tsc --noEmit` after `.ts`/`.tsx` edits
+- **Test suite execution**: Runs tests after `src/` file changes
+- **Prettier auto-formatting**: Formats files automatically after Write/Edit
+- **ESLint validation**: Lints TypeScript files with zero warnings allowed
+- **Hook isolation check**: Ensures custom hooks don't call each other directly
+- **Breaking change detection**: Detects export signature changes in core files
+- **Test coverage reminder**: Warns when new components lack test files
+- **Documentation sync reminder**: Prompts doc updates for core architecture files
+- **Secret scanning**: Detects hardcoded API keys or secrets in code
+
+#### Stop Hooks (run when session ends)
+- **Session summary**: Shows git status and files changed
+
+**Hook Philosophy**: Hooks enforce production-ready standards automatically. Don't work around them - they prevent common mistakes and enforce architectural patterns. If a hook blocks or warns, address the underlying issue.
 
 ### GitHub Integration
 

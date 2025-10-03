@@ -2,53 +2,85 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if ! lsof -ti:3001 > /dev/null || ! lsof -ti:3000 > /dev/null; then echo '⚠️  Warning: Backend (3001) or Frontend (3000) not running. Start servers: npm run dev:full' >&2; fi"
-          }
-        ]
+        "type": "command",
+        "command": "if ! lsof -ti:3001 > /dev/null || ! lsof -ti:3000 > /dev/null; then echo '⚠️  Warning: Backend (3001) or Frontend (3000) not running. Start servers: npm run dev:full' >&2; fi"
+      },
+      {
+        "type": "command",
+        "command": "if [ ! -f $PWD/.env ]; then echo '⚠️  Warning: .env file not found. Copy .env.example to .env and add ANTHROPIC_API_KEY' >&2; elif ! grep -q '^ANTHROPIC_API_KEY=sk-' $PWD/.env 2>/dev/null; then echo '⚠️  Warning: ANTHROPIC_API_KEY not set in .env or invalid format' >&2; fi"
+      },
+      {
+        "type": "command",
+        "command": "echo '\n📋 WORKFLOW REMINDER - See CLAUDE.md \"Claude Code Workflow\" section:\n  ✓ TodoWrite for multi-step tasks\n  ✓ Proactive agent invocation (technical-architect, test-writer, etc.)\n  ✓ Run tests/TypeScript/ESLint after changes\n'"
       }
     ],
     "PreToolUse": [
       {
         "matcher": "^Bash$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command // empty' | grep -qE '(git add|git commit).*\\.env\\b'; then echo '{\"block\": true, \"message\": \"🚫 Blocked: Attempting to commit .env file which contains ANTHROPIC_API_KEY. Remove .env from git staging.\"}'; exit 0; fi"
-          }
-        ]
+        "type": "command",
+        "command": "if echo \"$TOOL_INPUT\" | jq -r '.command // empty' | grep -qE 'git (add|commit)'; then FILES=$(echo \"$TOOL_INPUT\" | jq -r '.command' | grep -oE '[^[:space:]]+\\.(env|key|pem|json|yml)' || true); if echo \"$FILES\" | grep -qE '\\.(env|key|pem)'; then echo '{\"block\": true, \"message\": \"🚫 Blocked: Attempting to commit sensitive file: '$FILES'. Remove from git staging.\"}'; exit 0; fi; fi"
+      },
+      {
+        "matcher": "^Bash$",
+        "type": "command",
+        "command": "if echo \"$TOOL_INPUT\" | jq -r '.command // empty' | grep -qE 'npm run (dev|server|dev:full)'; then if lsof -ti:3000 > /dev/null 2>&1 || lsof -ti:3001 > /dev/null 2>&1; then echo '{\"block\": false, \"message\": \"⚠️  Warning: Port 3000 or 3001 already in use. Kill processes: lsof -ti:3000,3001 | xargs kill -9\"}'; fi; fi"
       }
     ],
     "PostToolUse": [
       {
         "matcher": "^(Write|Edit)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🔍 Running TypeScript type check...'; cd /Users/brettgray/Coding/Claude && npx tsc --noEmit 2>&1 | head -30 || echo '✓ No type errors'; fi"
-          }
-        ]
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🔍 Running TypeScript type check...'; cd $PWD && npx tsc --noEmit 2>&1 | head -30 || echo '✓ No type errors'; fi"
       },
       {
         "matcher": "^(Write|Edit)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '(src/|test\\.tsx?$)' && [ -f \"$FILE_PATH\" ]; then echo '🧪 Running test suite...'; cd /Users/brettgray/Coding/Claude && npm run test:run 2>&1 | tail -20; fi"
-          }
-        ]
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '(src/|test\\.tsx?$)' && [ -f \"$FILE_PATH\" ]; then echo '🧪 Running test suite...'; cd $PWD && npm run test:run 2>&1 | tail -20; fi"
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx|js|jsx|css|json)$' && [ -f \"$FILE_PATH\" ]; then cd $PWD && npx prettier --write \"$FILE_PATH\" 2>/dev/null && echo '✨ Auto-formatted file' || true; fi"
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then cd $PWD && npx eslint \"$FILE_PATH\" --max-warnings 0 2>&1 | head -20 || true; fi"
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/hooks/use(Chat|Requests|Documents)\\.ts$' && [ -f \"$FILE_PATH\" ]; then VIOLATIONS=$(grep -E 'use(Chat|Requests|Documents)\\(' \"$FILE_PATH\" | grep -v '^//' | head -3); if [ -n \"$VIOLATIONS\" ]; then echo '❌ Hook isolation violated: Hooks should not call other hooks directly. Use AppContext composition instead.'; fi; fi"
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(services|types|hooks)/.*\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🔍 Checking for breaking changes...'; git diff HEAD \"$FILE_PATH\" 2>/dev/null | grep -E '^[-+].*(export|interface|type)' | head -10 || echo '✓ No export signature changes'; fi"
+      },
+      {
+        "matcher": "^Write$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(components|features)/.*\\.(tsx)$' && ! echo \"$FILE_PATH\" | grep -q '\\.test\\.'; then TEST_FILE=\"${FILE_PATH%.tsx}.test.tsx\"; if [ ! -f \"$TEST_FILE\" ]; then echo '⚠️  WARNING: New component created without test file. Create '$TEST_FILE; fi; fi"
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(services|types|contexts)/.*\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '📚 REMINDER: Core architecture file changed. Consider updating docs/architecture/*.md if needed.'; fi"
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "type": "command",
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx|js|jsx)$' && [ -f \"$FILE_PATH\" ]; then if grep -qE '(ANTHROPIC_API_KEY|sk-ant-[a-zA-Z0-9_-]{95}|sk-[a-zA-Z0-9]{40,}|ghp_[a-zA-Z0-9]{36})' \"$FILE_PATH\" 2>/dev/null; then echo '⚠️  WARNING: Potential API key or secret detected in file. Review before commit.'; fi; fi"
       }
     ],
     "Stop": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '📊 Session complete. Project status:' && cd /Users/brettgray/Coding/Claude && (git status --short | head -10 || true)"
-          }
-        ]
+        "type": "command",
+        "command": "echo '📊 Session complete. Project status:' && cd $PWD && (git status --short | head -10 || true)"
+      },
+      {
+        "type": "command",
+        "command": "echo '\n📋 WORKFLOW COMPLIANCE CHECK:\n  Did you use TodoWrite for multi-step tasks? ✓/✗\n  Did you invoke relevant specialized agents? ✓/✗\n  Did you run tests after code changes? ✓/✗\n  Did you check TypeScript/ESLint? ✓/✗\n  Did you update documentation if needed? ✓/✗\n\nReview session in chat history to verify compliance with CLAUDE.md workflow.\n'"
       }
     ]
   }

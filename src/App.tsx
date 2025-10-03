@@ -7,6 +7,8 @@ import { Header } from './components/layout/Header';
 import { TabNavigation } from './components/layout/TabNavigation';
 import { SkeletonCard } from './components/ui/Skeleton';
 import { useAppContext } from './contexts/AppContext';
+import { filterRequestsByView } from './utils/requestFilters';
+import type { ViewType } from './types';
 
 // Lazy load pages for code splitting
 const SubmitPage = lazy(() => import('./pages/SubmitPage').then(m => ({ default: m.SubmitPage })));
@@ -25,31 +27,18 @@ function PageLoader() {
   );
 }
 
-// For demo purposes, using mock user names
-const MOCK_REQUESTER = 'Jessica Martinez';
-const MOCK_DEV = 'Sarah Chen';
-
 function AppContent() {
   const navigate = useNavigate();
   const { view, setView, requests } = useAppContext();
 
-  const handleViewChange = (newView: any) => {
+  const handleViewChange = (newView: ViewType) => {
     setView(newView);
     navigate('/dashboard');
   };
 
   // Calculate filtered request count based on view
   const getFilteredRequestCount = () => {
-    return requests.requests.filter(request => {
-      if (view === 'requester') {
-        return request.submittedBy === MOCK_REQUESTER;
-      } else if (view === 'dev') {
-        return request.owner === MOCK_DEV || request.stage === 'Ready for Dev';
-      } else if (view === 'management') {
-        return true;
-      }
-      return true;
-    }).length;
+    return filterRequestsByView(requests.requests, view).length;
   };
 
   return (

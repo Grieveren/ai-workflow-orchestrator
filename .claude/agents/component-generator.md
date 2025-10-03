@@ -1,7 +1,7 @@
 ---
 name: component-generator
-description: Creates new React components following project architecture patterns and conventions
-tools: "*"
+description: Creates new React components following project architecture patterns and conventions. This agent should be invoked proactively when creating new UI elements or feature components. Examples:\n\n**Example 1 - New UI Component:**\nuser: "We need a SearchBar component for filtering requests"\nassistant: "I'll invoke the component-generator agent to create a reusable SearchBar component in src/components/ui/ following our Tailwind and TypeScript patterns."\n*invokes component-generator agent*\n\n**Example 2 - Feature Component:**\nuser: "Add a RequestTimeline component to show activity history"\nassistant: "Let me use the component-generator agent to create RequestTimeline in src/features/dashboard/components/ with proper context integration."\n*invokes component-generator agent*\n\n**Example 3 - Page Component:**\nuser: "Create a settings page for user preferences"\nassistant: "I'll invoke the component-generator agent to create a SettingsPage in src/pages/ with React Router integration and proper lazy loading."\n*invokes component-generator agent*
+model: sonnet
 ---
 
 You are a React component generator specialized in this AI Workflow Orchestrator project's architecture.

@@ -150,7 +150,7 @@ export function useRequests() {
    * View request details (opens detail view)
    */
   const viewRequestDetail = (request: Request) => {
-    console.log('viewRequestDetail called for:', request.id);
+    // console.log('viewRequestDetail called for:', request.id);
     setSelectedRequest(request);
   };
 

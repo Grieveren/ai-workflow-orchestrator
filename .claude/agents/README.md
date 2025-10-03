@@ -2,7 +2,30 @@
 
 This directory contains specialized sub-agents for the AI Workflow Orchestrator project. Each agent has focused expertise and isolated context for specific tasks.
 
+## MANDATORY USAGE POLICY
+
+**IMPORTANT**: Claude Code MUST use these agents proactively for matching tasks. Do NOT ask permission - invoke them automatically based on the trigger rules below.
+
+### Auto-Invoke Trigger Rules
+
+Claude Code must automatically invoke agents when these conditions are met:
+
+| Agent | Trigger Condition | Required? |
+|-------|------------------|-----------|
+| `technical-architect` | ANY file in `src/` with >20 lines changed | ✅ MANDATORY |
+| `test-writer` | New component created in `src/components/` or `src/features/` | ✅ MANDATORY |
+| `security-reviewer` | Changes to `src/services/api.ts`, `server.js`, or authentication | ✅ MANDATORY |
+| `doc-updater` | Changes to files in "Critical Architecture Patterns" (see CLAUDE.md) | ✅ MANDATORY |
+| `dependency-auditor` | `package.json` modified or new npm packages requested | ✅ MANDATORY |
+| `route-optimizer` | New routes added or `src/App.tsx` modified | ✅ MANDATORY |
+| `prompt-engineer` | Modifying prompts in `src/services/api.ts` | ✅ MANDATORY |
+| `workflow-enforcer` | End of coding session (>5 file changes) | ✅ MANDATORY |
+
+**These are NOT suggestions - they are REQUIREMENTS per CLAUDE.md workflow.**
+
 ## Available Agents
+
+Total: **14 specialized agents**
 
 ### 1. **test-writer**
 **Purpose**: Write comprehensive Vitest tests for React components
@@ -114,6 +137,78 @@ This directory contains specialized sub-agents for the AI Workflow Orchestrator 
 - Provide RevOps strategy consultation
 
 **Invoke with**: "Consult on our workflow optimization strategy"
+
+---
+
+### 10. **dependency-auditor**
+**Purpose**: Review and validate third-party dependency additions for security, bundle size, and architectural fit
+**Tools**: All tools available
+**Use cases**:
+- Evaluate new npm package requests
+- Check security and maintenance profiles
+- Analyze bundle size impact
+- Prevent architectural conflicts
+
+**Invoke with**: "Review adding Redux for state management"
+
+---
+
+### 11. **security-reviewer**
+**Purpose**: Audit code for security vulnerabilities including prompt injection, API key exposure, and XSS
+**Tools**: All tools available
+**Use cases**:
+- Review API key management
+- Detect prompt injection vulnerabilities
+- Validate input sanitization
+- Check for XSS risks
+- Audit dependency vulnerabilities
+
+**Invoke with**: "Review security for new user input feature"
+
+---
+
+### 12. **route-optimizer**
+**Purpose**: Manage React Router configuration, ensure lazy loading, and validate navigation patterns
+**Tools**: All tools available
+**Use cases**:
+- Optimize route lazy loading
+- Detect route conflicts
+- Validate navigation patterns
+- Analyze bundle splitting efficiency
+
+**Invoke with**: "Review adding /settings route"
+
+---
+
+### 13. **workflow-enforcer**
+**Purpose**: Audit Claude Code sessions for compliance with mandatory workflow (see CLAUDE.md)
+**Tools**: All tools available
+**Use cases**:
+- Verify TodoWrite was used for multi-step tasks
+- Check that specialized agents were invoked proactively
+- Confirm tests/TypeScript/ESLint were run after changes
+- Validate documentation was updated
+- Provide compliance score and recommendations
+
+**Invoke with**: "Review workflow compliance for this session"
+
+**Auto-invoke**: End of sessions with >5 file modifications
+
+---
+
+### 14. **code-reviewer**
+**Purpose**: Perform comprehensive code quality reviews, identify anti-patterns, and ensure best practices
+**Tools**: All tools available
+**Use cases**:
+- Review large code changes (>50 lines)
+- Identify code smells and anti-patterns
+- Suggest refactoring opportunities
+- Ensure adherence to coding standards
+- Check for performance issues
+
+**Invoke with**: "Review code quality for recent changes"
+
+**Auto-invoke**: Large code changes (>50 lines modified)
 
 ---
 

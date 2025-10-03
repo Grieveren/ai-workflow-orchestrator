@@ -1,14 +1,17 @@
 import { Users, Bot } from 'lucide-react';
 import { StageBadge, SLABadge } from '../../../components/ui';
 import { calculateSLA } from '../../../utils/slaCalculator';
-import type { Request } from '../../../types';
+import type { Request, ViewType } from '../../../types';
 
 interface RequestTableProps {
   requests: Request[];
   onRequestClick: (request: Request) => void;
+  view?: ViewType;
 }
 
-export function RequestTable({ requests, onRequestClick }: RequestTableProps) {
+export function RequestTable({ requests, onRequestClick, view }: RequestTableProps) {
+  const showSubmittedBy = view === 'dev' || view === 'management';
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="overflow-x-auto">
@@ -18,6 +21,9 @@ export function RequestTable({ requests, onRequestClick }: RequestTableProps) {
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Request</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stage</th>
+              {showSubmittedBy && (
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requester</th>
+              )}
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Owner</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Priority</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">SLA</th>
@@ -38,6 +44,14 @@ export function RequestTable({ requests, onRequestClick }: RequestTableProps) {
                   <td className="px-6 py-4">
                     <StageBadge stage={req.stage} />
                   </td>
+                  {showSubmittedBy && (
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <Users size={16} className="text-gray-400" />
+                        {req.submittedBy || 'Unknown'}
+                      </div>
+                    </td>
+                  )}
                   <td className="px-6 py-4 text-sm text-gray-700">
                     <div className="flex items-center gap-2">
                       {req.owner === 'AI Agent' ?
