@@ -1,3 +1,4 @@
+export { LandingPage } from './LandingPage';
 export { SubmitPage } from './SubmitPage';
 export { DashboardPage } from './DashboardPage';
 export { KanbanPage } from './KanbanPage';
