@@ -1,16 +1,13 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AppProvider } from './contexts/AppContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Header } from './components/layout/Header';
-import { TabNavigation } from './components/layout/TabNavigation';
+import { AppLayout } from './components/layout/AppLayout';
 import { SkeletonCard } from './components/ui/Skeleton';
-import { useAppContext } from './contexts/AppContext';
-import { filterRequestsByView } from './utils/requestFilters';
-import type { ViewType } from './types';
 
 // Lazy load pages for code splitting
+const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const SubmitPage = lazy(() => import('./pages/SubmitPage').then(m => ({ default: m.SubmitPage })));
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const KanbanPage = lazy(() => import('./pages/KanbanPage').then(m => ({ default: m.KanbanPage })));
@@ -28,33 +25,23 @@ function PageLoader() {
 }
 
 function AppContent() {
-  const navigate = useNavigate();
-  const { view, setView, requests } = useAppContext();
-
-  const handleViewChange = (newView: ViewType) => {
-    setView(newView);
-    navigate('/dashboard');
-  };
-
-  // Calculate filtered request count based on view
-  const getFilteredRequestCount = () => {
-    return filterRequestsByView(requests.requests, view).length;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-5xl mx-auto">
-        <Header view={view} onViewChange={handleViewChange} />
-        <TabNavigation requestCount={getFilteredRequestCount()} view={view} />
-
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/" element={<SubmitPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/kanban" element={<KanbanPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/request/:id" element={<RequestDetailPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            {/* Landing page - no layout */}
+            <Route path="/" element={<LandingPage />} />
+
+            {/* All other routes - with AppLayout */}
+            <Route element={<AppLayout />}>
+              <Route path="/submit" element={<SubmitPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/kanban" element={<KanbanPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/request/:id" element={<RequestDetailPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
           </Routes>
         </Suspense>
       </div>
