@@ -24,6 +24,7 @@ A modern React application for managing workflow requests with AI-powered assist
 - **Icons**: Lucide React
 - **Backend**: Express.js (proxy server)
 - **AI**: Anthropic Claude API (Sonnet 4.5)
+- **MCP Servers**: 6 configured servers extending Claude Code (GitHub, Puppeteer, Memory, Filesystem, Sequential Thinking, SQLite)
 - **Testing**: Vitest, React Testing Library, jsdom
 
 ## Architecture
@@ -239,6 +240,7 @@ describe('Button', () => {
 - ✅ Lazy loading with code splitting (30% faster initial load)
 - ✅ Production-ready with optimized builds
 - ✅ Code quality enforced with ESLint and Prettier
+- ✅ Extended AI capabilities with MCP servers (browser automation, persistent memory, database)
 
 ## License
 

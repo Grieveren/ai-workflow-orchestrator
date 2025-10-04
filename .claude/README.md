@@ -6,6 +6,7 @@ This directory contains Claude Code configuration for the AI Workflow Orchestrat
 
 - **`hooks.json`**: Automated checks and validations that run during Claude Code sessions
 - **`settings.local.json`**: Local settings (auto-generated, not in git)
+- **MCP Servers**: Extended capabilities configured in Claude desktop app (see [CLAUDE.md MCP Servers](../CLAUDE.md#mcp-servers))
 
 ## Configured Hooks
 
@@ -65,3 +66,22 @@ Edit `hooks.json` directly. The file uses standard JSON format with these event 
 - `SessionEnd` - When session ends
 
 See [Claude Code Hooks Documentation](https://docs.claude.com/en/docs/claude-code/hooks) for more details.
+
+## MCP Servers
+
+This project has 6 configured MCP servers (GitHub, Puppeteer, Memory, Filesystem, Sequential Thinking, SQLite) that extend Claude Code's capabilities.
+
+**Configuration**: MCP servers are configured in the Claude desktop app settings, NOT in this directory.
+
+**Documentation**: See [CLAUDE.md - MCP Servers](../CLAUDE.md#mcp-servers) for:
+- Purpose of each server
+- Proactive usage patterns
+- Integration workflows
+- Session start checklist
+
+**Verification**: List available MCP tools with:
+```bash
+claude mcp list
+```
+
+**Note**: MCP tools only become available in NEW sessions after configuration.

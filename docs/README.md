@@ -93,6 +93,7 @@ Understanding how we got here:
 - ✅ 20 tests (100% passing)
 - ✅ Dual-server security pattern
 - ✅ No database (client-side state only)
+- ✅ MCP servers for extended AI capabilities
 
 ## 📊 Project Statistics
 
@@ -114,6 +115,7 @@ Understanding how we got here:
 ### For Claude Code
 - [CLAUDE.md](../CLAUDE.md) - AI assistant instructions
 - [Architecture Patterns](../CLAUDE.md#critical-architecture-patterns)
+- [MCP Servers](../CLAUDE.md#mcp-servers) - Extended AI capabilities
 - [Component Location Rules](architecture/component-strategy.md#decision-tree)
 
 ### For Product/Business
@@ -139,6 +141,11 @@ Understanding how we got here:
 **History & Context**:
 - Why this architecture? → [Migration Plan](history/MIGRATION_PLAN.md)
 - How did we refactor? → [Phase Completions](history/)
+
+**AI Tooling**:
+- What MCP servers are available? → [CLAUDE.md: MCP Servers](../CLAUDE.md#mcp-servers)
+- How to use Puppeteer for UI verification? → [CLAUDE.md: UI Development Workflow](../CLAUDE.md#proactive-usage-patterns)
+- Database persistence options? → [CLAUDE.md: SQLite Server](../CLAUDE.md#available-servers)
 
 ### By Role
 
