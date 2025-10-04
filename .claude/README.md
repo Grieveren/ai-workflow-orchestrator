@@ -10,7 +10,7 @@ This directory contains Claude Code configuration for the AI Workflow Orchestrat
 
 ## Configured Hooks
 
-The project has **16 automated hooks** configured in `hooks.json`:
+The project has **17 automated hooks** configured in `hooks.json`:
 
 ### UserPromptSubmit Hooks (3)
 1. **Server Status Check**: Checks if both backend (port 3001) and frontend (port 3000) are running
@@ -29,12 +29,13 @@ The project has **16 automated hooks** configured in `hooks.json`:
 10. **Hook Isolation Check**: Ensures custom hooks don't call each other directly
 11. **Breaking Change Detection**: Detects export signature changes in core files
 12. **Test Coverage Reminder**: Warns when new components lack test files
-13. **Documentation Sync Reminder**: Prompts doc updates for core architecture files
+13. **Smart Documentation Alert**: Detects which specific docs need updating and suggests invoking doc-updater agent
 14. **Secret Scanning**: Detects hardcoded API keys or secrets in code
 
-### Stop Hooks (2)
+### Stop Hooks (3)
 15. **Session Summary**: Shows git status and files changed
-16. **Workflow Compliance Check**: Displays checklist for workflow verification
+16. **Smart Commit Helper**: Analyzes uncommitted changes and provides ready-to-use git commands with change summary
+17. **Workflow Compliance Check**: Interactive checklist with suggestion to use workflow-enforcer agent
 
 ## Testing Hooks
 
