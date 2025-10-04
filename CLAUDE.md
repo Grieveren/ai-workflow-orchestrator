@@ -49,6 +49,7 @@ Claude Code MUST proactively invoke specialized agents WITHOUT asking permission
 - **`technical-architect`**: ANY file in `src/` with >20 lines changed, architectural decisions, or pattern changes
 - **`test-writer`**: New component created in `src/components/` or `src/features/`
 - **`security-reviewer`**: Modifications to `src/services/api.ts`, `server.js`, authentication, or user input handling
+- **`ux-reviewer`**: UI/UX changes to `src/components/`, `src/pages/`, `src/features/*/components/`, or Tailwind styling updates
 - **`doc-updater`**: Changes to files listed in "Critical Architecture Patterns" section
 - **`dependency-auditor`**: `package.json` modified or new npm packages requested
 - **`route-optimizer`**: New routes added or `src/App.tsx` router modified
@@ -148,6 +149,7 @@ The application requires an Anthropic API key for the backend proxy server:
 ```
 src/
 ├── pages/                       # Route pages
+│   ├── LandingPage.tsx           # Minimal entry page with view redirects
 │   ├── SubmitPage.tsx
 │   ├── DashboardPage.tsx
 │   ├── KanbanPage.tsx
@@ -167,10 +169,11 @@ src/
 │   └── layout/                  # Layout components
 │       ├── Header.tsx
 │       ├── TabNavigation.tsx
+│       ├── AppLayout.tsx         # Nested route layout wrapper
 │       └── index.ts
 ├── features/                    # Feature-specific components
 │   ├── chat/
-│   │   └── components/          # Chat-specific components
+│   │   └── components/          # Chat UI (ChatMessage, ChatInput, MinimalLanding)
 │   ├── dashboard/
 │   │   └── components/          # Dashboard + TeamCapacityWidget
 │   └── documents/
@@ -232,6 +235,8 @@ Uses React Context (`AppProvider`) with custom hooks:
 - **View control**: `view` (requester/dev/management) - controls role-based access and filtering
 - **Navigation**: React Router DOM for URL-based routing with auto-navigation on view change
 
+**SessionStorage Exception**: The `pendingExample` navigation handoff (LandingPage → SubmitPage) uses sessionStorage instead of Context. This is an acceptable exception for ephemeral routing state that crosses route boundaries. Do NOT use sessionStorage for domain data - only for one-time navigation handoffs.
+
 ### AI Integration Pattern
 The application uses the API service layer for all Claude interactions:
 
@@ -250,13 +255,16 @@ Each request includes:
 - Optional AI alerts for stalled requests
 
 ### UI Structure
-Page-based routing with React Router:
-- **`/`**: New request submission (SubmitPage) with AI chatbot interface
+Page-based routing with React Router using nested route layouts:
+- **`/`**: Minimal landing page (LandingPage) with Google-inspired UI - redirects dev/management users to dashboard
+- **`/submit`**: New request submission (SubmitPage) with full AI chatbot interface
 - **`/dashboard`**: Request list (DashboardPage) with stats, filtering, SLA badges, and team capacity widget
 - **`/kanban`**: Kanban board (KanbanPage) with drag-and-drop workflow and SLA badges
 - **`/analytics`**: Analytics dashboard (AnalyticsPage) with portfolio funnel, bottleneck detection, and cycle time trends
 - **`/request/:id`**: Individual request detail (RequestDetailPage) with document generation and approval workflow
 - **`*`**: 404 error page (NotFoundPage)
+
+All routes except `/` use the AppLayout component which provides Header and TabNavigation. The landing page renders without layout for a clean, focused entry experience.
 
 ### Role-Based View System
 The application provides three distinct user experiences with automatic filtering, scoped data display, and navigation control:
@@ -401,7 +409,7 @@ All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/his
 
 ### Custom Sub-Agents
 
-**IMPORTANT**: This project has 14 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
+**IMPORTANT**: This project has 15 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
 
 #### Development Agents
 - **component-generator**: Creates React components following project architecture patterns
@@ -422,6 +430,8 @@ All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/his
   - Auto-invoke when: New routes added OR `src/App.tsx` modified
 - **code-reviewer**: Performs code quality reviews, identifies anti-patterns, and ensures best practices
   - Auto-invoke when: Large code changes (>50 lines) or user requests code review
+- **ux-reviewer**: Audits UI/UX for accessibility (WCAG 2.1 AA), design consistency, and user experience
+  - Auto-invoke when: UI/UX changes to components, pages, or styling; Tailwind class updates; accessibility concerns
 - **workflow-enforcer**: Ensures compliance with project workflow defined in CLAUDE.md
   - Auto-invoke when: Session starts or user requests workflow verification
 
@@ -470,3 +480,90 @@ The `.claude/hooks.json` file configures **16 automated checks** during Claude C
 ### GitHub Integration
 
 The `.github/workflows/claude.yml` workflow enables @claude mentions in issues and PRs. Claude Code can respond to tasks in GitHub with read access to contents, pull requests, issues, and CI results.
+
+### MCP Servers
+
+This project has **6 configured MCP servers** that extend Claude Code's capabilities. These tools are loaded at session startup and should be used proactively for appropriate tasks.
+
+#### Available Servers
+
+1. **GitHub** (`@modelcontextprotocol/server-github`)
+   - **Purpose**: Repository management, PR/issue creation, code reviews
+   - **When to use**: Creating PRs, managing issues, reviewing GitHub activity
+   - **Example**: Use `mcp__github__create_pull_request` when user requests PR creation
+
+2. **Puppeteer** (`@modelcontextprotocol/server-puppeteer`)
+   - **Purpose**: Browser automation and visual inspection of the running application
+   - **When to use proactively**:
+     - BEFORE making UI/styling changes → screenshot `localhost:3000` to see current state
+     - AFTER UI changes → screenshot to verify the changes worked correctly
+     - When user reports visual bugs → screenshot to see the actual issue
+   - **Example**: `mcp__puppeteer__navigate` to `http://localhost:3000`, then `mcp__puppeteer__screenshot`
+   - **Integration**: Always verify both frontend (3000) and backend (3001) are running first
+   - **Agent synergy**: The `ux-reviewer` agent can request screenshots to validate visual changes and accessibility
+
+3. **Memory** (`@modelcontextprotocol/server-memory`)
+   - **Purpose**: Persist knowledge and decisions across Claude Code sessions
+   - **When to use proactively**:
+     - Store architectural decisions made during the session
+     - Remember user preferences (e.g., "always use Tailwind class X for Y")
+     - Track project-specific patterns discovered during development
+     - Save important context about requests, workflows, or team dynamics
+   - **Example**: After refactoring, store the rationale: `mcp__memory__store` "Why we chose sequential document generation over parallel"
+   - **Integration**: Check memory at session start for relevant context, update at session end
+
+4. **Filesystem** (`@modelcontextprotocol/server-filesystem`)
+   - **Purpose**: Enhanced file operations on the `./src` directory
+   - **When to use**: Advanced file watching, monitoring for changes, bulk operations
+   - **Scope**: Limited to `./src` directory for safety
+   - **Example**: Use `mcp__filesystem__watch` to monitor component changes during development
+
+5. **Sequential Thinking** (`@modelcontextprotocol/server-sequential-thinking`)
+   - **Purpose**: Advanced reasoning for complex multi-step architectural decisions
+   - **When to use proactively**:
+     - Planning major refactoring (e.g., adding database persistence)
+     - Analyzing workflow bottlenecks in the RevOps features
+     - Evaluating trade-offs for architectural changes
+     - Breaking down complex features into implementation phases
+   - **Example**: Use when user requests "add real-time collaboration" or other complex features
+
+6. **SQLite** (`mcp-server-sqlite-npx`)
+   - **Purpose**: Persistent data storage for the workflow orchestrator
+   - **Database**: `./workflow.db` (created automatically on first use)
+   - **When to use proactively**:
+     - Offer to migrate mock data to persistent storage
+     - When user requests "save requests between sessions"
+     - For analytics that require historical data tracking
+   - **Integration opportunities**:
+     - Store `Request` objects permanently (replace client-side state)
+     - Track document generation history
+     - Persist user preferences and view settings
+     - Enable multi-user collaboration with shared database
+   - **Example**: `mcp__sqlite__query` to create tables matching `src/types/index.ts` schemas
+
+#### Proactive Usage Patterns
+
+**UI Development Workflow:**
+1. Screenshot `localhost:3000` BEFORE changes (if servers running)
+2. Make UI modifications
+3. Screenshot AFTER to verify changes
+4. Store design decisions in Memory for future consistency
+
+**Feature Planning Workflow:**
+1. Use Sequential Thinking for complex features
+2. Check Memory for related past decisions
+3. Store the implementation plan in Memory
+4. Execute with appropriate specialized agents
+
+**Database Migration Workflow:**
+1. Analyze current mock data structure in `AppContext.tsx`
+2. Design SQLite schema matching `src/types/index.ts`
+3. Create migration script to preserve existing data
+4. Offer persistence layer as enhancement to user
+
+**Session Start Checklist:**
+- Check Memory for relevant project context
+- If UI work expected, verify servers running and take baseline screenshot
+- Store new learnings in Memory at session end
+
+**Note**: MCP tools only become available in NEW sessions after configuration. If tools are missing, verify with `claude mcp list` and restart the session.
