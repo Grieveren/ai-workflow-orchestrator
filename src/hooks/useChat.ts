@@ -13,6 +13,7 @@ export function useChat() {
   const [requestData, setRequestData] = useState<RequestData>({});
   const [showExamples, setShowExamples] = useState(false);
   const [showOtherInput, setShowOtherInput] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   /**
    * Start a new conversation with the AI
@@ -112,6 +113,7 @@ export function useChat() {
     setShowExamples(false);
     setShowOtherInput(false);
     setCurrentOptions([]);
+    setIsExpanded(false);
   };
 
   /**
@@ -130,12 +132,14 @@ export function useChat() {
     requestData,
     showExamples,
     showOtherInput,
+    isExpanded,
 
     // Setters
     setUserInput,
     setShowExamples,
     setShowOtherInput,
     setRequestData,
+    setIsExpanded,
 
     // Actions
     startConversation,

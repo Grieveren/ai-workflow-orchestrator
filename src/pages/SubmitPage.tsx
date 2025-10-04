@@ -47,6 +47,13 @@ export function SubmitPage() {
     // Clear on mount
     resetDocuments();
 
+    // Check for pending example from landing page
+    const pendingExample = sessionStorage.getItem('pendingExample');
+    if (pendingExample) {
+      sessionStorage.removeItem('pendingExample'); // Clean up immediately to prevent stale state
+      startConversation(pendingExample);
+    }
+
     // Also clear on unmount to prevent flash when navigating away
     return () => {
       resetDocuments();
