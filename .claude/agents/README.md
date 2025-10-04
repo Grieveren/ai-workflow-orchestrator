@@ -19,13 +19,14 @@ Claude Code must automatically invoke agents when these conditions are met:
 | `dependency-auditor` | `package.json` modified or new npm packages requested | ✅ MANDATORY |
 | `route-optimizer` | New routes added or `src/App.tsx` modified | ✅ MANDATORY |
 | `prompt-engineer` | Modifying prompts in `src/services/api.ts` | ✅ MANDATORY |
+| `ux-reviewer` | UI/UX changes to components, pages, or Tailwind styling | ✅ MANDATORY |
 | `workflow-enforcer` | End of coding session (>5 file changes) | ✅ MANDATORY |
 
 **These are NOT suggestions - they are REQUIREMENTS per CLAUDE.md workflow.**
 
 ## Available Agents
 
-Total: **14 specialized agents**
+Total: **15 specialized agents**
 
 ### 1. **test-writer**
 **Purpose**: Write comprehensive Vitest tests for React components
@@ -212,6 +213,29 @@ Total: **14 specialized agents**
 
 ---
 
+### 15. **ux-reviewer**
+**Purpose**: Audit UI/UX for accessibility (WCAG 2.1 AA), design consistency, and user experience using live browser testing
+**Tools**: All tools available (includes Puppeteer MCP for browser automation)
+**Use cases**:
+- Review UI components for accessibility compliance
+- Validate keyboard navigation and focus management
+- Test interactive elements (forms, modals, buttons)
+- Check responsive design across breakpoints
+- Verify color contrast ratios and visual hierarchy
+- Screenshot-based visual regression testing
+- Ensure role-based view consistency
+
+**Invoke with**: "Review UX and accessibility for the new modal component"
+
+**Auto-invoke**: UI/UX changes to `src/components/`, `src/pages/`, `src/features/*/components/`, or Tailwind styling updates
+
+**Live testing capabilities**:
+- Navigate and screenshot pages (`mcp__puppeteer__navigate`, `mcp__puppeteer__screenshot`)
+- Test interactions (`mcp__puppeteer__click`, `mcp__puppeteer__fill`, `mcp__puppeteer__hover`)
+- Evaluate accessibility (`mcp__puppeteer__evaluate` for focus states, ARIA attributes)
+
+---
+
 ## How to Use Agents
 
 ### Automatic Delegation
@@ -351,7 +375,6 @@ These agents are designed to work together:
 Consider adding agents for:
 - **refactor-assistant**: Safely refactor complex components
 - **performance-optimizer**: Analyze and optimize React performance
-- **accessibility-auditor**: Check components for a11y compliance
 - **migration-helper**: Assist with library upgrades
 
 ## Learn More
