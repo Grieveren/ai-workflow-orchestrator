@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent } from 'react';
+import { ChangeEvent, KeyboardEvent, forwardRef } from 'react';
 
 interface InputProps {
   value: string;
@@ -11,31 +11,34 @@ interface InputProps {
   type?: 'text' | 'email' | 'password' | 'number';
 }
 
-export function Input({
-  value,
-  onChange,
-  onKeyPress,
-  placeholder = '',
-  disabled = false,
-  className = '',
-  autoFocus = false,
-  type = 'text'
-}: InputProps) {
-  const baseStyles = 'px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed';
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  function Input({
+    value,
+    onChange,
+    onKeyPress,
+    placeholder = '',
+    disabled = false,
+    className = '',
+    autoFocus = false,
+    type = 'text'
+  }, ref) {
+    const baseStyles = 'px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed';
 
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      onKeyPress={onKeyPress}
-      placeholder={placeholder}
-      disabled={disabled}
-      autoFocus={autoFocus}
-      className={`${baseStyles} ${className}`}
-    />
-  );
-}
+    return (
+      <input
+        ref={ref}
+        type={type}
+        value={value}
+        onChange={onChange}
+        onKeyPress={onKeyPress}
+        placeholder={placeholder}
+        disabled={disabled}
+        autoFocus={autoFocus}
+        className={`${baseStyles} ${className}`}
+      />
+    );
+  }
+);
 
 // Textarea variant
 interface TextareaProps {
