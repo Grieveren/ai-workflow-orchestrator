@@ -10,31 +10,32 @@ This directory contains Claude Code configuration for the AI Workflow Orchestrat
 
 ## Configured Hooks
 
-The project has **13 automated hooks** configured in `hooks.json` (optimized for performance):
+The project has **17 automated hooks** configured in `hooks.json`:
 
-### UserPromptSubmit Hooks (2)
+### UserPromptSubmit Hooks (3)
 1. **Server Status Check**: Checks if both backend (port 3001) and frontend (port 3000) are running
 2. **API Key Validation**: Verifies `.env` file exists with valid `ANTHROPIC_API_KEY`
+3. **Workflow Reminder**: Displays workflow requirements (TodoWrite, agent invocation, testing)
 
 ### PreToolUse Hooks (2)
-3. **Enhanced Secret Detection**: Blocks commits of `.env`, `.key`, `.pem` files
-4. **Port Conflict Warning**: Warns if ports already in use before starting servers
+4. **Enhanced Secret Detection**: Blocks commits of `.env`, `.key`, `.pem` files
+5. **Port Conflict Warning**: Warns if ports already in use before starting servers
 
-### PostToolUse Hooks (6)
-5. **TypeScript Type Check** (Optimized): Runs `tsc --noEmit` only for critical paths (services/types/contexts)
-6. **Test Suite Execution** (Optimized): Runs tests only for `.test.ts`/`.test.tsx` files
-7. **Prettier Auto-Formatting**: Formats files automatically after Write/Edit
-8. **ESLint Validation**: Lints TypeScript files with zero warnings allowed
-9. **Hook Isolation Check** (Enhanced): Validates ALL custom hooks using pattern matching
-10. **Breaking Change Detection**: Detects export signature changes in core files
-11. **Test Coverage Reminder** (Expanded): Warns for components, features, hooks, and services
-12. **Smart Documentation Alert**: Detects which specific docs need updating
-13. **Secret Scanning** (Smart): Detects hardcoded API keys (excludes test files and test/ directory)
+### PostToolUse Hooks (9)
+6. **TypeScript Type Check**: Runs `tsc --noEmit` after `.ts`/`.tsx` edits
+7. **Test Suite Execution**: Runs tests after `src/` file changes
+8. **Prettier Auto-Formatting**: Formats files automatically after Write/Edit
+9. **ESLint Validation**: Lints TypeScript files with zero warnings allowed
+10. **Hook Isolation Check**: Ensures custom hooks don't call each other directly
+11. **Breaking Change Detection**: Detects export signature changes in core files
+12. **Test Coverage Reminder**: Warns when new components lack test files
+13. **Smart Documentation Alert**: Detects which specific docs need updating and suggests invoking doc-updater agent
+14. **Secret Scanning**: Detects hardcoded API keys or secrets in code
 
 ### Stop Hooks (3)
-14. **Session Summary**: Shows git status and files changed
-15. **Smart Commit Helper**: Analyzes uncommitted changes and provides ready-to-use git commands with change summary
-16. **Workflow Compliance Check**: Interactive checklist for session compliance
+15. **Session Summary**: Shows git status and files changed
+16. **Smart Commit Helper**: Analyzes uncommitted changes and provides ready-to-use git commands with change summary
+17. **Workflow Compliance Check**: Interactive checklist with suggestion to use workflow-enforcer agent
 
 ## Testing Hooks
 

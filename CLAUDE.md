@@ -31,14 +31,29 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
 Before starting ANY task, Claude Code MUST:
 
 1. **Use TodoWrite**: Create a todo list for any multi-step task (3+ distinct actions) or any complex task
-2. **Review Hooks**: Check `.claude/hooks.json` to understand what automated validation will run
+2. **Identify Relevant Agents**: Review `.claude/agents/` to determine which specialized agents apply
+3. **Review Hooks**: Check `.claude/hooks.json` to understand what automated validation will run
 
 **Exception: Documentation-Only Changes**
 For pure documentation updates (`*.md` files only, no code changes):
 - TodoWrite is optional if making <3 distinct changes
+- Skip `technical-architect` unless architectural documentation changed
 - Skip test/TypeScript/ESLint checks (not applicable to markdown)
+- Still use `doc-updater` for cross-file consistency verification
 
 ### During Work Phase (REQUIRED)
+
+Claude Code MUST proactively invoke specialized agents WITHOUT asking permission:
+
+**Auto-Invoke Triggers:**
+- **`technical-architect`**: ANY file in `src/` with >20 lines changed, architectural decisions, or pattern changes
+- **`test-writer`**: New component created in `src/components/` or `src/features/`
+- **`security-reviewer`**: Modifications to `src/services/api.ts`, `server.js`, authentication, or user input handling
+- **`ux-reviewer`**: UI/UX changes to `src/components/`, `src/pages/`, `src/features/*/components/`, or Tailwind styling updates
+- **`doc-updater`**: Changes to files listed in "Critical Architecture Patterns" section
+- **`dependency-auditor`**: `package.json` modified or new npm packages requested
+- **`route-optimizer`**: New routes added or `src/App.tsx` router modified
+- **`prompt-engineer`**: Modifying prompts in `src/services/api.ts`
 
 **Hook Compliance:**
 - Trust hooks to run automatically (they execute via `.claude/hooks.json`)
@@ -53,6 +68,14 @@ When hooks fail or produce warnings:
 - **Git commit blocks** → Review files being committed, fix security issues, retry
 - If errors persist → Document in chat, seek user guidance
 
+**Agent Invocation Failure:**
+If a specialized agent fails or times out:
+1. Review the agent's output for specific error messages
+2. Fix any environmental issues (missing files, incorrect paths, etc.)
+3. Re-invoke the agent with corrected context
+4. If persistent failure → Document the issue in chat and proceed with manual review
+5. Never skip agent review silently - always acknowledge when manual review replaces agent review
+
 ### Post-Work Phase (REQUIRED)
 
 After completing ANY code changes, Claude Code MUST:
@@ -60,10 +83,12 @@ After completing ANY code changes, Claude Code MUST:
 1. **Run Tests**: Execute `npm run test:run` to verify no regressions
 2. **TypeScript Check**: Run `npx tsc --noEmit` to ensure type safety
 3. **ESLint**: Execute `npm run lint` to verify code quality standards
+4. **Agent Review**: Invoke `technical-architect` for final architectural review
 
 ### Workflow Enforcement
 
 **These are NOT suggestions - they are REQUIREMENTS:**
+- Specialized agents must be used proactively, not reactively
 - Tests, TypeScript, and ESLint checks are MANDATORY after changes
 - TodoWrite must be used for task tracking and transparency
 - Documentation must be updated when architectural patterns change
@@ -133,7 +158,6 @@ src/
 │   ├── NotFoundPage.tsx
 │   └── index.ts
 ├── components/
-│   ├── ErrorBoundary.tsx        # Error boundary wrapper
 │   ├── ui/                      # Reusable UI components
 │   │   ├── Button.tsx
 │   │   ├── Card.tsx
@@ -172,6 +196,7 @@ src/
 ├── test/                        # Test setup
 │   └── setup.ts
 ├── App.tsx                      # Main router component
+├── ErrorBoundary.tsx            # Error boundary wrapper
 ├── main.tsx                     # Entry point
 └── index.css                    # Tailwind styles
 ```
@@ -315,21 +340,19 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 
 ## Tech Stack Details
 
-- **React 19.2.0** with TypeScript (Server Components ready)
-- **Vite 6.3.6** for build tooling (16% faster builds, configured for port 3000 with auto-open)
+- **React 18** with TypeScript
+- **Vite** for build tooling (configured for port 3000 with auto-open)
 - **React Router DOM v7** for URL-based navigation
-- **Tailwind CSS 4.1.14** for styling (CSS-first configuration)
+- **Tailwind CSS** for styling
 - **Lucide React** for icons
 - **React Hot Toast** for modern toast notifications
 - **Express.js** backend proxy server (runs on port 3001)
 - **React Context** for state management with custom hooks
 - **Vitest** for testing with React Testing Library
-- **ESLint 9.37.0** with flat config for code quality (zero warnings policy)
+- **ESLint** with TypeScript plugin for code quality (zero warnings policy)
 - **Prettier** for consistent code formatting
 - **Proxied API calls** through Express backend for security
 - **Code splitting** with lazy loading for optimal performance
-
-**Recent Migration** (October 2025): All major dependencies upgraded - see [docs/history/dependencies/MIGRATION_COMPLETE.md](docs/history/dependencies/MIGRATION_COMPLETE.md) for details. Build time improved 16%, dev server 74% faster.
 
 ## Known Patterns
 
@@ -341,10 +364,9 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - Backend proxy server handles API authentication, frontend handles all application state
 - No database (state is stored client-side only)
 - Lazy loading with Suspense for code splitting
-- Test coverage for UI components and features (11 test files, 119 tests)
-- ESLint 9 flat config with TypeScript and React hooks rules (eslint.config.mjs)
+- Test coverage for UI components and features (20 test files)
+- ESLint configuration with TypeScript and React hooks rules (.eslintrc.json)
 - Prettier configuration for code formatting (.prettierrc.json)
-- Tailwind 4 CSS-first configuration (src/index.css replaces tailwind.config.js)
 
 ## Critical Architecture Patterns
 
@@ -381,30 +403,51 @@ The application follows strict architectural patterns. **Detailed documentation*
 
 ## Migration Status
 
-### Architectural Migration ✅
-All architectural phases complete (see [docs/history/architectural/](docs/history/architectural/)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
-
-### Dependency Migration ✅ (October 2025)
-All major dependencies upgraded to latest stable versions. See [docs/history/dependencies/](docs/history/dependencies/) for comprehensive details.
-
-**Completed Upgrades:**
-- ✅ React 18.3.1 → 19.2.0 (Server Components support)
-- ✅ ESLint 8.57.1 → 9.37.0 (Flat config migration)
-- ✅ Vite 5.4.20 → 6.3.6 (Performance improvements)
-- ✅ Tailwind CSS 3.4.17 → 4.1.14 (CSS-first configuration)
-
-**Performance Gains:**
-- Build time: 27.52s → 23.13s (-16% faster)
-- Dev server: ~8s → 2.09s (-74% faster)
-- Bundle gzipped: 95.85 kB (optimized, under 100 kB target)
-- Zero breaking changes, all 119 tests passing
-
-**Key Changes:**
-- ESLint now uses flat config (eslint.config.mjs)
-- Tailwind uses CSS-first config in src/index.css
-- All configurations updated for modern tooling
+All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/history/MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
 
 ## Claude Code Configuration
+
+### Custom Sub-Agents
+
+**IMPORTANT**: This project has 15 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
+
+#### Development Agents
+- **component-generator**: Creates React components following project architecture patterns
+  - Auto-invoke when: User requests new UI components
+- **test-writer**: Writes Vitest tests for components following project test patterns
+  - Auto-invoke when: New components created OR user requests tests
+- **api-integration**: Adds new Claude API methods to service layer (`src/services/api.ts`)
+  - Auto-invoke when: New API functionality needed
+
+#### Quality & Architecture Agents
+- **technical-architect**: Reviews architectural decisions and ensures consistency with production-ready patterns
+  - Auto-invoke when: Major architectural changes, new patterns introduced, performance concerns
+- **security-reviewer**: Audits code for vulnerabilities (prompt injection, API key exposure, XSS)
+  - Auto-invoke when: `src/services/api.ts`, `server.js`, or user input handling modified
+- **dependency-auditor**: Reviews npm package additions for security, bundle size, and architectural fit
+  - Auto-invoke when: User requests new dependencies OR `package.json` modified
+- **route-optimizer**: Manages React Router configuration, lazy loading, and navigation patterns
+  - Auto-invoke when: New routes added OR `src/App.tsx` modified
+- **code-reviewer**: Performs code quality reviews, identifies anti-patterns, and ensures best practices
+  - Auto-invoke when: Large code changes (>50 lines) or user requests code review
+- **ux-reviewer**: Audits UI/UX for accessibility (WCAG 2.1 AA), design consistency, and user experience
+  - Auto-invoke when: UI/UX changes to components, pages, or styling; Tailwind class updates; accessibility concerns
+- **workflow-enforcer**: Ensures compliance with project workflow defined in CLAUDE.md
+  - Auto-invoke when: Session starts or user requests workflow verification
+
+#### Planning & Documentation Agents
+- **product-owner**: Reviews feature requests for business value and ensures product quality
+  - Auto-invoke when: User requests new features (evaluate before implementing)
+- **project-manager**: Plans implementation, breaks down features, and coordinates development tasks
+  - Auto-invoke when: Complex multi-step features requested
+- **doc-updater**: Updates project documentation to reflect code changes
+  - Auto-invoke when: Architectural changes made, new features completed
+- **prompt-engineer**: Optimizes Claude API prompts in the service layer
+  - Auto-invoke when: Modifying prompts in `src/services/api.ts`
+- **revops-expert**: Provides strategic consultation on Revenue Operations workflow optimization
+  - Auto-invoke when: User asks about process improvements or workflow optimization
+
+**Agent Usage Philosophy**: Be proactive, not reactive. If a task matches an agent's expertise, delegate to that agent immediately without asking. This provides better focused context and follows the pattern the agent system was designed for.
 
 ### Automated Hooks
 
@@ -457,6 +500,7 @@ This project has **6 configured MCP servers** that extend Claude Code's capabili
      - When user reports visual bugs → screenshot to see the actual issue
    - **Example**: `mcp__puppeteer__navigate` to `http://localhost:3000`, then `mcp__puppeteer__screenshot`
    - **Integration**: Always verify both frontend (3000) and backend (3001) are running first
+   - **Agent synergy**: The `ux-reviewer` agent can request screenshots to validate visual changes and accessibility
 
 3. **Memory** (`@modelcontextprotocol/server-memory`)
    - **Purpose**: Persist knowledge and decisions across Claude Code sessions
@@ -509,7 +553,7 @@ This project has **6 configured MCP servers** that extend Claude Code's capabili
 1. Use Sequential Thinking for complex features
 2. Check Memory for related past decisions
 3. Store the implementation plan in Memory
-4. Execute the implementation plan systematically
+4. Execute with appropriate specialized agents
 
 **Database Migration Workflow:**
 1. Analyze current mock data structure in `AppContext.tsx`
