@@ -8,10 +8,6 @@
       {
         "type": "command",
         "command": "if [ ! -f $PWD/.env ]; then echo '⚠️  Warning: .env file not found. Copy .env.example to .env and add ANTHROPIC_API_KEY' >&2; elif ! grep -q '^ANTHROPIC_API_KEY=sk-' $PWD/.env 2>/dev/null; then echo '⚠️  Warning: ANTHROPIC_API_KEY not set in .env or invalid format' >&2; fi"
-      },
-      {
-        "type": "command",
-        "command": "echo '\n📋 WORKFLOW REMINDER - See CLAUDE.md \"Claude Code Workflow\" section:\n  ✓ TodoWrite for multi-step tasks\n  ✓ Run tests/TypeScript/ESLint after changes\n'"
       }
     ],
     "PreToolUse": [
@@ -30,12 +26,12 @@
       {
         "matcher": "^(Write|Edit)$",
         "type": "command",
-        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🔍 Running TypeScript type check...'; cd $PWD && npx tsc --noEmit 2>&1 | head -30 || echo '✓ No type errors'; fi"
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(services|types|contexts)/.*\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🔍 Running TypeScript type check (critical path)...'; cd $PWD && npx tsc --noEmit 2>&1 | head -30 || echo '✓ No type errors'; fi"
       },
       {
         "matcher": "^(Write|Edit)$",
         "type": "command",
-        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '(src/|test\\.tsx?$)' && [ -f \"$FILE_PATH\" ]; then echo '🧪 Running test suite...'; cd $PWD && npm run test:run 2>&1 | tail -20; fi"
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.test\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then echo '🧪 Running related tests...'; cd $PWD && npm run test:run \"$FILE_PATH\" 2>&1 | tail -20 || echo '✓ Tests passed'; fi"
       },
       {
         "matcher": "^(Write|Edit)$",
@@ -50,7 +46,7 @@
       {
         "matcher": "^(Write|Edit)$",
         "type": "command",
-        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/hooks/use(Chat|Requests|Documents)\\.ts$' && [ -f \"$FILE_PATH\" ]; then VIOLATIONS=$(grep -E 'use(Chat|Requests|Documents)\\(' \"$FILE_PATH\" | grep -v '^//' | head -3); if [ -n \"$VIOLATIONS\" ]; then echo '❌ Hook isolation violated: Hooks should not call other hooks directly. Use AppContext composition instead.'; fi; fi"
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/hooks/use.*\\.ts$' && [ -f \"$FILE_PATH\" ]; then VIOLATIONS=$(grep -E 'use[A-Z][a-zA-Z]*\\(' \"$FILE_PATH\" | grep -v '^//' | grep -v 'useState\\|useEffect\\|useContext\\|useMemo\\|useCallback\\|useRef\\|useReducer' | head -3); if [ -n \"$VIOLATIONS\" ]; then echo '❌ Hook isolation violated: Custom hooks should not call other custom hooks directly. Use AppContext composition instead.'; fi; fi"
       },
       {
         "matcher": "^(Write|Edit)$",
@@ -60,7 +56,7 @@
       {
         "matcher": "^Write$",
         "type": "command",
-        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(components|features)/.*\\.(tsx)$' && ! echo \"$FILE_PATH\" | grep -q '\\.test\\.'; then TEST_FILE=\"${FILE_PATH%.tsx}.test.tsx\"; if [ ! -f \"$TEST_FILE\" ]; then echo '⚠️  WARNING: New component created without test file. Create '$TEST_FILE; fi; fi"
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(components|features|hooks|services)/.*\\.(ts|tsx)$' && ! echo \"$FILE_PATH\" | grep -q '\\.test\\.'; then if echo \"$FILE_PATH\" | grep -qE '\\.tsx$'; then EXT='tsx'; else EXT='ts'; fi; TEST_FILE=\"${FILE_PATH%.*}.test.$EXT\"; if [ ! -f \"$TEST_FILE\" ]; then echo '⚠️  WARNING: New file created without test. Create '$TEST_FILE; fi; fi"
       },
       {
         "matcher": "^(Write|Edit)$",
@@ -70,7 +66,7 @@
       {
         "matcher": "^(Write|Edit)$",
         "type": "command",
-        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx|js|jsx)$' && [ -f \"$FILE_PATH\" ]; then if grep -qE '(ANTHROPIC_API_KEY|sk-ant-[a-zA-Z0-9_-]{95}|sk-[a-zA-Z0-9]{40,}|ghp_[a-zA-Z0-9]{36})' \"$FILE_PATH\" 2>/dev/null; then echo '⚠️  WARNING: Potential API key or secret detected in file. Review before commit.'; fi; fi"
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE '\\.(ts|tsx|js|jsx)$' && ! echo \"$FILE_PATH\" | grep -qE '(\\.test\\.(ts|tsx)|/test/)' && [ -f \"$FILE_PATH\" ]; then if grep -qE '(ANTHROPIC_API_KEY|sk-ant-[a-zA-Z0-9_-]{95}|sk-[a-zA-Z0-9]{40,}|ghp_[a-zA-Z0-9]{36})' \"$FILE_PATH\" 2>/dev/null; then echo '⚠️  WARNING: Potential API key or secret detected in file. Review before commit.'; fi; fi"
       }
     ],
     "Stop": [

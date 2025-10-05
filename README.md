@@ -47,6 +47,7 @@ See [MIGRATION_PLAN.md](docs/history/architectural/MIGRATION_PLAN.md) for the co
 ```
 src/
 ├── pages/                # Route pages
+│   ├── LandingPage.tsx
 │   ├── SubmitPage.tsx
 │   ├── DashboardPage.tsx
 │   ├── KanbanPage.tsx
@@ -55,6 +56,7 @@ src/
 │   ├── NotFoundPage.tsx
 │   └── index.ts
 ├── components/
+│   ├── ErrorBoundary.tsx # Error boundary wrapper
 │   ├── layout/           # Header, TabNavigation
 │   │   ├── Header.tsx
 │   │   ├── TabNavigation.tsx
@@ -87,7 +89,6 @@ src/
 │   └── users.ts
 ├── test/                 # Test setup
 │   └── setup.ts
-├── ErrorBoundary.tsx     # Error boundary wrapper
 └── App.tsx               # Main router component
 ```
 
@@ -168,9 +169,11 @@ npm run preview
 
 | Route | Description |
 |-------|-------------|
-| `/` | New request submission with AI chat |
+| `/` | Minimal landing page with view redirects and chat interface |
+| `/submit` | New request submission with AI chat |
 | `/dashboard` | Request list with stats and filtering |
 | `/kanban` | Kanban board view by stage |
+| `/analytics` | Analytics dashboard with portfolio metrics |
 | `/request/:id` | Individual request details |
 
 ## Development

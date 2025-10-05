@@ -26,19 +26,19 @@ The AI Workflow Orchestrator uses a modern, production-ready architecture that e
 ## Quick Reference
 
 ### Tech Stack
-- **Frontend**: React 18 + TypeScript + Vite
+- **Frontend**: React 19.2.0 + TypeScript + Vite 6.3.6
 - **Routing**: React Router DOM v7
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4.1.14
 - **Icons**: Lucide React
 - **Backend**: Express.js proxy server
 - **AI**: Claude Sonnet 4.5
 - **Testing**: Vitest + React Testing Library
 
 ### Project Statistics
-- **Bundle Size**: 227 KB (optimized, code-split)
-- **Test Coverage**: 20 tests (100% passing)
+- **Bundle Size**: 96 KB gzipped (273 KB raw, optimized with code splitting)
+- **Test Coverage**: 119 tests across 11 test files (100% passing)
 - **Components**: 17 reusable components
-- **Pages**: 5 route pages
+- **Pages**: 7 route pages
 - **Custom Hooks**: 3 (useChat, useRequests, useDocuments)
 
 ### Architecture Status

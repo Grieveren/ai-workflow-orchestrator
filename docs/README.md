@@ -80,7 +80,7 @@ Understanding how we got here:
 ## 🔑 Key Concepts
 
 ### Tech Stack
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **Frontend**: React 19.2.0, TypeScript, Vite 6.3.6, Tailwind CSS 4.1.14
 - **Backend**: Express.js proxy server
 - **Routing**: React Router DOM v7
 - **Testing**: Vitest, React Testing Library
@@ -89,8 +89,8 @@ Understanding how we got here:
 ### Architecture Highlights
 - ✅ Production-ready (all 5 phases complete)
 - ✅ Type-safe with TypeScript
-- ✅ 227 KB optimized bundle with code splitting
-- ✅ 20 tests (100% passing)
+- ✅ 96 KB gzipped bundle (273 KB raw, optimized with code splitting)
+- ✅ 119 tests across 11 test files (100% passing)
 - ✅ Dual-server security pattern
 - ✅ No database (client-side state only)
 - ✅ MCP servers for extended AI capabilities
@@ -98,11 +98,11 @@ Understanding how we got here:
 ## 📊 Project Statistics
 
 - **Components**: 17 reusable components
-- **Pages**: 5 route pages
+- **Pages**: 7 route pages
 - **Custom Hooks**: 3 (domain-specific)
 - **Lines of Code**: ~4,000 (from 1,544 monolith)
-- **Bundle Size**: 227 KB total (optimized, split)
-- **Test Coverage**: 20 tests, 100% pass rate
+- **Bundle Size**: 96 KB gzipped (273 KB raw, optimized with code splitting)
+- **Test Coverage**: 119 tests across 11 test files, 100% pass rate
 
 ## 🎯 Quick Links
 

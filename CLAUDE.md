@@ -133,6 +133,7 @@ src/
 │   ├── NotFoundPage.tsx
 │   └── index.ts
 ├── components/
+│   ├── ErrorBoundary.tsx        # Error boundary wrapper
 │   ├── ui/                      # Reusable UI components
 │   │   ├── Button.tsx
 │   │   ├── Card.tsx
@@ -171,7 +172,6 @@ src/
 ├── test/                        # Test setup
 │   └── setup.ts
 ├── App.tsx                      # Main router component
-├── ErrorBoundary.tsx            # Error boundary wrapper
 ├── main.tsx                     # Entry point
 └── index.css                    # Tailwind styles
 ```
