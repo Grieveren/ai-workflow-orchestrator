@@ -115,20 +115,20 @@ export function RequestDetailPage() {
 
   const getStageColor = (stage: RequestStage): string => {
     const colors: Record<RequestStage, string> = {
-      'Intake': 'bg-gray-100 text-gray-700',
-      'Scoping': 'bg-yellow-100 text-yellow-700',
-      'Ready for Dev': 'bg-blue-100 text-blue-700',
-      'In Progress': 'bg-purple-100 text-purple-700',
-      'Review': 'bg-orange-100 text-orange-700',
-      'Completed': 'bg-green-100 text-green-700'
+      'Intake': 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200',
+      'Scoping': 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+      'Ready for Dev': 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+      'In Progress': 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+      'Review': 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300',
+      'Completed': 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
     };
-    return colors[stage] || 'bg-gray-100 text-gray-700';
+    return colors[stage] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
   };
 
   if (!selectedRequest) {
     return (
-      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-        <p className="text-gray-600">Loading request...</p>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
+        <p className="text-gray-600 dark:text-gray-400">Loading request...</p>
       </div>
     );
   }
@@ -137,24 +137,24 @@ export function RequestDetailPage() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold text-gray-800">{selectedRequest.id}</h2>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100">{selectedRequest.id}</h2>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStageColor(selectedRequest.stage)}`}>
                 {selectedRequest.stage}
               </span>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                selectedRequest.priority === 'High' ? 'bg-red-100 text-red-700' :
-                'bg-yellow-100 text-yellow-700'
+                selectedRequest.priority === 'High' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' :
+                'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'
               }`}>
                 {selectedRequest.priority}
               </span>
               <SLABadge sla={sla} />
             </div>
-            <h3 className="text-xl text-gray-700 mb-2">{selectedRequest.title}</h3>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <h3 className="text-xl text-gray-700 dark:text-gray-300 mb-2">{selectedRequest.title}</h3>
+            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
               <span>Owner: {selectedRequest.owner}</span>
               <span>•</span>
               <span>Opened {selectedRequest.daysOpen} days ago</span>
@@ -163,11 +163,11 @@ export function RequestDetailPage() {
             </div>
 
             {selectedRequest.aiAlert && (
-              <div className="mt-3 flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
-                <AlertCircle className="text-red-600 shrink-0 mt-0.5" size={16} />
+              <div className="mt-3 flex items-start gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <AlertCircle className="text-red-600 dark:text-red-400 shrink-0 mt-0.5" size={16} />
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-red-800">AI Alert</div>
-                  <div className="text-sm text-red-700">{selectedRequest.aiAlert}</div>
+                  <div className="text-sm font-medium text-red-800 dark:text-red-300">AI Alert</div>
+                  <div className="text-sm text-red-700 dark:text-red-400">{selectedRequest.aiAlert}</div>
                   <div className="mt-2 flex gap-2">
                     <button
                       onClick={() => {
@@ -196,15 +196,15 @@ export function RequestDetailPage() {
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             ✕
           </button>
         </div>
 
         {view === 'dev' && selectedRequest.stage === 'Ready for Dev' && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="font-medium text-blue-900 mb-2">This request is ready for you to start</div>
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="font-medium text-blue-900 dark:text-blue-300 mb-2">This request is ready for you to start</div>
             <div className="flex gap-2">
               <button
                 onClick={() => {
@@ -236,8 +236,8 @@ export function RequestDetailPage() {
         )}
 
         {view === 'dev' && selectedRequest.stage === 'In Progress' && (
-          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <div className="font-medium text-purple-900 mb-3">Update Progress</div>
+          <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+            <div className="font-medium text-purple-900 dark:text-purple-300 mb-3">Update Progress</div>
             <div className="flex gap-2">
               <button
                 onClick={() => {
@@ -266,8 +266,8 @@ export function RequestDetailPage() {
         )}
 
         {view === 'requester' && selectedRequest.stage === 'Review' && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="font-medium text-green-900 mb-3">Ready for your review</div>
+          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <div className="font-medium text-green-900 dark:text-green-300 mb-3">Ready for your review</div>
             <div className="flex gap-2">
               <button
                 onClick={() => {
@@ -299,15 +299,15 @@ export function RequestDetailPage() {
           </div>
         )}
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <h4 className="font-semibold text-gray-800 mb-4">Activity Timeline</h4>
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h4 className="font-semibold text-gray-800 dark:text-slate-100 mb-4">Activity Timeline</h4>
           <div className="space-y-3">
             {(selectedRequest.activity || []).map((item, idx) => (
               <div key={idx} className="flex gap-3">
-                <div className="shrink-0 w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                <div className="shrink-0 w-2 h-2 bg-purple-400 dark:bg-purple-500 rounded-full mt-2"></div>
                 <div className="flex-1">
-                  <div className="text-sm text-gray-800">{item.action}</div>
-                  <div className="text-xs text-gray-500">{item.user} • {item.timestamp}</div>
+                  <div className="text-sm text-gray-800 dark:text-slate-100">{item.action}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{item.user} • {item.timestamp}</div>
                 </div>
               </div>
             ))}
@@ -340,11 +340,11 @@ export function RequestDetailPage() {
               />
 
               {/* Move to Ready for Dev button */}
-              <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 mt-4">
-                <h4 className="font-semibold text-gray-800 mb-3">Ready to hand off to development?</h4>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6 mt-4">
+                <h4 className="font-semibold text-gray-800 dark:text-slate-100 mb-3">Ready to hand off to development?</h4>
                 {!allDocsApproved ? (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
-                    <p className="text-sm text-yellow-800">
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mb-4">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-300">
                       ⚠️ All documents must be approved before moving to development
                     </p>
                   </div>

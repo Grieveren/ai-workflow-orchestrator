@@ -15,6 +15,12 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
   - **Requester View**: Submit and track personal requests
   - **Developer View**: Manage assigned work and team workflow
   - **Management View**: Full portfolio oversight with analytics
+- **Dark Mode with System Preference Support:**
+  - WCAG 2.1 AA compliant color palette (4.5:1 contrast ratios)
+  - Persistent theme preference with localStorage
+  - Automatic system preference detection (prefers-color-scheme)
+  - Smooth 150ms transitions between light/dark modes
+  - Manual toggle in header navigation
 - **RevOps Optimization Features:**
   - SLA tracking with visual status badges (on-time/at-risk/overdue)
   - Team capacity monitoring with utilization indicators
@@ -165,6 +171,7 @@ src/
 │   │   ├── Input.tsx
 │   │   ├── Skeleton.tsx
 │   │   ├── SLABadge.tsx
+│   │   ├── ThemeToggle.tsx       # Dark mode toggle component
 │   │   └── index.ts
 │   └── layout/                  # Layout components
 │       ├── Header.tsx
@@ -183,7 +190,8 @@ src/
 │   ├── useRequests.ts
 │   └── useDocuments.ts
 ├── contexts/                    # React Context providers
-│   └── AppContext.tsx
+│   ├── AppContext.tsx
+│   └── ThemeContext.tsx          # Theme state management (dark/light mode)
 ├── types/                       # TypeScript type definitions
 │   └── index.ts
 ├── services/                    # API service layer
@@ -204,7 +212,7 @@ src/
 ### Type System
 All data structures are defined in `src/types/index.ts`:
 - **Domain types**: `Request` (includes `submittedBy` for requester tracking), `ChatMessage`, `RequestData`, `GeneratedDocs`, `TeamMember`
-- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType` (`'requester' | 'dev' | 'management'`), `TabType`, `SLAStatus`
+- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType` (`'requester' | 'dev' | 'management'`), `TabType`, `SLAStatus`, `Theme` (`'light' | 'dark'`)
 - **API types**: `ClaudeApiRequest`, `ClaudeApiResponse`, `RoutingInfo`
 - **RevOps types**: `SLAData`, `DocumentApproval`
 
@@ -228,12 +236,15 @@ The service layer handles all HTTP requests to the backend proxy at `http://loca
 - Concise, demo-friendly content (<200 words per document)
 
 ### State Management
-Uses React Context (`AppProvider`) with custom hooks:
+Uses React Context (`AppProvider`, `ThemeProvider`) with custom hooks:
 - **`useChat` hook**: `chatMessages`, `userInput`, `isProcessing`, `currentOptions`
 - **`useRequests` hook**: `requests`, `selectedRequest`, `requestData`
 - **`useDocuments` hook**: `generatedDocs`, `userMode`, `isGenerating`, `activeDocTab`, `docChatMessages`
+- **`useTheme` hook**: `theme`, `setTheme`, `toggleTheme` - manages dark/light mode with localStorage persistence
 - **View control**: `view` (requester/dev/management) - controls role-based access and filtering
 - **Navigation**: React Router DOM for URL-based routing with auto-navigation on view change
+
+**Theme Persistence**: The `ThemeProvider` stores user preference in localStorage and detects system preference (`prefers-color-scheme: dark`) as fallback. Theme state applies the `.dark` class to `<html>` element for Tailwind CSS dark mode.
 
 **SessionStorage Exception**: The `pendingExample` navigation handoff (LandingPage → SubmitPage) uses sessionStorage instead of Context. This is an acceptable exception for ephemeral routing state that crosses route boundaries. Do NOT use sessionStorage for domain data - only for one-time navigation handoffs.
 

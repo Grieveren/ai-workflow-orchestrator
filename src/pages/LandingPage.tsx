@@ -102,7 +102,7 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-slate-950 dark:via-gray-900 dark:to-slate-950 p-6 transition-colors duration-200">
       <div className="max-w-2xl mx-auto mt-8">
         {/* Logo - always visible */}
         <div className="text-center mb-8">
@@ -121,18 +121,18 @@ export function LandingPage() {
           <h1 className="text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 pb-2">
             What can we do for you today?
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
             Describe your request in plain English, and our AI will guide you through the details.
           </p>
         </div>
 
         {/* Main Chat Container - expands smoothly */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-500">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-500">
           <div className="p-0">
             {/* Chat messages area - grows when expanded, only shows when there are messages */}
             <div className={`overflow-y-auto transition-all duration-500 ${
               isExpanded && chatMessages.length > 0
-                ? 'min-h-[450px] max-h-[450px] opacity-100 bg-gray-50 rounded-xl p-6 mx-6 mt-6 mb-4'
+                ? 'min-h-[450px] max-h-[450px] opacity-100 bg-gray-50 dark:bg-gray-900 rounded-xl p-6 mx-6 mt-6 mb-4'
                 : 'min-h-0 max-h-0 opacity-0 p-0'
             }`}>
               {chatMessages.map((msg, idx) => (
@@ -150,12 +150,12 @@ export function LandingPage() {
                     type="text"
                     readOnly
                     placeholder="Describe what you need... (e.g. I need a report on sales by region)"
-                    className="w-full pl-4 pr-24 py-4 text-base rounded-xl border-2 border-purple-300 bg-gray-50
-                             focus:outline-hidden focus:ring-4 focus:ring-purple-200 focus:border-purple-400
-                             hover:border-purple-400 transition-all cursor-pointer"
+                    className="w-full pl-4 pr-24 py-4 text-base rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-gray-50 dark:bg-gray-900 dark:text-slate-100
+                             focus:outline-hidden focus:ring-4 focus:ring-purple-200 dark:focus:ring-purple-900/50 focus:border-purple-400 dark:focus:border-purple-500
+                             hover:border-purple-400 dark:hover:border-purple-500 transition-all cursor-pointer"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-sm font-medium">Start</span>
+                    <span className="text-gray-400 dark:text-gray-500 text-sm font-medium">Start</span>
                   </div>
                 </div>
               </div>
@@ -174,14 +174,14 @@ export function LandingPage() {
                     }}
                     placeholder="Describe what you need... (e.g. I need a report on sales by region)"
                     disabled={chatIsProcessing}
-                    className="w-full pl-4 pr-24 py-4 text-base rounded-xl border-2 border-purple-300 bg-gray-50
-                             focus:outline-hidden focus:ring-4 focus:ring-purple-200 focus:border-purple-400
-                             hover:border-purple-400 transition-all"
+                    className="w-full pl-4 pr-24 py-4 text-base rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-gray-50 dark:bg-gray-900 dark:text-slate-100
+                             focus:outline-hidden focus:ring-4 focus:ring-purple-200 dark:focus:ring-purple-900/50 focus:border-purple-400 dark:focus:border-purple-500
+                             hover:border-purple-400 dark:hover:border-purple-500 transition-all"
                   />
                   <button
                     onClick={() => startConversation()}
                     disabled={chatIsProcessing || !userInput.trim()}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 text-sm font-medium hover:text-purple-600 transition disabled:opacity-50"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition disabled:opacity-50"
                   >
                     Start
                   </button>
@@ -234,14 +234,14 @@ export function LandingPage() {
 
         {/* Examples - always visible */}
         <div className="text-center mb-8 mt-8">
-          <p className="text-sm text-gray-500 mb-4">Or try an example:</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Or try an example:</p>
           <div className="flex flex-wrap gap-3 justify-center">
             {examples.map((example, index) => (
               <button
                 key={index}
                 onClick={() => handleExampleClick(example)}
-                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700
-                         hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700
+                className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200
+                         hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300
                          transition-all duration-200 shadow-xs hover:shadow-md"
               >
                 {example}
@@ -254,8 +254,8 @@ export function LandingPage() {
         <div className="text-center">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700
-                     hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200
+                     hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300
                      transition-all duration-200 shadow-xs hover:shadow-md font-medium"
           >
             <FolderOpen className="h-5 w-5" />

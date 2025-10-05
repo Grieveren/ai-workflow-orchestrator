@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     autoFocus = false,
     type = 'text'
   }, ref) {
-    const baseStyles = 'px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-hidden focus:border-purple-400 focus:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles = 'px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-purple-400 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed';
 
     return (
       <input
@@ -60,7 +60,7 @@ export function Textarea({
   className = '',
   rows = 4
 }: TextareaProps) {
-  const baseStyles = 'w-full px-4 py-3 border border-gray-300 rounded-lg font-mono text-sm text-gray-800 focus:outline-hidden focus:border-purple-400 resize-none disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg font-mono text-sm text-gray-800 dark:text-slate-100 dark:bg-gray-900 focus:outline-hidden focus:border-purple-400 dark:focus:border-purple-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed';
 
   return (
     <textarea

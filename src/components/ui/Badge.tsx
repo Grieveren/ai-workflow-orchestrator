@@ -11,12 +11,12 @@ interface BadgeProps {
 
 export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
   const variantStyles: Record<BadgeVariant, string> = {
-    default: 'bg-gray-100 text-gray-700',
-    primary: 'bg-purple-100 text-purple-700',
-    success: 'bg-green-100 text-green-700',
-    warning: 'bg-yellow-100 text-yellow-700',
-    danger: 'bg-red-100 text-red-700',
-    info: 'bg-blue-100 text-blue-700'
+    default: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200',
+    primary: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+    success: 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300',
+    warning: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+    danger: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
+    info: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
   };
 
   return (
@@ -34,12 +34,12 @@ interface StageBadgeProps {
 
 export function StageBadge({ stage, className = '' }: StageBadgeProps) {
   const stageColors: Record<RequestStage, string> = {
-    'Intake': 'bg-gray-100 text-gray-700',
-    'Scoping': 'bg-yellow-100 text-yellow-700',
-    'Ready for Dev': 'bg-blue-100 text-blue-700',
-    'In Progress': 'bg-purple-100 text-purple-700',
-    'Review': 'bg-orange-100 text-orange-700',
-    'Completed': 'bg-green-100 text-green-700'
+    'Intake': 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200',
+    'Scoping': 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+    'Ready for Dev': 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+    'In Progress': 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+    'Review': 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300',
+    'Completed': 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
   };
 
   return (
@@ -57,9 +57,9 @@ interface PriorityBadgeProps {
 
 export function PriorityBadge({ priority, className = '' }: PriorityBadgeProps) {
   const priorityColors: Record<Priority, string> = {
-    'High': 'bg-red-100 text-red-700',
-    'Medium': 'bg-yellow-100 text-yellow-700',
-    'Low': 'bg-green-100 text-green-700'
+    'High': 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
+    'Medium': 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+    'Low': 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
   };
 
   return (

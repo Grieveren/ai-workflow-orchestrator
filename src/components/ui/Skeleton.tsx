@@ -7,7 +7,7 @@ interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 export function Skeleton({ className = '', ...props }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse bg-gray-200 rounded-sm ${className}`}
+      className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded-sm ${className}`}
       {...props}
     />
   );
@@ -25,7 +25,7 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
 
 export function SkeletonCard() {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-xs border border-gray-100">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xs border border-gray-100 dark:border-gray-700">
       <div className="flex items-center gap-4 mb-4">
         <Skeleton className="w-12 h-12 rounded-full" />
         <div className="flex-1">
@@ -40,10 +40,10 @@ export function SkeletonCard() {
 
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 overflow-hidden">
       <div className="p-6">
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="flex gap-4 py-4 border-b border-gray-100 last:border-0">
+          <div key={i} className="flex gap-4 py-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
             <Skeleton className="w-20 h-6" />
             <Skeleton className="flex-1 h-6" />
             <Skeleton className="w-24 h-6" />

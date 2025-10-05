@@ -62,10 +62,10 @@ export function LoadingIndicator({ streamingText }: LoadingIndicatorProps) {
           <div className="shrink-0 w-8 h-8 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
             <Bot className="text-white" size={16} />
           </div>
-          <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-xs">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 shadow-xs">
             <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
-              <span className="text-sm text-gray-600">Thinking...</span>
+              <Loader2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">Thinking...</span>
             </div>
           </div>
         </div>
@@ -80,25 +80,25 @@ export function LoadingIndicator({ streamingText }: LoadingIndicatorProps) {
         <div className="shrink-0 w-8 h-8 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
           <Bot className="text-white" size={16} />
         </div>
-        <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-xs flex-1 min-w-0">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 shadow-xs flex-1 min-w-0">
           {/* Progress Steps - Claude Code style */}
           <div className="space-y-3 mb-4">
             {steps.map((step, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <div className="shrink-0 mt-0.5">
                   {step.status === 'complete' ? (
-                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
                   ) : step.status === 'active' ? (
-                    <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
+                    <Loader2 className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
                   ) : (
-                    <Circle className="w-4 h-4 text-gray-300" />
+                    <Circle className="w-4 h-4 text-gray-300 dark:text-gray-600" />
                   )}
                 </div>
                 <div className="flex-1">
                   <p className={`text-xs font-medium ${
-                    step.status === 'complete' ? 'text-green-700' :
-                    step.status === 'active' ? 'text-purple-700' :
-                    'text-gray-400'
+                    step.status === 'complete' ? 'text-green-700 dark:text-green-400' :
+                    step.status === 'active' ? 'text-purple-700 dark:text-purple-400' :
+                    'text-gray-400 dark:text-gray-500'
                   }`}>
                     {step.label}
                   </p>
@@ -109,7 +109,7 @@ export function LoadingIndicator({ streamingText }: LoadingIndicatorProps) {
 
 
           {/* Time Estimate */}
-          <p className="text-xs text-gray-400 mt-3 text-center">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">
             Generating 3 documents sequentially (~15-20 seconds)
           </p>
         </div>

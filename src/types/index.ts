@@ -6,6 +6,7 @@ export type DocType = 'brd' | 'fsd' | 'techSpec';
 export type ViewType = 'requester' | 'dev' | 'management';
 export type TabType = 'submit' | 'dashboard' | 'kanban' | 'detail' | 'analytics';
 export type SLAStatus = 'on-time' | 'at-risk' | 'overdue';
+export type Theme = 'light' | 'dark';
 
 // Activity log entry
 export interface ActivityItem {

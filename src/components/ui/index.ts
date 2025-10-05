@@ -11,3 +11,5 @@ export { SLABadge } from './SLABadge';
 export { Input, Textarea } from './Input';
 
 export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable } from './Skeleton';
+
+export { ThemeToggle } from './ThemeToggle';

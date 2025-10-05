@@ -48,20 +48,20 @@ export function TeamCapacityWidget() {
   };
 
   const getUtilizationBgColor = (utilization: number): string => {
-    if (utilization >= 86) return 'bg-red-100';
-    if (utilization >= 66) return 'bg-yellow-100';
-    return 'bg-green-100';
+    if (utilization >= 86) return 'bg-red-100 dark:bg-red-900/20';
+    if (utilization >= 66) return 'bg-yellow-100 dark:bg-yellow-900/20';
+    return 'bg-green-100 dark:bg-green-900/20';
   };
 
   const isOverloaded = (utilization: number): boolean => utilization > 85;
 
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Team Capacity</h2>
-        <div className="text-sm text-gray-600">
-          Avg: <span className="font-semibold text-gray-800">{averageUtilization}%</span>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-slate-100">Team Capacity</h2>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Avg: <span className="font-semibold text-gray-800 dark:text-slate-100">{averageUtilization}%</span>
         </div>
       </div>
 
@@ -70,28 +70,28 @@ export function TeamCapacityWidget() {
         {teamMembers.map((member) => (
           <div
             key={member.name}
-            className="pb-4 border-b border-gray-100 last:border-b-0 last:pb-0"
+            className="pb-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 last:pb-0"
           >
             {/* Name and Warning */}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-800">{member.name}</span>
+                <span className="font-medium text-gray-800 dark:text-slate-100">{member.name}</span>
                 {isOverloaded(member.utilization) && (
-                  <AlertTriangle className="text-red-500" size={16} />
+                  <AlertTriangle className="text-red-500 dark:text-red-400" size={16} />
                 )}
               </div>
             </div>
 
             {/* Role */}
-            <p className="text-sm text-gray-600 mb-2">{member.role}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{member.role}</p>
 
             {/* Requests and Utilization */}
-            <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
+            <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mb-2">
               <span>
                 {member.activeRequests}/{member.maxCapacity} requests
               </span>
               <span>•</span>
-              <span className="font-medium text-gray-800">
+              <span className="font-medium text-gray-800 dark:text-slate-100">
                 {member.utilization}%
               </span>
             </div>

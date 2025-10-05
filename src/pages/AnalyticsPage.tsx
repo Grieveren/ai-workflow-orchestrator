@@ -36,15 +36,15 @@ export function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Portfolio Analytics</h1>
-        <p className="text-gray-600 mt-1">Executive dashboard showing portfolio health and workflow efficiency</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Portfolio Analytics</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Executive dashboard showing portfolio health and workflow efficiency</p>
       </div>
 
       {/* Section 1: Funnel */}
-      <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center gap-2 mb-6">
-          <BarChart3 className="w-6 h-6 text-blue-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Request Flow</h2>
+          <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Request Flow</h2>
         </div>
 
         <div className="space-y-3">
@@ -55,32 +55,32 @@ export function AnalyticsPage() {
 
             return (
               <div key={item.stage} className="flex items-center gap-4">
-                <div className="w-32 shrink-0 text-sm font-medium text-gray-700">
+                <div className="w-32 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300">
                   {item.stage}
                 </div>
                 <div className="flex-1 flex items-center gap-2">
                   <div
                     className={`h-10 rounded transition-all ${
-                      isHighCount ? 'bg-yellow-400' : 'bg-blue-500'
+                      isHighCount ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-blue-500 dark:bg-blue-600'
                     }`}
                     style={{ width: `${Math.max(widthPercent, 5)}%` }}
                   />
-                  <span className="text-lg font-semibold text-gray-900 min-w-8">
+                  <span className="text-lg font-semibold text-gray-900 dark:text-slate-100 min-w-8">
                     {item.count}
                   </span>
                 </div>
                 {index < funnelData.length - 1 && (
-                  <ArrowRight className="w-4 h-4 text-gray-400 shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" />
                 )}
               </div>
             );
           })}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Total Active Requests</span>
-            <span className="font-semibold text-gray-900">
+            <span className="text-gray-600 dark:text-gray-400">Total Active Requests</span>
+            <span className="font-semibold text-gray-900 dark:text-slate-100">
               {funnelData.reduce((sum, item) => sum + item.count, 0)}
             </span>
           </div>
@@ -88,20 +88,20 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 2: Bottleneck */}
-      <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center gap-2 mb-6">
-          <AlertTriangle className="w-6 h-6 text-yellow-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Bottleneck Detection</h2>
+          <AlertTriangle className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Bottleneck Detection</h2>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <div className="font-semibold text-yellow-900 mb-2">
+              <div className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2">
                 Bottleneck Alert: "{bottleneck.stage}" stage
               </div>
-              <div className="space-y-1 text-sm text-yellow-800">
+              <div className="space-y-1 text-sm text-yellow-800 dark:text-yellow-400">
                 <div className="flex items-center justify-between">
                   <span>Average duration:</span>
                   <span className="font-semibold">{bottleneck.avgDuration} days</span>
@@ -110,7 +110,7 @@ export function AnalyticsPage() {
                   <span>Target duration:</span>
                   <span className="font-semibold">{bottleneck.targetDuration} days</span>
                 </div>
-                <div className="flex items-center justify-between text-yellow-900">
+                <div className="flex items-center justify-between text-yellow-900 dark:text-yellow-300">
                   <span>Performance:</span>
                   <span className="font-bold">
                     {((bottleneck.avgDuration / bottleneck.targetDuration) * 100).toFixed(0)}%
@@ -120,8 +120,8 @@ export function AnalyticsPage() {
                   </span>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-yellow-200">
-                <div className="text-sm text-yellow-900">
+              <div className="mt-3 pt-3 border-t border-yellow-200 dark:border-yellow-800">
+                <div className="text-sm text-yellow-900 dark:text-yellow-300">
                   <span className="font-semibold">Recommendation:</span> {bottleneck.recommendation}
                 </div>
               </div>
@@ -131,50 +131,50 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 3: Cycle Time */}
-      <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center gap-2 mb-6">
-          <TrendingDown className="w-6 h-6 text-green-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Cycle Time Trends</h2>
+          <TrendingDown className="w-6 h-6 text-green-600 dark:text-green-500" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Cycle Time Trends</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Current Cycle Time */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="text-sm text-blue-700 mb-1">Current Average</div>
-            <div className="text-3xl font-bold text-blue-900">{cycleTime.current}</div>
-            <div className="text-xs text-blue-600 mt-1">days to complete</div>
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="text-sm text-blue-700 dark:text-blue-400 mb-1">Current Average</div>
+            <div className="text-3xl font-bold text-blue-900 dark:text-blue-300">{cycleTime.current}</div>
+            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">days to complete</div>
           </div>
 
           {/* Previous Cycle Time */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-700 mb-1">Last Month</div>
-            <div className="text-3xl font-bold text-gray-900">{cycleTime.previous}</div>
-            <div className="text-xs text-gray-600 mt-1">days to complete</div>
+          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div className="text-sm text-gray-700 dark:text-gray-400 mb-1">Last Month</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-slate-100">{cycleTime.previous}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">days to complete</div>
           </div>
 
           {/* Improvement */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="text-sm text-green-700 mb-1">Improvement</div>
-            <div className="text-3xl font-bold text-green-900">-{improvement}%</div>
-            <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <div className="text-sm text-green-700 dark:text-green-400 mb-1">Improvement</div>
+            <div className="text-3xl font-bold text-green-900 dark:text-green-300">-{improvement}%</div>
+            <div className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
               <TrendingDown className="w-3 h-3" />
               faster than last month
             </div>
           </div>
 
           {/* SLA Adherence */}
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <div className="text-sm text-purple-700 mb-1">SLA Adherence</div>
-            <div className="text-3xl font-bold text-purple-900">{cycleTime.slaAdherence}%</div>
-            <div className="text-xs text-purple-600 mt-1">on-time delivery</div>
+          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+            <div className="text-sm text-purple-700 dark:text-purple-400 mb-1">SLA Adherence</div>
+            <div className="text-3xl font-bold text-purple-900 dark:text-purple-300">{cycleTime.slaAdherence}%</div>
+            <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">on-time delivery</div>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="w-2 h-2 bg-green-500 dark:bg-green-600 rounded-full"></div>
             <span>Performance trending positively</span>
-            <span className="ml-auto text-gray-500">Based on last 30 days</span>
+            <span className="ml-auto text-gray-500 dark:text-gray-400">Based on last 30 days</span>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AppProvider } from './contexts/AppContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppLayout } from './components/layout/AppLayout';
 import { SkeletonCard } from './components/ui/Skeleton';
@@ -26,7 +27,7 @@ function PageLoader() {
 
 function AppContent() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-gray-900 dark:to-slate-950 p-6 transition-colors duration-200">
       <div className="max-w-5xl mx-auto">
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -53,11 +54,12 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AppProvider>
-          <AppContent />
-          <Toaster
-            position="top-right"
-            toastOptions={{
+        <ThemeProvider>
+          <AppProvider>
+            <AppContent />
+            <Toaster
+              position="top-right"
+              toastOptions={{
               duration: 3000,
               style: {
                 background: '#fff',
@@ -82,7 +84,8 @@ export default function App() {
               },
             }}
           />
-        </AppProvider>
+          </AppProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );

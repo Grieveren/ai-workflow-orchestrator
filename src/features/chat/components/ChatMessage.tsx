@@ -20,7 +20,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         className={`rounded-2xl px-4 py-3 ${
           isUser
             ? 'bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-br-sm shadow-md'
-            : 'bg-white border border-gray-200 rounded-tl-sm shadow-xs text-gray-800'
+            : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tl-sm shadow-xs text-gray-800 dark:text-slate-100'
         }`}
       >
         <div className="whitespace-pre-wrap">{message.content}</div>

@@ -93,7 +93,7 @@ export function SubmitPage() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
       <div className="bg-linear-to-r from-purple-500 to-pink-500 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -115,36 +115,36 @@ export function SubmitPage() {
       </div>
 
       <div className="p-6">
-        <div className="bg-gray-50 rounded-xl p-6 mb-4 min-h-[450px] max-h-[450px] overflow-y-auto">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 mb-4 min-h-[450px] max-h-[450px] overflow-y-auto">
           {chatMessages.length === 0 ? (
             <div className="text-center mt-12">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-br from-purple-100 to-pink-100 rounded-full mb-6">
                 <Bot className="text-purple-600" size={40} />
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-3">
+              <h3 className="text-2xl font-semibold text-gray-800 dark:text-slate-100 mb-3">
                 Hi! I'm here to help
               </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 Just describe what you need in plain English. I'll ask you a few questions to make sure we get it right.
               </p>
 
               {!showExamples ? (
                 <button
                   onClick={() => setShowExamples(true)}
-                  className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium transition"
+                  className="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition"
                 >
                   <Lightbulb size={18} />
                   Show me some examples
                 </button>
               ) : (
                 <div className="mt-6 text-left max-w-lg mx-auto">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Try one of these:</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Try one of these:</p>
                   <div className="space-y-2">
                     {exampleRequests.map((example, idx) => (
                       <button
                         key={idx}
                         onClick={() => startConversation(example)}
-                        className="w-full text-left px-4 py-3 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-lg transition text-sm text-gray-700 hover:text-purple-700"
+                        className="w-full text-left px-4 py-3 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-purple-900/20 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 rounded-lg transition text-sm text-gray-700 dark:text-gray-200 hover:text-purple-700 dark:hover:text-purple-300"
                       >
                         "{example}"
                       </button>
