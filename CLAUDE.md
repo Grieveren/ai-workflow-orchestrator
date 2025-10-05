@@ -340,16 +340,16 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 
 ## Tech Stack Details
 
-- **React 18** with TypeScript
-- **Vite** for build tooling (configured for port 3000 with auto-open)
+- **React 19** with TypeScript
+- **Vite 6** for build tooling (configured for port 3000 with auto-open)
 - **React Router DOM v7** for URL-based navigation
-- **Tailwind CSS** for styling
+- **Tailwind CSS v4** for styling (CSS-first configuration, pure v4 defaults)
 - **Lucide React** for icons
 - **React Hot Toast** for modern toast notifications
 - **Express.js** backend proxy server (runs on port 3001)
 - **React Context** for state management with custom hooks
 - **Vitest** for testing with React Testing Library
-- **ESLint** with TypeScript plugin for code quality (zero warnings policy)
+- **ESLint 9** with TypeScript plugin for code quality (zero warnings policy)
 - **Prettier** for consistent code formatting
 - **Proxied API calls** through Express backend for security
 - **Code splitting** with lazy loading for optimal performance
@@ -404,6 +404,8 @@ The application follows strict architectural patterns. **Detailed documentation*
 ## Migration Status
 
 All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/history/MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
+
+**Dependency Migration**: ✅ Complete (Oct 2025) - Upgraded to React 19, ESLint 9, Vite 6, Tailwind 4. Now using pure Tailwind 4 CSS-first configuration (compatibility layer removed). See [docs/history/dependencies/](docs/history/dependencies/).
 
 ## Claude Code Configuration
 
