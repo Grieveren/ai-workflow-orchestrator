@@ -58,7 +58,7 @@ export function SubmitPage() {
     return () => {
       resetDocuments();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Only run once on mount/unmount
 
   // Auto-scroll to bottom when new messages arrive

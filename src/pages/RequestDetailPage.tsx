@@ -60,7 +60,7 @@ export function RequestDetailPage() {
         navigate('/dashboard');
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [id, requests]);
 
   // Auto-scroll to documents section when mode is selected or docs are generated
@@ -78,7 +78,7 @@ export function RequestDetailPage() {
       closeRequestDetail();
       resetDocuments();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const handleClose = () => {

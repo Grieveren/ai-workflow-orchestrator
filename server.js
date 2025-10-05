@@ -114,7 +114,7 @@ app.post('/api/chat/stream', async (req, res) => {
     console.error('Streaming error:', error);
     try {
       res.write(`data: ${JSON.stringify({ error: true, message: error.message })}\n\n`);
-    } catch (e) {
+    } catch {
       // Response already closed
     }
     res.end();
