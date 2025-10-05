@@ -118,7 +118,7 @@ export function LandingPage() {
 
         {/* Headline - always visible */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 pb-2">
             What can we do for you today?
           </h1>
           <p className="text-lg text-gray-600">
