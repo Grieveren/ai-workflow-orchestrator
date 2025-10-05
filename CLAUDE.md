@@ -31,33 +31,14 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
 Before starting ANY task, Claude Code MUST:
 
 1. **Use TodoWrite**: Create a todo list for any multi-step task (3+ distinct actions) or any complex task
-2. **Identify Relevant Agents**: Review `.claude/agents/` to determine which specialized agents apply
-3. **Review Hooks**: Check `.claude/hooks.json` to understand what automated validation will run
+2. **Review Hooks**: Check `.claude/hooks.json` to understand what automated validation will run
 
 **Exception: Documentation-Only Changes**
 For pure documentation updates (`*.md` files only, no code changes):
 - TodoWrite is optional if making <3 distinct changes
-- Skip `technical-architect` unless architectural documentation changed
 - Skip test/TypeScript/ESLint checks (not applicable to markdown)
-- Still use `doc-updater` for cross-file consistency verification
 
 ### During Work Phase (REQUIRED)
-
-Claude Code MUST proactively invoke specialized agents WITHOUT asking permission:
-
-**Auto-Invoke Triggers:**
-- **`technical-architect`**: ANY file in `src/` with >20 lines changed, architectural decisions, or pattern changes
-- **`test-writer`**: New component created in `src/components/` or `src/features/`
-- **`test-coordinator`**: Full test suite execution after major changes (>5 files modified in src/)
-- **`troubleshooting-expert`**: User explicitly reports bugs/errors or hooks fail repeatedly (>2 attempts)
-- **`performance-profiler`**: Bundle size increases >50 KB or data-heavy features added
-- **`migration-helper`**: User requests database persistence or major dependency upgrades
-- **`security-reviewer`**: Modifications to `src/services/api.ts`, `server.js`, authentication, or user input handling
-- **`ux-reviewer`**: UI/UX changes to `src/components/`, `src/pages/`, `src/features/*/components/`, or Tailwind styling updates
-- **`doc-updater`**: Changes to files listed in "Critical Architecture Patterns" section
-- **`dependency-auditor`**: `package.json` modified or new npm packages requested
-- **`route-optimizer`**: New routes added or `src/App.tsx` router modified
-- **`prompt-engineer`**: Modifying prompts in `src/services/api.ts`
 
 **Hook Compliance:**
 - Trust hooks to run automatically (they execute via `.claude/hooks.json`)
@@ -67,37 +48,22 @@ Claude Code MUST proactively invoke specialized agents WITHOUT asking permission
 **Hook Failure Protocol:**
 When hooks fail or produce warnings:
 - **TypeScript errors** → Fix immediately, do not proceed with other work
-  - If errors persist after 2 attempts → Invoke troubleshooting-expert
 - **Test failures** → Debug and resolve before continuing to next task
-  - If multiple test files failing → Invoke test-coordinator for suite analysis
 - **ESLint warnings** → Address all warnings (zero-warning policy enforced)
 - **Git commit blocks** → Review files being committed, fix security issues, retry
 - If errors persist → Document in chat, seek user guidance
-
-**Agent Invocation Failure:**
-If a specialized agent fails or times out:
-1. Review the agent's output for specific error messages
-2. Fix any environmental issues (missing files, incorrect paths, etc.)
-3. Re-invoke the agent with corrected context
-4. If persistent failure → Document the issue in chat and proceed with manual review
-5. Never skip agent review silently - always acknowledge when manual review replaces agent review
 
 ### Post-Work Phase (REQUIRED)
 
 After completing ANY code changes, Claude Code MUST:
 
 1. **Run Tests**: Execute `npm run test:run` to verify no regressions
-   - If failures detected: Invoke test-coordinator for analysis
 2. **TypeScript Check**: Run `npx tsc --noEmit` to ensure type safety
-   - If errors persist after 2 attempts: Invoke troubleshooting-expert
 3. **ESLint**: Execute `npm run lint` to verify code quality standards
-4. **Agent Review**: Invoke `technical-architect` for final architectural review
-   - For performance-critical changes: Also invoke performance-profiler
 
 ### Workflow Enforcement
 
 **These are NOT suggestions - they are REQUIREMENTS:**
-- Specialized agents must be used proactively, not reactively
 - Tests, TypeScript, and ESLint checks are MANDATORY after changes
 - TodoWrite must be used for task tracking and transparency
 - Documentation must be updated when architectural patterns change
@@ -127,8 +93,6 @@ npm test              # Watch mode
 npm run test:run      # Run once
 npm run test:ui       # With UI
 
-**Agent Tip**: Use test-coordinator agent to analyze test failures and coverage gaps
-
 # Build for production (TypeScript compile + Vite build)
 npm run build
 
@@ -154,8 +118,6 @@ The application requires an Anthropic API key for the backend proxy server:
 ## Architecture
 
 **Status**: ✅ Production-ready architecture (All 5 phases complete)
-
-**Agent Support**: The technical-architect agent reviews all architectural changes to maintain production-ready standards. Use performance-profiler to validate bundle size stays within the 273 KB total (96 KB gzipped) target.
 
 ### Current Structure
 
@@ -399,7 +361,6 @@ The application follows strict architectural patterns. **Detailed documentation*
 - Backend (port 3001): Express proxy with API key
 - Frontend (port 3000): Vite dev server
 - Start both: `npm run dev:full`
-- **Agent Support**: security-reviewer validates API key never exposed to frontend; troubleshooting-expert debugs CORS issues or proxy connection failures
 
 **State Management**:
 - `useChat` → Chatbot conversation state
@@ -417,7 +378,6 @@ The application follows strict architectural patterns. **Detailed documentation*
 - Co-locate: `Component.test.tsx` next to `Component.tsx`
 - Run single test: `npm test -- Component.test.tsx`
 - See [testing docs](docs/architecture/testing.md) for patterns
-- **Agent Support**: test-writer creates co-located tests; test-coordinator runs suite and analyzes coverage gaps; invoke test-coordinator before creating pull requests
 
 ## Migration Status
 
@@ -445,102 +405,6 @@ All major dependencies upgraded to latest stable versions. See [docs/history/dep
 - All configurations updated for modern tooling
 
 ## Claude Code Configuration
-
-### Custom Sub-Agents
-
-**IMPORTANT**: This project has 19 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
-
-#### Development Agents
-- **component-generator**: Creates React components following project architecture patterns
-  - Auto-invoke when: User requests new UI components
-- **test-writer**: Writes Vitest tests for components following project test patterns
-  - Auto-invoke when: New components created OR user requests tests
-- **api-integration**: Adds new Claude API methods to service layer (`src/services/api.ts`)
-  - Auto-invoke when: New API functionality needed
-
-#### Quality & Architecture Agents
-- **technical-architect**: Reviews architectural decisions and ensures consistency with production-ready patterns
-  - Auto-invoke when: Major architectural changes, new patterns introduced, performance concerns
-- **security-reviewer**: Audits code for vulnerabilities (prompt injection, API key exposure, XSS)
-  - Auto-invoke when: `src/services/api.ts`, `server.js`, or user input handling modified
-- **dependency-auditor**: Reviews npm package additions for security, bundle size, and architectural fit
-  - Auto-invoke when: User requests new dependencies OR `package.json` modified
-- **route-optimizer**: Manages React Router configuration, lazy loading, and navigation patterns
-  - Auto-invoke when: New routes added OR `src/App.tsx` modified
-- **code-reviewer**: Performs code quality reviews, identifies anti-patterns, and ensures best practices
-  - Auto-invoke when: Large code changes (>50 lines) or user requests code review
-- **ux-reviewer**: Audits UI/UX for accessibility (WCAG 2.1 AA), design consistency, and user experience
-  - Auto-invoke when: UI/UX changes to components, pages, or styling; Tailwind class updates; accessibility concerns
-- **workflow-enforcer**: Ensures compliance with project workflow defined in CLAUDE.md
-  - Auto-invoke when: Session starts or user requests workflow verification
-
-#### Testing & Debugging Agents
-- **test-coordinator**: Coordinates test execution, analyzes test results, and ensures comprehensive test coverage
-  - Auto-invoke when: Running full test suite after major changes (>5 files modified in src/), test failures detected by hooks, user requests "run all tests", or before creating pull requests
-- **troubleshooting-expert**: Diagnoses and resolves bugs, errors, and unexpected application behavior
-  - Auto-invoke when: User explicitly reports bugs, errors, or unexpected behavior; TypeScript, test, or ESLint hooks fail repeatedly (>2 attempts); or console errors detected in development
-
-#### Performance & Migration Agents
-- **performance-profiler**: Analyzes application performance, identifies bottlenecks, and optimizes bundle sizes
-  - Auto-invoke when: User reports performance issues or slow rendering; bundle size increases >50 KB; adding data-heavy features (>100 items in lists); or user requests performance optimization
-- **migration-helper**: Plans and executes safe migrations of data structures, state management, or dependency upgrades
-  - Auto-invoke when: User explicitly requests database/persistence layer, major dependency upgrades (React, Vite, TypeScript), breaking changes to state management (modifying AppContext), or migration from mock data to real backend
-
-#### Planning & Documentation Agents
-- **product-owner**: Reviews feature requests for business value and ensures product quality
-  - Auto-invoke when: User requests new features (evaluate before implementing)
-- **project-manager**: Plans implementation, breaks down features, and coordinates development tasks
-  - Auto-invoke when: Complex multi-step features requested
-- **doc-updater**: Updates project documentation to reflect code changes
-  - Auto-invoke when: Architectural changes made, new features completed
-- **prompt-engineer**: Optimizes Claude API prompts in the service layer
-  - Auto-invoke when: Modifying prompts in `src/services/api.ts`
-- **revops-expert**: Provides strategic consultation on Revenue Operations workflow optimization
-  - Auto-invoke when: User asks about process improvements or workflow optimization
-
-**Agent Usage Philosophy**: Be proactive, not reactive. If a task matches an agent's expertise, delegate to that agent immediately without asking. This provides better focused context and follows the pattern the agent system was designed for.
-
-**Exception**: troubleshooting-expert is reactive - only invoke when actual problems occur, not preemptively on every code change.
-
-### Agent Coordination Patterns
-
-Some tasks require multiple agents working together systematically:
-
-**Testing Workflow:**
-```
-test-writer (create tests) → test-coordinator (execute & analyze)
-```
-- **test-writer**: Creates individual test files for components (tactical)
-- **test-coordinator**: Runs test suite, analyzes coverage, identifies gaps (strategic)
-- **Workflow**: test-writer creates tests → test-coordinator runs and validates them
-
-**Debugging Workflow:**
-```
-troubleshooting-expert (diagnose) → May escalate to security-reviewer (if security-related)
-```
-- Security concerns (API keys, XSS, prompt injection) → security-reviewer
-- Functional bugs (broken features, logic errors) → troubleshooting-expert
-- If unsure: Start with troubleshooting-expert, escalate if security-related
-
-**Performance Optimization:**
-```
-performance-profiler (analyze) → May invoke route-optimizer or dependency-auditor
-```
-- performance-profiler analyzes bottlenecks
-- May recommend lazy loading (route-optimizer)
-- May recommend dependency reduction (dependency-auditor)
-
-**Major Migrations:**
-```
-migration-helper (plan) → technical-architect (review) → test-coordinator (validate)
-```
-- migration-helper creates phase-by-phase plan
-- technical-architect reviews architectural impact
-- test-coordinator validates no regressions after each phase
-
-**When to Use test-coordinator vs Running Tests:**
-- **Hooks**: Run tests automatically after file changes (individual test files)
-- **test-coordinator**: Strategic analysis of full test suite, coverage gaps, failure patterns, pre-deployment validation
 
 ### Automated Hooks
 
@@ -593,7 +457,6 @@ This project has **6 configured MCP servers** that extend Claude Code's capabili
      - When user reports visual bugs → screenshot to see the actual issue
    - **Example**: `mcp__puppeteer__navigate` to `http://localhost:3000`, then `mcp__puppeteer__screenshot`
    - **Integration**: Always verify both frontend (3000) and backend (3001) are running first
-   - **Agent synergy**: The `ux-reviewer` agent can request screenshots to validate visual changes and accessibility
 
 3. **Memory** (`@modelcontextprotocol/server-memory`)
    - **Purpose**: Persist knowledge and decisions across Claude Code sessions
@@ -646,7 +509,7 @@ This project has **6 configured MCP servers** that extend Claude Code's capabili
 1. Use Sequential Thinking for complex features
 2. Check Memory for related past decisions
 3. Store the implementation plan in Memory
-4. Execute with appropriate specialized agents
+4. Execute the implementation plan systematically
 
 **Database Migration Workflow:**
 1. Analyze current mock data structure in `AppContext.tsx`

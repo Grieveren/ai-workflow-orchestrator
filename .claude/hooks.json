@@ -11,7 +11,7 @@
       },
       {
         "type": "command",
-        "command": "echo '\n📋 WORKFLOW REMINDER - See CLAUDE.md \"Claude Code Workflow\" section:\n  ✓ TodoWrite for multi-step tasks\n  ✓ Proactive agent invocation (technical-architect, test-writer, etc.)\n  ✓ Run tests/TypeScript/ESLint after changes\n'"
+        "command": "echo '\n📋 WORKFLOW REMINDER - See CLAUDE.md \"Claude Code Workflow\" section:\n  ✓ TodoWrite for multi-step tasks\n  ✓ Run tests/TypeScript/ESLint after changes\n'"
       }
     ],
     "PreToolUse": [
@@ -65,7 +65,7 @@
       {
         "matcher": "^(Write|Edit)$",
         "type": "command",
-        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(services|types|contexts|components/layout|App\\.tsx)/.*\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then DOCS=''; if echo \"$FILE_PATH\" | grep -q 'services/api.ts'; then DOCS='CLAUDE.md (API Service Layer section)'; elif echo \"$FILE_PATH\" | grep -q 'types/index.ts'; then DOCS='CLAUDE.md (Type System section)'; elif echo \"$FILE_PATH\" | grep -q 'contexts/AppContext.tsx'; then DOCS='CLAUDE.md (State Management section), docs/architecture/state-management.md'; elif echo \"$FILE_PATH\" | grep -q 'App.tsx'; then DOCS='CLAUDE.md (UI Structure section)'; elif echo \"$FILE_PATH\" | grep -q 'components/layout'; then DOCS='CLAUDE.md (Architecture section)'; fi; if [ -n \"$DOCS\" ]; then echo '📚 AUTO-DOC ALERT: Core file changed. Invoke doc-updater agent to update: '$DOCS; fi; fi"
+        "command": "FILE_PATH=$(echo \"$TOOL_INPUT\" | jq -r '.file_path // empty'); if echo \"$FILE_PATH\" | grep -qE 'src/(services|types|contexts|components/layout|App\\.tsx)/.*\\.(ts|tsx)$' && [ -f \"$FILE_PATH\" ]; then DOCS=''; if echo \"$FILE_PATH\" | grep -q 'services/api.ts'; then DOCS='CLAUDE.md (API Service Layer section)'; elif echo \"$FILE_PATH\" | grep -q 'types/index.ts'; then DOCS='CLAUDE.md (Type System section)'; elif echo \"$FILE_PATH\" | grep -q 'contexts/AppContext.tsx'; then DOCS='CLAUDE.md (State Management section), docs/architecture/state-management.md'; elif echo \"$FILE_PATH\" | grep -q 'App.tsx'; then DOCS='CLAUDE.md (UI Structure section)'; elif echo \"$FILE_PATH\" | grep -q 'components/layout'; then DOCS='CLAUDE.md (Architecture section)'; fi; if [ -n \"$DOCS\" ]; then echo '📚 AUTO-DOC ALERT: Core file changed. Update documentation: '$DOCS; fi; fi"
       },
       {
         "matcher": "^(Write|Edit)$",
@@ -80,11 +80,11 @@
       },
       {
         "type": "command",
-        "command": "cd $PWD && CHANGES=$(git diff --stat 2>/dev/null | tail -1); UNTRACKED=$(git ls-files --others --exclude-standard | wc -l | tr -d ' '); if [ -n \"$CHANGES\" ] || [ \"$UNTRACKED\" -gt 0 ]; then echo '\n🎯 COMMIT HELPER:'; echo '  Changes: '$CHANGES; echo '  Untracked files: '$UNTRACKED; echo '\n  Quick commit:'; echo '    git add -A'; echo '    git commit -m \"your descriptive message\"'; echo '    git push'; echo '\n  Or use workflow-enforcer agent to review session compliance first.'; fi"
+        "command": "cd $PWD && CHANGES=$(git diff --stat 2>/dev/null | tail -1); UNTRACKED=$(git ls-files --others --exclude-standard | wc -l | tr -d ' '); if [ -n \"$CHANGES\" ] || [ \"$UNTRACKED\" -gt 0 ]; then echo '\n🎯 COMMIT HELPER:'; echo '  Changes: '$CHANGES; echo '  Untracked files: '$UNTRACKED; echo '\n  Quick commit:'; echo '    git add -A'; echo '    git commit -m \"your descriptive message\"'; echo '    git push'; fi"
       },
       {
         "type": "command",
-        "command": "echo '\n📋 WORKFLOW COMPLIANCE CHECK:\n  ✓ TodoWrite for multi-step tasks?\n  ✓ Proactive agent invocation (technical-architect, test-writer, ux-reviewer, etc.)?\n  ✓ Tests/TypeScript/ESLint after changes?\n  ✓ Documentation updated (or doc-updater invoked)?\n\n💡 TIP: Use workflow-enforcer agent for automated compliance review.\n'"
+        "command": "echo '\n📋 WORKFLOW COMPLIANCE CHECK:\n  ✓ TodoWrite for multi-step tasks?\n  ✓ Tests/TypeScript/ESLint after changes?\n  ✓ Documentation updated?\n'"
       }
     ]
   }

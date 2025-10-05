@@ -15,7 +15,7 @@ The project has **17 automated hooks** configured in `hooks.json`:
 ### UserPromptSubmit Hooks (3)
 1. **Server Status Check**: Checks if both backend (port 3001) and frontend (port 3000) are running
 2. **API Key Validation**: Verifies `.env` file exists with valid `ANTHROPIC_API_KEY`
-3. **Workflow Reminder**: Displays workflow requirements (TodoWrite, agent invocation, testing)
+3. **Workflow Reminder**: Displays workflow requirements (TodoWrite, testing)
 
 ### PreToolUse Hooks (2)
 4. **Enhanced Secret Detection**: Blocks commits of `.env`, `.key`, `.pem` files
@@ -29,13 +29,13 @@ The project has **17 automated hooks** configured in `hooks.json`:
 10. **Hook Isolation Check**: Ensures custom hooks don't call each other directly
 11. **Breaking Change Detection**: Detects export signature changes in core files
 12. **Test Coverage Reminder**: Warns when new components lack test files
-13. **Smart Documentation Alert**: Detects which specific docs need updating and suggests invoking doc-updater agent
+13. **Smart Documentation Alert**: Detects which specific docs need updating
 14. **Secret Scanning**: Detects hardcoded API keys or secrets in code
 
 ### Stop Hooks (3)
 15. **Session Summary**: Shows git status and files changed
 16. **Smart Commit Helper**: Analyzes uncommitted changes and provides ready-to-use git commands with change summary
-17. **Workflow Compliance Check**: Interactive checklist with suggestion to use workflow-enforcer agent
+17. **Workflow Compliance Check**: Interactive checklist for session compliance
 
 ## Testing Hooks
 
