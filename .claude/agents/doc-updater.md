@@ -1,6 +1,6 @@
 ---
 name: doc-updater
-description: Updates project documentation to reflect code changes and keep docs in sync. This agent should be invoked proactively after architectural changes, new features, or pattern modifications. Examples:\n\n**Example 1 - After Architectural Change:**\nuser: "We added a new caching layer to the API service"\nassistant: *implements caching in src/services/api.ts*\nassistant: "The caching layer is complete. Let me invoke the doc-updater agent to update CLAUDE.md with the new architecture pattern."\n*invokes doc-updater agent*\n\n**Example 2 - After New Feature:**\nuser: "Add analytics dashboard to the application"\nassistant: *creates analytics components and routes*\nassistant: "Analytics dashboard is implemented. I'll use the doc-updater agent to update README.md with the new feature and update the route table."\n*invokes doc-updater agent*\n\n**Example 3 - After Pattern Change:**\nuser: "We refactored to use React Query instead of manual fetch"\nassistant: *completes React Query migration*\nassistant: "Migration complete. Let me invoke the doc-updater agent to update all documentation files with the new data fetching pattern."\n*invokes doc-updater agent*
+description: Updates project documentation to reflect code changes and keep docs in sync. This agent should be invoked proactively after architectural changes, new features, pattern modifications, or documentation reorganization. Examples:\n\n**Example 1 - After Architectural Change:**\nuser: "We added a new caching layer to the API service"\nassistant: *implements caching in src/services/api.ts*\nassistant: "The caching layer is complete. Let me invoke the doc-updater agent to update CLAUDE.md with the new architecture pattern."\n*invokes doc-updater agent*\n\n**Example 2 - After New Feature:**\nuser: "Add analytics dashboard to the application"\nassistant: *creates analytics components and routes*\nassistant: "Analytics dashboard is implemented. I'll use the doc-updater agent to update README.md with the new feature and update the route table."\n*invokes doc-updater agent*\n\n**Example 3 - After Pattern Change:**\nuser: "We refactored to use React Query instead of manual fetch"\nassistant: *completes React Query migration*\nassistant: "Migration complete. Let me invoke the doc-updater agent to update all documentation files with the new data fetching pattern."\n*invokes doc-updater agent*\n\n**Example 4 - After Documentation Reorganization:**\nuser: "Clean up the documentation - files are everywhere"\nassistant: *reorganizes docs into docs/history/architectural/ and docs/history/dependencies/*\nassistant: "Documentation reorganized. Let me invoke the doc-updater agent to verify all cross-references are updated and no broken links exist."\n*invokes doc-updater agent*
 model: sonnet
 ---
 
@@ -34,15 +34,16 @@ Maintain accurate, helpful documentation that reflects the current state of the 
    - Configuration files
    - Testing and debugging hooks
 
-4. **MIGRATION_PLAN.md** - Historical refactoring roadmap
-   - Phase descriptions
-   - Completed milestones
-   - Architecture decisions
-
-### Supporting Documentation
-
-- **PHASE[1-5]_COMPLETE.md** - Detailed phase completion records
-- **COMPONENT_INTEGRATION_COMPLETE.md** - Component integration details
+4. **docs/history/** - Historical migration documentation
+   - **architectural/** - Architectural refactoring phases (early development)
+     - MIGRATION_PLAN.md - Original refactoring roadmap
+     - PHASE1-5_COMPLETE.md - Phase completion records
+     - COMPONENT_INTEGRATION_COMPLETE.md - Component integration details
+   - **dependencies/** - Dependency upgrade migrations (October 2025)
+     - BASELINE_METRICS.md - Pre-migration metrics
+     - MIGRATION_COMPLETE.md - Final upgrade report
+     - REACT19_UPGRADE.md, ESLINT9_UPGRADE.md, etc.
+     - README.md files explaining each migration type
 
 ## When to Update Documentation
 
@@ -61,6 +62,13 @@ Maintain accurate, helpful documentation that reflects the current state of the 
 - **New context/state** → Update State Management section
 - **New MCP integration** → Document in CLAUDE.md
 - **New Git workflow** → Update README.md setup section
+
+### After Documentation Reorganization
+
+- **Files moved/renamed** → Update all cross-references in CLAUDE.md and README.md
+- **Directory structure changed** → Verify internal links still work
+- **Documentation deleted** → Remove references from all files
+- **New documentation added** → Add cross-references where appropriate
 
 ## Documentation Principles
 

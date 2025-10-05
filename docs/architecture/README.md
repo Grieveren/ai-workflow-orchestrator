@@ -4,7 +4,7 @@ This directory contains detailed architectural documentation for the AI Workflow
 
 ## Overview
 
-The AI Workflow Orchestrator uses a modern, production-ready architecture that evolved through a comprehensive 5-phase refactoring (see [Migration History](../history/MIGRATION_PLAN.md)).
+The AI Workflow Orchestrator uses a modern, production-ready architecture that evolved through a comprehensive 5-phase refactoring (see [Migration History](../history/architectural/MIGRATION_PLAN.md)).
 
 ## Architecture Documents
 

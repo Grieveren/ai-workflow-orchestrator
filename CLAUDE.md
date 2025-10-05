@@ -367,7 +367,7 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - **Proxied API calls** through Express backend for security
 - **Code splitting** with lazy loading for optimal performance
 
-**Recent Migration** (October 2025): All major dependencies upgraded - see [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) for details. Build time improved 16%, dev server 74% faster.
+**Recent Migration** (October 2025): All major dependencies upgraded - see [docs/history/dependencies/MIGRATION_COMPLETE.md](docs/history/dependencies/MIGRATION_COMPLETE.md) for details. Build time improved 16%, dev server 74% faster.
 
 ## Known Patterns
 
@@ -422,10 +422,10 @@ The application follows strict architectural patterns. **Detailed documentation*
 ## Migration Status
 
 ### Architectural Migration ✅
-All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/history/MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
+All architectural phases complete (see [docs/history/architectural/](docs/history/architectural/)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
 
 ### Dependency Migration ✅ (October 2025)
-All major dependencies upgraded to latest stable versions. See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) for comprehensive details.
+All major dependencies upgraded to latest stable versions. See [docs/history/dependencies/](docs/history/dependencies/) for comprehensive details.
 
 **Completed Upgrades:**
 - ✅ React 18.3.1 → 19.2.0 (Server Components support)

@@ -64,7 +64,7 @@ Deep dives into architectural patterns and decisions:
 
 Understanding how we got here:
 
-- **[Migration Plan](history/MIGRATION_PLAN.md)** (15KB)
+- **[Migration Plan](history/architectural/MIGRATION_PLAN.md)** (15KB)
   - Complete 5-phase refactoring roadmap
   - From 1,544-line monolith to modular architecture
   - Rationale for each phase
@@ -121,7 +121,7 @@ Understanding how we got here:
 ### For Product/Business
 - [Features](../README.md#features)
 - [Tech Stack](../README.md#tech-stack)
-- [Migration Success](history/MIGRATION_PLAN.md)
+- [Migration Success](history/architectural/MIGRATION_PLAN.md)
 
 ## 🔍 Finding Documentation
 
@@ -139,7 +139,7 @@ Understanding how we got here:
 - Running tests → [Testing: Running Tests](architecture/testing.md#running-tests)
 
 **History & Context**:
-- Why this architecture? → [Migration Plan](history/MIGRATION_PLAN.md)
+- Why this architecture? → [Migration Plan](history/architectural/MIGRATION_PLAN.md)
 - How did we refactor? → [Phase Completions](history/)
 
 **AI Tooling**:
@@ -162,7 +162,7 @@ Understanding how we got here:
 
 **Product Owner / Manager**:
 1. [README](../README.md) - Features and capabilities
-2. [Migration Plan](history/MIGRATION_PLAN.md) - Refactoring value delivered
+2. [Migration Plan](history/architectural/MIGRATION_PLAN.md) - Refactoring value delivered
 
 ## 📝 Documentation Standards
 

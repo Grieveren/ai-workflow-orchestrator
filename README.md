@@ -28,7 +28,7 @@ A modern React application for managing workflow requests with AI-powered assist
 - **MCP Servers**: 6 configured servers extending Claude Code (GitHub, Puppeteer, Memory, Filesystem, Sequential Thinking, SQLite)
 - **Testing**: Vitest, React Testing Library, jsdom
 
-**Recent Upgrade** (October 2025): All major dependencies upgraded. Build time improved 16%, dev server startup 74% faster. See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) for details.
+**Recent Upgrade** (October 2025): All major dependencies upgraded. Build time improved 16%, dev server startup 74% faster. See [MIGRATION_COMPLETE.md](docs/history/dependencies/MIGRATION_COMPLETE.md) for details.
 
 ## Architecture
 
@@ -40,7 +40,7 @@ This project has undergone a complete architectural refactoring:
 - ✅ **Phase 4**: React Router & Vitest testing
 - ✅ **Phase 5**: Error boundaries, lazy loading, advanced features
 
-See [MIGRATION_PLAN.md](MIGRATION_PLAN.md) for the complete refactoring strategy.
+See [MIGRATION_PLAN.md](docs/history/architectural/MIGRATION_PLAN.md) for the complete refactoring strategy.
 
 ### Code Organization
 
@@ -218,8 +218,8 @@ describe('Button', () => {
 - [Testing Philosophy](docs/architecture/testing.md) - Testing approach
 
 ### Migration History
-- [Migration Plan](docs/history/MIGRATION_PLAN.md) - Complete refactoring roadmap
-- [Phase Completions](docs/history/) - Detailed phase reports
+- [Migration Plan](docs/history/architectural/MIGRATION_PLAN.md) - Complete refactoring roadmap
+- [Phase Completions](docs/history/architectural/) - Detailed phase reports
 
 ## Key Improvements
 
