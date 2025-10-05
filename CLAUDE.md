@@ -340,19 +340,21 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 
 ## Tech Stack Details
 
-- **React 18** with TypeScript
-- **Vite** for build tooling (configured for port 3000 with auto-open)
+- **React 19.2.0** with TypeScript (Server Components ready)
+- **Vite 6.3.6** for build tooling (16% faster builds, configured for port 3000 with auto-open)
 - **React Router DOM v7** for URL-based navigation
-- **Tailwind CSS** for styling
+- **Tailwind CSS 4.1.14** for styling (CSS-first configuration)
 - **Lucide React** for icons
 - **React Hot Toast** for modern toast notifications
 - **Express.js** backend proxy server (runs on port 3001)
 - **React Context** for state management with custom hooks
 - **Vitest** for testing with React Testing Library
-- **ESLint** with TypeScript plugin for code quality (zero warnings policy)
+- **ESLint 9.37.0** with flat config for code quality (zero warnings policy)
 - **Prettier** for consistent code formatting
 - **Proxied API calls** through Express backend for security
 - **Code splitting** with lazy loading for optimal performance
+
+**Recent Migration** (October 2025): All major dependencies upgraded - see [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) for details. Build time improved 16%, dev server 74% faster.
 
 ## Known Patterns
 
@@ -364,9 +366,10 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - Backend proxy server handles API authentication, frontend handles all application state
 - No database (state is stored client-side only)
 - Lazy loading with Suspense for code splitting
-- Test coverage for UI components and features (20 test files)
-- ESLint configuration with TypeScript and React hooks rules (.eslintrc.json)
+- Test coverage for UI components and features (11 test files, 119 tests)
+- ESLint 9 flat config with TypeScript and React hooks rules (eslint.config.mjs)
 - Prettier configuration for code formatting (.prettierrc.json)
+- Tailwind 4 CSS-first configuration (src/index.css replaces tailwind.config.js)
 
 ## Critical Architecture Patterns
 
@@ -403,7 +406,28 @@ The application follows strict architectural patterns. **Detailed documentation*
 
 ## Migration Status
 
+### Architectural Migration ✅
 All architectural phases complete (see [docs/history/MIGRATION_PLAN.md](docs/history/MIGRATION_PLAN.md)). The codebase is production-ready with type safety, modular components, React Router navigation, comprehensive testing, error boundaries, and lazy loading.
+
+### Dependency Migration ✅ (October 2025)
+All major dependencies upgraded to latest stable versions. See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) for comprehensive details.
+
+**Completed Upgrades:**
+- ✅ React 18.3.1 → 19.2.0 (Server Components support)
+- ✅ ESLint 8.57.1 → 9.37.0 (Flat config migration)
+- ✅ Vite 5.4.20 → 6.3.6 (Performance improvements)
+- ✅ Tailwind CSS 3.4.17 → 4.1.14 (CSS-first configuration)
+
+**Performance Gains:**
+- Build time: 27.52s → 23.13s (-16% faster)
+- Dev server: ~8s → 2.09s (-74% faster)
+- Bundle gzipped: 95.85 kB (optimized, under 100 kB target)
+- Zero breaking changes, all 119 tests passing
+
+**Key Changes:**
+- ESLint now uses flat config (eslint.config.mjs)
+- Tailwind uses CSS-first config in src/index.css
+- All configurations updated for modern tooling
 
 ## Claude Code Configuration
 

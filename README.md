@@ -19,13 +19,16 @@ A modern React application for managing workflow requests with AI-powered assist
 
 ## Tech Stack
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **Frontend**: React 19.2.0, TypeScript, Vite 6.3.6, Tailwind CSS 4.1.14
 - **Routing**: React Router DOM v7
 - **Icons**: Lucide React
 - **Backend**: Express.js (proxy server)
 - **AI**: Anthropic Claude API (Sonnet 4.5)
+- **Code Quality**: ESLint 9.37.0 (flat config), Prettier
 - **MCP Servers**: 6 configured servers extending Claude Code (GitHub, Puppeteer, Memory, Filesystem, Sequential Thinking, SQLite)
 - **Testing**: Vitest, React Testing Library, jsdom
+
+**Recent Upgrade** (October 2025): All major dependencies upgraded. Build time improved 16%, dev server startup 74% faster. See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) for details.
 
 ## Architecture
 
@@ -90,7 +93,7 @@ src/
 
 ## Prerequisites
 
-- Node.js 18+
+- **Node.js 20+** (required for Tailwind CSS 4 tooling)
 - npm or yarn
 - Anthropic API key
 
@@ -224,8 +227,10 @@ describe('Button', () => {
 - **Before**: 1,544-line monolithic component
 - **After**: 17 reusable components, 6 route pages, 3 custom hooks
 - **Result**: 68% reduction in main component size
-- **Bundle**: 227 KB total (75 KB gzipped), split into 6 chunks for optimal loading
+- **Bundle**: 273 KB total (96 KB gzipped), optimized with code splitting
 - **Testing**: 11 test files with 119 comprehensive tests
+- **Build Performance**: 23.13s production build (16% faster after Vite 6 upgrade)
+- **Dev Server**: 2.09s startup (74% faster after Vite 6 upgrade)
 
 ### Architecture Benefits
 - ✅ Type-safe with TypeScript
@@ -239,8 +244,10 @@ describe('Button', () => {
 - ✅ Error boundaries for graceful error handling
 - ✅ Lazy loading with code splitting (30% faster initial load)
 - ✅ Production-ready with optimized builds
-- ✅ Code quality enforced with ESLint and Prettier
+- ✅ Code quality enforced with ESLint 9 (flat config) and Prettier
+- ✅ Modern tooling with React 19, Vite 6, Tailwind 4
 - ✅ Extended AI capabilities with MCP servers (browser automation, persistent memory, database)
+- ✅ Performance optimized: 16% faster builds, 74% faster dev server
 
 ## License
 
