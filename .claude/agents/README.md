@@ -26,7 +26,7 @@ Claude Code must automatically invoke agents when these conditions are met:
 
 ## Available Agents
 
-Total: **15 specialized agents**
+Total: **19 specialized agents**
 
 ### 1. **test-writer**
 **Purpose**: Write comprehensive Vitest tests for React components
@@ -236,6 +236,66 @@ Total: **15 specialized agents**
 
 ---
 
+### 16. **test-coordinator**
+**Purpose**: Coordinate test execution, analyze test results, and ensure comprehensive test coverage
+**Tools**: All tools available
+**Use cases**:
+- Run and analyze multiple test files together
+- Debug systematic test failures after refactoring
+- Pre-deployment test verification
+- Identify test coverage gaps
+
+**Invoke with**: "Run the full test suite and verify all tests pass"
+
+**Auto-invoke**: Running full test suite after major changes (>5 files modified in src/), test failures detected by hooks, user requests "run all tests", or before creating pull requests
+
+---
+
+### 17. **troubleshooting-expert**
+**Purpose**: Diagnose and resolve bugs, errors, and unexpected application behavior
+**Tools**: All tools available
+**Use cases**:
+- Debug runtime errors and exceptions
+- Investigate "not working" user reports
+- Trace issues across components
+- Verify fixes don't introduce regressions
+
+**Invoke with**: "Debug why the submit button isn't working"
+
+**Auto-invoke**: User explicitly reports bugs, errors, or unexpected behavior; TypeScript, test, or ESLint hooks fail repeatedly (>2 attempts); or console errors detected in development
+
+---
+
+### 18. **performance-profiler**
+**Purpose**: Analyze application performance, identify bottlenecks, and optimize bundle sizes
+**Tools**: All tools available
+**Use cases**:
+- Profile React component render performance
+- Analyze bundle size after dependency additions
+- Identify performance bottlenecks in data processing
+- Optimize code splitting and lazy loading
+
+**Invoke with**: "Analyze performance of the dashboard page"
+
+**Auto-invoke**: User reports performance issues or slow rendering; bundle size increases >50 KB; adding data-heavy features (>100 items in lists); or user requests performance optimization
+
+---
+
+### 19. **migration-helper**
+**Purpose**: Plan and execute safe migrations of data structures, state management, or dependency upgrades
+**Tools**: All tools available
+**Use cases**:
+- Migrate from mock data to SQLite persistence
+- Upgrade major dependencies safely
+- Refactor state management patterns
+- Plan breaking changes with migration paths
+
+**Invoke with**: "Help migrate mock data to SQLite database"
+
+**Auto-invoke**: User explicitly requests database/persistence layer, major dependency upgrades (React, Vite, TypeScript), breaking changes to state management (modifying AppContext), or migration from mock data to real backend
+
+---
+
 ## How to Use Agents
 
 ### Automatic Delegation
@@ -372,10 +432,10 @@ These agents are designed to work together:
 
 ## Future Agent Ideas
 
-Consider adding agents for:
+The current agent suite is comprehensive. Future additions could include:
 - **refactor-assistant**: Safely refactor complex components
-- **performance-optimizer**: Analyze and optimize React performance
-- **migration-helper**: Assist with library upgrades
+- **database-designer**: Design and optimize database schemas for SQLite integration
+- **ui-generator**: Generate complete page layouts from wireframes or descriptions
 
 ## Learn More
 
