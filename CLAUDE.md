@@ -433,7 +433,7 @@ All major dependencies upgraded to latest stable versions. See [MIGRATION_COMPLE
 
 ### Custom Sub-Agents
 
-**IMPORTANT**: This project has 15 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
+**IMPORTANT**: This project has 19 specialized sub-agents in `.claude/agents/`. **You MUST use these agents proactively** for appropriate tasks - do not ask permission first, just invoke them automatically.
 
 #### Development Agents
 - **component-generator**: Creates React components following project architecture patterns
@@ -458,6 +458,18 @@ All major dependencies upgraded to latest stable versions. See [MIGRATION_COMPLE
   - Auto-invoke when: UI/UX changes to components, pages, or styling; Tailwind class updates; accessibility concerns
 - **workflow-enforcer**: Ensures compliance with project workflow defined in CLAUDE.md
   - Auto-invoke when: Session starts or user requests workflow verification
+
+#### Testing & Troubleshooting Agents
+- **test-coordinator**: Coordinates test execution, analyzes test results, and ensures comprehensive test coverage
+  - Auto-invoke when: Multiple test files need coordinated execution, test failures occur, features complete and need end-to-end verification, or pre-deployment validation
+- **troubleshooting-expert**: Diagnoses and resolves bugs, errors, and unexpected application behavior
+  - Auto-invoke when: User reports errors ("not working", "getting an error", "page is broken"), or after significant code changes to verify functionality
+
+#### Performance & Migration Agents
+- **performance-profiler**: Analyzes application performance, identifies bottlenecks, and optimizes bundle sizes
+  - Auto-invoke when: Performance issues reported, new features with heavy data processing added, or after code splitting/lazy loading implementation
+- **migration-helper**: Plans and executes safe migrations of data structures, state management, or dependency upgrades
+  - Auto-invoke when: User requests data persistence (SQLite), dependency upgrades, or state management refactoring
 
 #### Planning & Documentation Agents
 - **product-owner**: Reviews feature requests for business value and ensures product quality
