@@ -1,0 +1,24 @@
+
+> ai-workflow-orchestrator@1.0.0 test:run
+> vitest run
+
+
+ RUN  v3.2.4 /mnt/c/Coding/ai-workflow-orchestrator
+
+ ✓ src/components/ui/SLABadge.test.tsx (7 tests) 35ms
+ ✓ src/components/ui/Card.test.tsx (4 tests) 24ms
+ ✓ src/pages/AnalyticsPage.test.tsx (5 tests) 94ms
+ ✓ src/features/dashboard/components/KanbanBoard.test.tsx (22 tests) 321ms
+ ✓ src/features/dashboard/components/RequestTable.test.tsx (20 tests) 357ms
+ ✓ src/features/dashboard/components/StatsBar.test.tsx (23 tests) 127ms
+ ✓ src/utils/requestFilters.test.ts (16 tests) 5ms
+ ✓ src/features/chat/components/ChatMessage.test.tsx (3 tests) 33ms
+ ✓ src/components/ui/Button.test.tsx (5 tests) 129ms
+ ✓ src/features/dashboard/components/TeamCapacityWidget.test.tsx (6 tests) 57ms
+ ✓ src/components/ui/Badge.test.tsx (8 tests) 25ms
+
+ Test Files  11 passed (11)
+      Tests  119 passed (119)
+   Start at  11:59:08
+   Duration  28.43s (transform 2.29s, setup 38.14s, collect 11.22s, tests 1.21s, environment 106.70s, prepare 13.25s)
+
