@@ -127,7 +127,7 @@ export function RequestDetailPage() {
 
   if (!selectedRequest) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
         <p className="text-gray-600">Loading request...</p>
       </div>
     );
@@ -137,7 +137,7 @@ export function RequestDetailPage() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -164,7 +164,7 @@ export function RequestDetailPage() {
 
             {selectedRequest.aiAlert && (
               <div className="mt-3 flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
-                <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={16} />
+                <AlertCircle className="text-red-600 shrink-0 mt-0.5" size={16} />
                 <div className="flex-1">
                   <div className="text-sm font-medium text-red-800">AI Alert</div>
                   <div className="text-sm text-red-700">{selectedRequest.aiAlert}</div>
@@ -175,7 +175,7 @@ export function RequestDetailPage() {
                           icon: '📧',
                         });
                       }}
-                      className="text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                      className="text-xs px-3 py-1 bg-red-600 text-white rounded-sm hover:bg-red-700"
                     >
                       Send Reminder
                     </button>
@@ -185,7 +185,7 @@ export function RequestDetailPage() {
                           requestsHook.dismissAlert(selectedRequest.id);
                         }
                       }}
-                      className="text-xs px-3 py-1 bg-white text-red-700 border border-red-300 rounded hover:bg-red-50"
+                      className="text-xs px-3 py-1 bg-white text-red-700 border border-red-300 rounded-sm hover:bg-red-50"
                     >
                       Dismiss
                     </button>
@@ -304,7 +304,7 @@ export function RequestDetailPage() {
           <div className="space-y-3">
             {(selectedRequest.activity || []).map((item, idx) => (
               <div key={idx} className="flex gap-3">
-                <div className="flex-shrink-0 w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                <div className="shrink-0 w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
                 <div className="flex-1">
                   <div className="text-sm text-gray-800">{item.action}</div>
                   <div className="text-xs text-gray-500">{item.user} • {item.timestamp}</div>
@@ -340,7 +340,7 @@ export function RequestDetailPage() {
               />
 
               {/* Move to Ready for Dev button */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-4">
+              <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 mt-4">
                 <h4 className="font-semibold text-gray-800 mb-3">Ready to hand off to development?</h4>
                 {!allDocsApproved ? (
                   <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">

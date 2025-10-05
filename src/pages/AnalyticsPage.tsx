@@ -41,7 +41,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 1: Funnel */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
         <div className="flex items-center gap-2 mb-6">
           <BarChart3 className="w-6 h-6 text-blue-600" />
           <h2 className="text-xl font-semibold text-gray-900">Request Flow</h2>
@@ -55,7 +55,7 @@ export function AnalyticsPage() {
 
             return (
               <div key={item.stage} className="flex items-center gap-4">
-                <div className="w-32 flex-shrink-0 text-sm font-medium text-gray-700">
+                <div className="w-32 shrink-0 text-sm font-medium text-gray-700">
                   {item.stage}
                 </div>
                 <div className="flex-1 flex items-center gap-2">
@@ -65,12 +65,12 @@ export function AnalyticsPage() {
                     }`}
                     style={{ width: `${Math.max(widthPercent, 5)}%` }}
                   />
-                  <span className="text-lg font-semibold text-gray-900 min-w-[2rem]">
+                  <span className="text-lg font-semibold text-gray-900 min-w-8">
                     {item.count}
                   </span>
                 </div>
                 {index < funnelData.length - 1 && (
-                  <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-gray-400 shrink-0" />
                 )}
               </div>
             );
@@ -88,7 +88,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 2: Bottleneck */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
         <div className="flex items-center gap-2 mb-6">
           <AlertTriangle className="w-6 h-6 text-yellow-600" />
           <h2 className="text-xl font-semibold text-gray-900">Bottleneck Detection</h2>
@@ -96,7 +96,7 @@ export function AnalyticsPage() {
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
             <div className="flex-1">
               <div className="font-semibold text-yellow-900 mb-2">
                 Bottleneck Alert: "{bottleneck.stage}" stage
@@ -131,7 +131,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 3: Cycle Time */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
         <div className="flex items-center gap-2 mb-6">
           <TrendingDown className="w-6 h-6 text-green-600" />
           <h2 className="text-xl font-semibold text-gray-900">Cycle Time Trends</h2>

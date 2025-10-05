@@ -22,15 +22,15 @@ export function MinimalLanding({ onExampleClick, onExpand }: MinimalLandingProps
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="w-full max-w-2xl px-4">
         {/* RevOps Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl">
+            <div className="p-3 bg-linear-to-br from-purple-600 to-pink-600 rounded-2xl">
               <Workflow className="h-8 w-8 text-white" />
             </div>
-            <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="text-4xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               RevOps
             </span>
           </div>
@@ -38,7 +38,7 @@ export function MinimalLanding({ onExampleClick, onExpand }: MinimalLandingProps
 
         {/* Headline */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             {headline}
           </h1>
           <p className="text-lg text-gray-600">
@@ -58,7 +58,7 @@ export function MinimalLanding({ onExampleClick, onExpand }: MinimalLandingProps
                 readOnly
                 placeholder="Click here to describe your request..."
                 className="w-full pl-14 pr-6 py-6 text-lg rounded-2xl border-2 border-gray-200 bg-white shadow-lg
-                         focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400
+                         focus:outline-hidden focus:ring-4 focus:ring-purple-200 focus:border-purple-400
                          group-hover:border-purple-300 transition-all cursor-pointer"
               />
             </div>
@@ -78,7 +78,7 @@ export function MinimalLanding({ onExampleClick, onExpand }: MinimalLandingProps
                 }}
                 className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700
                          hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700
-                         transition-all duration-200 shadow-sm hover:shadow-md"
+                         transition-all duration-200 shadow-xs hover:shadow-md"
               >
                 {example}
               </button>
@@ -92,7 +92,7 @@ export function MinimalLanding({ onExampleClick, onExpand }: MinimalLandingProps
             to="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700
                      hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700
-                     transition-all duration-200 shadow-sm hover:shadow-md font-medium"
+                     transition-all duration-200 shadow-xs hover:shadow-md font-medium"
           >
             <FolderOpen className="h-5 w-5" />
             View My Requests

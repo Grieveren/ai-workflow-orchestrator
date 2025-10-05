@@ -22,12 +22,12 @@ export function Button({
   children,
   type = 'button'
 }: ButtonProps) {
-  const baseStyles = 'rounded-xl font-medium transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'rounded-xl font-medium transition shadow-xs disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantStyles: Record<ButtonVariant, string> = {
-    primary: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white disabled:from-gray-300 disabled:to-gray-300',
+    primary: 'bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white disabled:from-gray-300 disabled:to-gray-300',
     secondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50',
-    success: 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white disabled:from-gray-300 disabled:to-gray-300',
+    success: 'bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white disabled:from-gray-300 disabled:to-gray-300',
     danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-300',
     ghost: 'bg-transparent text-purple-600 hover:bg-purple-50'
   };

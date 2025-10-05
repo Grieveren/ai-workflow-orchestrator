@@ -94,7 +94,7 @@ export function SubmitPage() {
 
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-      <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4">
+      <div className="bg-linear-to-r from-purple-500 to-pink-500 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bot className="text-white" size={24} />
@@ -118,7 +118,7 @@ export function SubmitPage() {
         <div className="bg-gray-50 rounded-xl p-6 mb-4 min-h-[450px] max-h-[450px] overflow-y-auto">
           {chatMessages.length === 0 ? (
             <div className="text-center mt-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-br from-purple-100 to-pink-100 rounded-full mb-6">
                 <Bot className="text-purple-600" size={40} />
               </div>
               <h3 className="text-2xl font-semibold text-gray-800 mb-3">

@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export function Header({ view, onViewChange }: HeaderProps) {
   return (
-    <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white p-8 rounded-2xl mb-8 shadow-xl">
+    <div className="bg-linear-to-r from-purple-600 via-purple-500 to-pink-500 text-white p-8 rounded-2xl mb-8 shadow-xl">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -18,7 +18,7 @@ export function Header({ view, onViewChange }: HeaderProps) {
           <p className="text-purple-100">Tell me what you need, and I'll help you get things done</p>
         </div>
 
-        <div className="flex gap-2 bg-white/20 backdrop-blur-sm rounded-xl p-1">
+        <div className="flex gap-2 bg-white/20 backdrop-blur-xs rounded-xl p-1">
           <button
             onClick={() => onViewChange('requester')}
             className={`px-4 py-2.5 rounded-lg font-medium transition text-sm ${

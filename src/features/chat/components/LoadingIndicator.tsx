@@ -59,10 +59,10 @@ export function LoadingIndicator({ streamingText }: LoadingIndicatorProps) {
     return (
       <div className="text-left mb-6">
         <div className="flex items-start gap-3 w-full">
-          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
             <Bot className="text-white" size={16} />
           </div>
-          <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-xs">
             <div className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
               <span className="text-sm text-gray-600">Thinking...</span>
@@ -77,15 +77,15 @@ export function LoadingIndicator({ streamingText }: LoadingIndicatorProps) {
   return (
     <div className="text-left mb-6">
       <div className="flex items-start gap-3 w-full">
-        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+        <div className="shrink-0 w-8 h-8 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
           <Bot className="text-white" size={16} />
         </div>
-        <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1 min-w-0">
+        <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-xs flex-1 min-w-0">
           {/* Progress Steps - Claude Code style */}
           <div className="space-y-3 mb-4">
             {steps.map((step, index) => (
               <div key={index} className="flex items-start space-x-3">
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="shrink-0 mt-0.5">
                   {step.status === 'complete' ? (
                     <CheckCircle2 className="w-4 h-4 text-green-600" />
                   ) : step.status === 'active' ? (

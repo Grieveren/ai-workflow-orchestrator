@@ -24,7 +24,7 @@ export function DocumentChat({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
       <h4 className="font-medium text-gray-800 mb-4">Refine with AI</h4>
 
       {messages.length > 0 && (
@@ -32,7 +32,7 @@ export function DocumentChat({
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex items-start gap-2 ${msg.role === 'user' ? 'justify-end' : ''}`}>
               {msg.role === 'assistant' && (
-                <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <div className="shrink-0 w-6 h-6 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <Bot className="text-white" size={12} />
                 </div>
               )}

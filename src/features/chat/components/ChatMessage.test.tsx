@@ -14,7 +14,7 @@ describe('ChatMessage', () => {
     const messageElement = screen.getByText('Hello, AI!');
     expect(messageElement).toBeInTheDocument();
     // User messages have purple gradient background
-    expect(messageElement.parentElement).toHaveClass('bg-gradient-to-r');
+    expect(messageElement.parentElement).toHaveClass('bg-linear-to-r');
   });
 
   it('renders assistant message with correct styling', () => {

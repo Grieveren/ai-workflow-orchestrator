@@ -91,7 +91,7 @@ import { Button } from './components/ui/Button';
 <div className="grid grid-cols-4 gap-4">
   {/* 52 lines of stat cards */}
 </div>
-<div className="bg-white rounded-xl shadow-sm">
+<div className="bg-white rounded-xl shadow-xs">
   <table className="w-full">
     {/* 50 lines of table markup */}
   </table>

@@ -63,7 +63,7 @@ export function PriorityBadge({ priority, className = '' }: PriorityBadgeProps) 
   };
 
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[priority]} ${className}`}>
+    <span className={`px-2 py-0.5 rounded-sm text-xs font-medium ${priorityColors[priority]} ${className}`}>
       {priority}
     </span>
   );

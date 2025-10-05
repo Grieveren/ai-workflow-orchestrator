@@ -102,15 +102,15 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-2xl mx-auto mt-8">
         {/* Logo - always visible */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl">
+            <div className="p-3 bg-linear-to-br from-purple-600 to-pink-600 rounded-2xl">
               <Workflow className="h-8 w-8 text-white" />
             </div>
-            <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="text-4xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               RevOps
             </span>
           </div>
@@ -118,7 +118,7 @@ export function LandingPage() {
 
         {/* Headline - always visible */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             What can we do for you today?
           </h1>
           <p className="text-lg text-gray-600">
@@ -151,7 +151,7 @@ export function LandingPage() {
                     readOnly
                     placeholder="Describe what you need... (e.g. I need a report on sales by region)"
                     className="w-full pl-4 pr-24 py-4 text-base rounded-xl border-2 border-purple-300 bg-gray-50
-                             focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400
+                             focus:outline-hidden focus:ring-4 focus:ring-purple-200 focus:border-purple-400
                              hover:border-purple-400 transition-all cursor-pointer"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -175,7 +175,7 @@ export function LandingPage() {
                     placeholder="Describe what you need... (e.g. I need a report on sales by region)"
                     disabled={chatIsProcessing}
                     className="w-full pl-4 pr-24 py-4 text-base rounded-xl border-2 border-purple-300 bg-gray-50
-                             focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400
+                             focus:outline-hidden focus:ring-4 focus:ring-purple-200 focus:border-purple-400
                              hover:border-purple-400 transition-all"
                   />
                   <button
@@ -242,7 +242,7 @@ export function LandingPage() {
                 onClick={() => handleExampleClick(example)}
                 className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700
                          hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700
-                         transition-all duration-200 shadow-sm hover:shadow-md"
+                         transition-all duration-200 shadow-xs hover:shadow-md"
               >
                 {example}
               </button>
@@ -256,7 +256,7 @@ export function LandingPage() {
             to="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border-2 border-gray-200 text-gray-700
                      hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700
-                     transition-all duration-200 shadow-sm hover:shadow-md font-medium"
+                     transition-all duration-200 shadow-xs hover:shadow-md font-medium"
           >
             <FolderOpen className="h-5 w-5" />
             View My Requests

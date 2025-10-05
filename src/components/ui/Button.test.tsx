@@ -27,7 +27,7 @@ describe('Button', () => {
   it('applies primary variant styles by default', () => {
     render(<Button>Primary Button</Button>);
     const button = screen.getByText('Primary Button');
-    expect(button).toHaveClass('bg-gradient-to-r');
+    expect(button).toHaveClass('bg-linear-to-r');
   });
 
   it('applies secondary variant styles when variant is secondary', () => {

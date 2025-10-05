@@ -137,7 +137,7 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const baseClasses = 'rounded font-medium transition-colors';
+  const baseClasses = 'rounded-sm font-medium transition-colors';
   const variantClasses = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',

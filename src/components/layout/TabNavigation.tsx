@@ -15,9 +15,9 @@ export function TabNavigation({ requestCount, view }: TabNavigationProps) {
   };
 
   const getClassName = (path: string) => {
-    return `px-6 py-2.5 rounded-xl font-medium transition shadow-sm ${
+    return `px-6 py-2.5 rounded-xl font-medium transition shadow-xs ${
       isActive(path)
-        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+        ? 'bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-md'
         : 'bg-white text-gray-700 hover:bg-gray-50'
     }`;
   };

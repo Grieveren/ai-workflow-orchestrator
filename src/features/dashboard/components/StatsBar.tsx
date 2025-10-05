@@ -34,7 +34,7 @@ export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
 
   return (
     <div className="grid grid-cols-3 gap-6 mb-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600 mb-1">{getStatLabel('Active Requests')}</p>
@@ -46,7 +46,7 @@ export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600 mb-1">{getStatLabel('Completed Today')}</p>
@@ -58,7 +58,7 @@ export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600 mb-1">Needs Attention</p>

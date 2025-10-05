@@ -26,7 +26,7 @@ function PageLoader() {
 
 function AppContent() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-5xl mx-auto">
         <Suspense fallback={<PageLoader />}>
           <Routes>
