@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 import { Textarea, Button } from '../../../components/ui';
 import type { DocType, GeneratedDocs } from '../../../types';
 
@@ -19,6 +19,14 @@ const docTitles: Record<DocType, string> = {
   techSpec: 'Technical Specification'
 };
 
+// Helper function to determine if a document is locked based on sequential approval workflow
+const isDocumentLocked = (docType: DocType, documents: GeneratedDocs): boolean => {
+  if (docType === 'brd') return false; // BRD is always unlocked (first in sequence)
+  if (docType === 'fsd') return !documents.approvals?.brd?.approved; // FSD locked until BRD approved
+  if (docType === 'techSpec') return !documents.approvals?.fsd?.approved; // Tech Spec locked until FSD approved
+  return false;
+};
+
 export function DocumentViewer({
   documents,
   activeTab,
@@ -31,21 +39,24 @@ export function DocumentViewer({
 }: DocumentViewerProps) {
   const currentApproval = documents.approvals?.[activeTab];
   const isApproved = currentApproval?.approved || false;
+  const isLocked = isDocumentLocked(activeTab, documents);
 
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-gray-100 mb-8">
-      <div className="border-b border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 mb-8">
+      <div className="border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-gray-800">Generated Documents</h3>
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-slate-100">Generated Documents</h3>
           <div className="flex gap-2">
             {showApprovalUI && onApprove && (
               <Button
                 onClick={() => onApprove(activeTab)}
                 variant={isApproved ? "secondary" : "primary"}
                 size="sm"
-                disabled={isApproved}
+                disabled={isApproved || isLocked}
               >
-                {isApproved ? (
+                {isLocked ? (
+                  <><Lock size={16} className="mr-1" /> Locked</>
+                ) : isApproved ? (
                   <><Check size={16} className="mr-1" /> Approved</>
                 ) : (
                   `Approve ${activeTab === 'brd' ? 'BRD' : activeTab === 'fsd' ? 'FSD' : 'Tech Spec'}`
@@ -65,20 +76,27 @@ export function DocumentViewer({
           {(Object.keys(docTitles) as DocType[]).map((tab) => {
             const tabApproval = documents.approvals?.[tab];
             const tabIsApproved = tabApproval?.approved || false;
+            const tabIsLocked = isDocumentLocked(tab, documents);
 
             return (
               <button
                 key={tab}
-                onClick={() => onTabChange(tab)}
+                onClick={() => !tabIsLocked && onTabChange(tab)}
+                disabled={tabIsLocked}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition flex items-center gap-2 ${
-                  activeTab === tab
-                    ? 'bg-purple-100 text-purple-700'
-                    : 'text-gray-600 hover:bg-gray-100'
+                  tabIsLocked
+                    ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-60'
+                    : activeTab === tab
+                    ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 {tab === 'brd' ? 'BRD' : tab === 'fsd' ? 'FSD' : 'Tech Spec'}
-                {tabIsApproved && (
-                  <Check size={14} className="text-green-600" />
+                {tabIsLocked && (
+                  <Lock size={14} className="text-gray-400 dark:text-gray-600" />
+                )}
+                {tabIsApproved && !tabIsLocked && (
+                  <Check size={14} className="text-green-600 dark:text-green-400" />
                 )}
               </button>
             );
@@ -87,14 +105,29 @@ export function DocumentViewer({
       </div>
 
       <div className="p-6">
-        {isApproved && currentApproval && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-            <Check size={18} className="text-green-600" />
+        {isLocked && (
+          <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg flex items-center gap-2">
+            <Lock size={18} className="text-yellow-600 dark:text-yellow-400" />
             <div className="flex-1">
-              <div className="text-sm font-medium text-green-800">
+              <div className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                Sequential Approval Required
+              </div>
+              <div className="text-xs text-yellow-600 dark:text-yellow-400">
+                {activeTab === 'fsd' && 'Please approve the BRD before reviewing the FSD'}
+                {activeTab === 'techSpec' && 'Please approve the FSD before reviewing the Tech Spec'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isApproved && currentApproval && (
+          <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-700 rounded-lg flex items-center gap-2">
+            <Check size={18} className="text-green-600 dark:text-green-400" />
+            <div className="flex-1">
+              <div className="text-sm font-medium text-green-800 dark:text-green-300">
                 Approved by {currentApproval.approver}
               </div>
-              <div className="text-xs text-green-600">
+              <div className="text-xs text-green-600 dark:text-green-400">
                 {currentApproval.date}
               </div>
             </div>
@@ -108,7 +141,7 @@ export function DocumentViewer({
             rows={16}
             className="h-96"
           />
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             💡 You can edit the document directly or use AI to refine it below
           </p>
         </div>

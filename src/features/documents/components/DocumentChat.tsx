@@ -24,8 +24,8 @@ export function DocumentChat({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-      <h4 className="font-medium text-gray-800 mb-4">Refine with AI</h4>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
+      <h4 className="font-medium text-gray-800 dark:text-slate-100 mb-4">Refine with AI</h4>
 
       {messages.length > 0 && (
         <div className="mb-4 max-h-48 overflow-y-auto space-y-3">
@@ -39,8 +39,8 @@ export function DocumentChat({
               <div
                 className={`px-3 py-2 rounded-lg text-sm ${
                   msg.role === 'user'
-                    ? 'bg-purple-100 text-purple-900'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-300'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-slate-100'
                 }`}
               >
                 {msg.content}

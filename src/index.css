@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@variant dark (.dark &);
+
 /*
   Tailwind 4 Dark Mode Configuration
   Uses class-based dark mode strategy: toggle 'dark' class on <html> element

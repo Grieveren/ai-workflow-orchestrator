@@ -8,7 +8,7 @@ describe('TeamCapacityWidget', () => {
 
     expect(screen.getByText('Team Capacity')).toBeInTheDocument();
     expect(screen.getByText(/Avg:/)).toBeInTheDocument();
-    expect(screen.getByText(/55%/)).toBeInTheDocument(); // Average of 60, 40, 80, 40
+    expect(screen.getByText(/50%/)).toBeInTheDocument(); // Average of 60, 40, 80, 20
   });
 
   it('displays all team members', () => {
@@ -26,19 +26,21 @@ describe('TeamCapacityWidget', () => {
     expect(screen.getByText('Data Analyst')).toBeInTheDocument();
     expect(screen.getByText('Salesforce Admin')).toBeInTheDocument();
     expect(screen.getByText('RevOps Manager')).toBeInTheDocument();
-    expect(screen.getByText('Systems Specialist')).toBeInTheDocument();
+    expect(screen.getByText('Product Owner')).toBeInTheDocument();
   });
 
   it('displays request counts and utilization percentages', () => {
     render(<TeamCapacityWidget />);
 
-    expect(screen.getByText('3/5 requests')).toBeInTheDocument();
-    expect(screen.getAllByText('2/5 requests').length).toBe(2); // Mike and Alex both have 2/5
-    expect(screen.getByText('4/5 requests')).toBeInTheDocument();
+    expect(screen.getByText('3/5 requests')).toBeInTheDocument(); // Sarah
+    expect(screen.getByText('2/5 requests')).toBeInTheDocument(); // Mike
+    expect(screen.getByText('4/5 requests')).toBeInTheDocument(); // Jennifer
+    expect(screen.getByText('1/5 requests')).toBeInTheDocument(); // Alex (Product Owner)
 
-    expect(screen.getByText('60%')).toBeInTheDocument();
-    expect(screen.getAllByText('40%').length).toBe(2); // Mike and Alex both have 40%
-    expect(screen.getByText('80%')).toBeInTheDocument();
+    expect(screen.getByText('60%')).toBeInTheDocument(); // Sarah
+    expect(screen.getByText('40%')).toBeInTheDocument(); // Mike
+    expect(screen.getByText('80%')).toBeInTheDocument(); // Jennifer
+    expect(screen.getByText('20%')).toBeInTheDocument(); // Alex (Product Owner)
   });
 
   it('shows warning icon for overloaded members (utilization > 85%)', () => {

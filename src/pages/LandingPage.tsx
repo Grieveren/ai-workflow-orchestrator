@@ -8,6 +8,7 @@ import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
 import { OptionSelector } from '../features/chat/components/OptionSelector';
 import { ChatInput } from '../features/chat/components/ChatInput';
 import { Button } from '../components/ui/Button';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Link } from 'react-router-dom';
 
 /**
@@ -80,7 +81,8 @@ export function LandingPage() {
 
   const submitRequest = async () => {
     setIsSubmitting(true);
-    const newRequest = await submitRequestAction(requestData);
+    // Pass conversation history for AI impact scoring
+    const newRequest = await submitRequestAction(requestData, chatMessages);
     if (newRequest) {
       toast.success('Request submitted successfully!', {
         icon: '✅',
@@ -103,6 +105,11 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-slate-950 dark:via-gray-900 dark:to-slate-950 p-6 transition-colors duration-200">
+      {/* Theme Toggle - fixed top-right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="max-w-2xl mx-auto mt-8">
         {/* Logo - always visible */}
         <div className="text-center mb-8">

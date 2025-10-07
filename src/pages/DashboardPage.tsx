@@ -3,7 +3,7 @@ import { StatsBar } from '../features/dashboard/components/StatsBar';
 import { RequestTable } from '../features/dashboard/components/RequestTable';
 import { TeamCapacityWidget } from '../features/dashboard/components/TeamCapacityWidget';
 import { useNavigate } from 'react-router-dom';
-import { filterRequestsByView, getCurrentUser, sortRequestsByPriority } from '../utils/requestFilters';
+import { filterRequestsByView, getCurrentUser, sortRequestsByImpact } from '../utils/requestFilters';
 import type { Request } from '../types';
 
 export function DashboardPage() {
@@ -18,9 +18,9 @@ export function DashboardPage() {
     navigate(`/request/${request.id}`);
   };
 
-  // Get current user, filter, and sort requests by priority
+  // Get current user, filter, and sort requests by impact score (with priority fallback)
   const currentUser = getCurrentUser(view);
-  const filteredRequests = sortRequestsByPriority(
+  const filteredRequests = sortRequestsByImpact(
     filterRequestsByView(requests, view)
   );
 

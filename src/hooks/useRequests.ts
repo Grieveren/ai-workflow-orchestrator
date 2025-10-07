@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { Request, RequestStage, RequestData } from '../types';
+import type { Request, RequestStage, RequestData, ChatMessage } from '../types';
 import { api } from '../services/api';
+import { MOCK_USERS } from '../constants/users';
 
 // Mock initial requests data
 const initialRequests: Request[] = [
@@ -48,7 +49,7 @@ const initialRequests: Request[] = [
     id: 'REQ-003',
     title: 'Customer health score dashboard',
     status: 'Scoping',
-    owner: 'Jennifer Kim',
+    owner: 'Alex Rivera', // Product Owner for review
     submittedBy: 'Mark Stevens',
     priority: 'High',
     clarityScore: 8,
@@ -59,7 +60,7 @@ const initialRequests: Request[] = [
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     activity: [
       { timestamp: '5 days ago', action: 'Request submitted', user: 'Mark Stevens' },
-      { timestamp: '5 days ago', action: 'Auto-routed to Jennifer Kim', user: 'AI Agent' },
+      { timestamp: '5 days ago', action: 'Assigned to Alex Rivera (Product Owner) for review', user: 'AI Agent' },
       { timestamp: '3 days ago', action: 'AI reminder sent: No activity for 48 hours', user: 'AI Agent' }
     ],
     aiAlert: 'No activity for 3 days - may be stalled'
@@ -81,17 +82,30 @@ export function useRequests() {
   };
 
   /**
-   * Submit a new request with AI routing
+   * Submit a new request with AI routing and impact assessment
+   * @param requestData - The extracted request data from conversation
+   * @param conversationHistory - Optional chat messages for AI impact scoring
    */
-  const submitRequest = async (requestData: RequestData): Promise<Request | null> => {
+  const submitRequest = async (
+    requestData: RequestData,
+    conversationHistory?: ChatMessage[]
+  ): Promise<Request | null> => {
     try {
-      const routing = await api.routeRequest(requestData);
+      // Run routing and impact scoring in parallel for speed
+      const [routing, impactAssessment] = await Promise.all([
+        api.routeRequest(requestData),
+        conversationHistory
+          ? api.calculateImpactScore(conversationHistory, requestData)
+          : Promise.resolve(undefined)
+      ]);
 
       const newRequest: Request = {
         id: `REQ-${String(requests.length + 1).padStart(3, '0')}`,
         title: requestData.title || 'New Request',
         status: 'Scoping',
-        owner: routing.owner,
+        // New workflow: All requests start with Product Owner for review in Scoping stage
+        owner: MOCK_USERS.PRODUCT_OWNER,
+        submittedBy: MOCK_USERS.REQUESTER, // Track who submitted
         priority: routing.priority,
         clarityScore: 9,
         daysOpen: 0,
@@ -99,7 +113,17 @@ export function useRequests() {
         lastUpdate: 'Just now',
         timeline: routing.timeline,
         complexity: routing.complexity as 'simple' | 'medium' | 'complex',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        impactAssessment, // Add AI-generated impact assessment (undefined if not provided)
+        activity: [
+          { timestamp: 'Just now', action: 'Request submitted', user: MOCK_USERS.REQUESTER },
+          { timestamp: 'Just now', action: `Assigned to ${MOCK_USERS.PRODUCT_OWNER} (Product Owner) for review`, user: 'AI Agent' },
+          ...(impactAssessment ? [{
+            timestamp: 'Just now',
+            action: `AI Impact Score: ${impactAssessment.totalScore}/100 (Tier ${impactAssessment.tier})`,
+            user: 'AI Agent'
+          }] : [])
+        ]
       };
 
       addRequest(newRequest);
@@ -112,6 +136,7 @@ export function useRequests() {
 
   /**
    * Update a request's stage and add activity log entry
+   * Automatically assigns owner when transitioning to "In Progress"
    */
   const updateRequestStage = (requestId: string, newStage: RequestStage, note: string, user?: string) => {
     setRequests(requests.map(req => {
@@ -121,8 +146,13 @@ export function useRequests() {
           action: note,
           user: user || 'User'
         }];
+
+        // When transitioning to "In Progress", assign owner to the user making the transition
+        const updatedOwner = newStage === 'In Progress' && user ? user : req.owner;
+
         return {
           ...req,
+          owner: updatedOwner,
           stage: newStage,
           lastUpdate: 'Just now',
           activity,
@@ -136,8 +166,10 @@ export function useRequests() {
     if (selectedRequest?.id === requestId) {
       const updated = requests.find(r => r.id === requestId);
       if (updated) {
+        const updatedOwner = newStage === 'In Progress' && user ? user : updated.owner;
         setSelectedRequest({
           ...updated,
+          owner: updatedOwner,
           stage: newStage,
           lastUpdate: 'Just now',
           aiAlert: null

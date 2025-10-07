@@ -4,15 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an AI-powered workflow orchestrator built with React, TypeScript, and the Anthropic Claude API. The application manages workflow requests through an intelligent chatbot interface with automated routing, requirement generation (BRD/FSD/Tech Specs), and **three distinct role-based views** (Requester/Developer/Management).
+This is an AI-powered workflow orchestrator built with React, TypeScript, and the Anthropic Claude API. The application manages workflow requests through an intelligent chatbot interface with automated routing, requirement generation (BRD/FSD/Tech Specs), and **four distinct role-based views** (Requester/Product Owner/Developer/Management).
 
 **Key Features:**
 - AI-powered conversational intake that guides users through requirement gathering
 - Smart routing to team members based on request type
+- **AI Impact Assessment**: Automated 0-100 scoring based on revenue potential, user reach, strategic alignment, urgency, and quick-win potential for data-driven prioritization
 - Automated generation of Business Requirements Document (BRD), Functional Specification Document (FSD), and Technical Specifications
-- Dashboard with request tracking, priority levels, clarity scores, and workflow stages
-- **Three-view system with role-based access control:**
+- Dashboard with request tracking, priority levels, clarity scores, impact scores, and workflow stages
+- **Four-view system with role-based access control:**
   - **Requester View**: Submit and track personal requests
+  - **Product Owner View**: Review and refine requirements in Scoping stage
   - **Developer View**: Manage assigned work and team workflow
   - **Management View**: Full portfolio oversight with analytics
 - **Dark Mode with System Preference Support:**
@@ -21,12 +23,14 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
   - Automatic system preference detection (prefers-color-scheme)
   - Smooth 150ms transitions between light/dark modes
   - Manual toggle in header navigation
+  - Comprehensive dark mode styling across all UI components (document generation, modals, chat interfaces)
 - **RevOps Optimization Features:**
   - SLA tracking with visual status badges (on-time/at-risk/overdue)
   - Team capacity monitoring with utilization indicators
   - Analytics dashboard with portfolio funnel and cycle time metrics
-  - Document approval workflow with quality gates
+  - **Sequential document approval workflow** (BRD → FSD → Tech Spec) with quality gates and locking
   - Modern toast notifications for all user feedback
+  - Reusable Modal component replacing native browser prompts
 
 ## Claude Code Workflow - MANDATORY PROCESS
 
@@ -171,7 +175,9 @@ src/
 │   │   ├── Input.tsx
 │   │   ├── Skeleton.tsx
 │   │   ├── SLABadge.tsx
-│   │   ├── ThemeToggle.tsx       # Dark mode toggle component
+│   │   ├── ImpactBadge.tsx        # Impact score badge component
+│   │   ├── ThemeToggle.tsx        # Dark mode toggle component
+│   │   ├── Modal.tsx              # Reusable modal dialog with dark mode
 │   │   └── index.ts
 │   └── layout/                  # Layout components
 │       ├── Header.tsx
@@ -198,7 +204,9 @@ src/
 │   └── api.ts
 ├── utils/                       # Utility functions
 │   ├── slaCalculator.ts         # SLA calculation logic
-│   └── requestFilters.ts        # Request filtering and sorting
+│   ├── requestFilters.ts        # Request filtering and sorting
+│   ├── impactValidation.ts      # Impact assessment validation and utilities
+│   └── permissions.ts           # Role-based access control
 ├── constants/                   # Application constants
 │   └── users.ts                 # Mock user definitions
 ├── test/                        # Test setup
@@ -211,10 +219,11 @@ src/
 
 ### Type System
 All data structures are defined in `src/types/index.ts`:
-- **Domain types**: `Request` (includes `submittedBy` for requester tracking), `ChatMessage`, `RequestData`, `GeneratedDocs`, `TeamMember`
-- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType` (`'requester' | 'dev' | 'management'`), `TabType`, `SLAStatus`, `Theme` (`'light' | 'dark'`)
+- **Domain types**: `Request` (includes `submittedBy` for requester tracking and optional `impactAssessment` field), `ChatMessage`, `RequestData`, `GeneratedDocs`, `TeamMember`
+- **Enum types**: `RequestStage`, `Priority`, `UserMode`, `DocType`, `ViewType` (`'requester' | 'product-owner' | 'dev' | 'management'`), `TabType`, `SLAStatus`, `Theme` (`'light' | 'dark'`)
 - **API types**: `ClaudeApiRequest`, `ClaudeApiResponse`, `RoutingInfo`
-- **RevOps types**: `SLAData`, `DocumentApproval`
+- **RevOps types**: `SLAData`, `DocumentApproval` (includes optional `approverRole` field to track which role approved documents)
+- **Impact Assessment types**: `ImpactAssessment` (includes `totalScore` 0-100, `breakdown` with 5 scoring categories, `tier` 1-3, `assessedAt`, `assessedBy`, and `justification`)
 
 ### API Service Layer
 All Claude API interactions are centralized in `src/services/api.ts`:
@@ -222,6 +231,7 @@ All Claude API interactions are centralized in `src/services/api.ts`:
 - `api.continueConversation()` - Multi-turn conversation
 - `api.extractRequestData()` - Extract structured data from chat
 - `api.routeRequest()` - Route to team member
+- `api.calculateImpactScore()` - AI-powered impact assessment (0-100 scoring across 5 dimensions)
 - `api.generateDocuments()` - Create BRD/FSD/Tech Spec (sequential, 3 separate API calls)
 - `api.generateSingleDocument()` - Create one document (BRD, FSD, or Tech Spec)
 - `api.refineDocument()` - Update documents based on feedback
@@ -241,8 +251,9 @@ Uses React Context (`AppProvider`, `ThemeProvider`) with custom hooks:
 - **`useRequests` hook**: `requests`, `selectedRequest`, `requestData`
 - **`useDocuments` hook**: `generatedDocs`, `userMode`, `isGenerating`, `activeDocTab`, `docChatMessages`
 - **`useTheme` hook**: `theme`, `setTheme`, `toggleTheme` - manages dark/light mode with localStorage persistence
-- **View control**: `view` (requester/dev/management) - controls role-based access and filtering
+- **View control**: `view` (requester/product-owner/dev/management) - controls role-based access and filtering
 - **Navigation**: React Router DOM for URL-based routing with auto-navigation on view change
+- **Permission checks**: Centralized in `src/utils/permissions.ts` for role-based feature access
 
 **Theme Persistence**: The `ThemeProvider` stores user preference in localStorage and detects system preference (`prefers-color-scheme: dark`) as fallback. Theme state applies the `.dark` class to `<html>` element for Tailwind CSS dark mode.
 
@@ -253,21 +264,117 @@ The application uses the API service layer for all Claude interactions:
 
 1. **Initial request intake**: Conversational chatbot that extracts requirements through guided questions
 2. **Follow-up conversation**: Processes user responses with strict prompt instructions to provide bullet-point options
-3. **Document generation**: Creates BRD, FSD, and Technical Spec based on collected requirements and user experience level (Guided/Collaborative/Expert)
-4. **Document refinement**: Allows iterative improvements to generated documents
+3. **Impact assessment**: AI analyzes conversation history to calculate a 0-100 impact score across 5 dimensions (revenue potential, user reach, strategic alignment, urgency, quick-win potential) and assigns a tier (1=AI auto, 2=manual review, 3=business case required)
+4. **Document generation**: Creates BRD, FSD, and Technical Spec based on collected requirements and user experience level (Guided/Collaborative/Expert)
+5. **Document refinement**: Allows iterative improvements to generated documents
+
+### Impact Assessment System
+
+The application includes AI-powered impact scoring to enable data-driven prioritization. Impact assessments are calculated automatically during request submission.
+
+**ImpactAssessment Type**:
+```typescript
+interface ImpactAssessment {
+  totalScore: number;           // 0-100 composite score
+  breakdown: {
+    revenueImpact: number;      // 0-30 points (direct/indirect revenue)
+    userReach: number;          // 0-25 points (number of users affected)
+    strategicAlignment: number; // 0-20 points (alignment with goals)
+    urgency: number;            // 0-15 points (time sensitivity)
+    quickWinBonus: number;      // 0-10 points (high impact + low effort)
+  };
+  tier: 1 | 2 | 3;             // Approval tier required
+  assessedAt: string;          // ISO timestamp
+  assessedBy: 'AI' | string;   // AI or human assessor
+  justification: string;        // Explanation of score
+}
+```
+
+**Scoring Dimensions**:
+- **Revenue Impact (0-30)**: Direct revenue generation, cost savings, or efficiency gains
+- **User Reach (0-25)**: Number of users, customers, or stakeholders affected
+- **Strategic Alignment (0-20)**: Alignment with company OKRs, roadmap, or strategic initiatives
+- **Urgency (0-15)**: Time sensitivity, regulatory deadlines, or competitive pressure
+- **Quick Win Bonus (0-10)**: High-impact requests with low complexity/effort (accelerator)
+
+**Tier System**:
+- **Tier 1 (0-40 points)**: AI auto-approval, low friction workflow
+- **Tier 2 (41-70 points)**: Manual review by Product Owner required
+- **Tier 3 (71-100 points)**: Full business case and executive approval required
+
+**API Method**:
+```typescript
+api.calculateImpactScore(
+  conversationHistory: ChatMessage[],
+  requestData: RequestData
+): Promise<ImpactAssessment>
+```
+
+**Workflow Integration**:
+- Impact scoring runs automatically during request submission (parallel with routing)
+- Conversation history passed from `LandingPage` → `useRequests` → `api.calculateImpactScore()`
+- Score stored in `request.impactAssessment` field (optional, nullable)
+- Activity log entry created: "AI Impact Score: 85/100 (Tier 1)"
+- Dashboard sorted by impact score (assessed requests first, then by descending score)
+
+**Dashboard Display**:
+- New "Impact" column in `RequestTable` with `ImpactBadge` component
+- Badge displays score (0-100), tier (1-3), and visual variant (high/medium/low/none)
+- Visual sort indicator (ArrowDown icon) shows impact-based sorting
+- Small badge size (`sm`) optimized for table cells
+
+**Utility Functions** (`src/utils/impactValidation.ts`):
+- `validateImpactScore(assessment)`: Validates breakdown sums to totalScore ±1 tolerance
+- `getImpactScore(request)`: Null-safe score getter (returns 0 if undefined)
+- `getImpactTier(request)`: Null-safe tier getter (returns undefined if no assessment)
+- `hasImpactAssessment(request)`: Type guard for TypeScript narrowing
+- `getImpactBadgeVariant(score)`: Maps score to badge variant (high ≥70, medium 40-69, low <40, none if no assessment)
+- `isQuickWin(request)`: Identifies high-impact requests with low complexity
+- `sortByImpactScore(requests)`: Sorts requests with assessed first, then by score descending
+
+**Security & Validation**:
+- Input validation: Conversation length (2-50 messages), message size (<5000 chars)
+- Output validation: Score ranges (0-100 total, correct breakdown ranges), tier validation (1-3)
+- Error handling: JSON parsing wrapped in try-catch, graceful degradation if scoring fails
+- Sanitization: Validated inputs prevent DoS attacks
+
+**Test Coverage**: 101 tests across 3 test files
+- `impactValidation.test.ts`: 49 tests for validation utilities
+- `requestFilters.test.ts`: 36 tests for sorting/filtering (including impact-based sorting)
+- `ImpactBadge.test.tsx`: 16 tests for badge component rendering
+
+**Phase Status**:
+- ✅ **Phase 1 Complete**: AI-driven scoring with automated tier assignment
+- ⏸️ **Phase 2 Planned**: Product Owner manual override capability
+- ⏸️ **Phase 3 Planned**: Business case workflow for Tier 3 requests
 
 ### Request Workflow
-Requests flow through stages: `Scoping` → `Ready for Dev` → `In Progress` → `Review` → `Completed`
+Requests flow through stages with role-based ownership:
+
+1. **Intake** → Requester submits request via chatbot
+2. **Scoping** → Product Owner reviews, generates BRD/FSD/Tech Spec, and approves documents
+3. **Ready for Dev** → Developer picks up approved request from work pool
+4. **In Progress** → Developer actively working on implementation
+5. **Review** → Developer submits for review
+6. **Completed** → Request finished and delivered
+
+**Stage Ownership:**
+- **Scoping**: Product Owner (Alex Rivera) - exclusive document generation and approval rights
+- **Ready for Dev → Completed**: Developer (Sarah Chen) - implementation and delivery
+- **All Stages**: Requester (Jessica Martinez) - read-only tracking of their submissions
+- **All Stages**: Management - read-only portfolio oversight
 
 Each request includes:
 - Basic metadata (id, title, status, owner, priority, daysOpen)
 - Clarity score (1-10)
+- Optional impact assessment (0-100 score with tier and breakdown)
 - Activity log with timestamps
 - Optional AI alerts for stalled requests
+- Document approval tracking with approver role attribution
 
 ### UI Structure
 Page-based routing with React Router using nested route layouts:
-- **`/`**: Minimal landing page (LandingPage) with Google-inspired UI - redirects dev/management users to dashboard
+- **`/`**: Minimal landing page (LandingPage) with Google-inspired UI - redirects product-owner/dev/management users to dashboard
 - **`/submit`**: New request submission (SubmitPage) with full AI chatbot interface
 - **`/dashboard`**: Request list (DashboardPage) with stats, filtering, SLA badges, and team capacity widget
 - **`/kanban`**: Kanban board (KanbanPage) with drag-and-drop workflow and SLA badges
@@ -278,7 +385,7 @@ Page-based routing with React Router using nested route layouts:
 All routes except `/` use the AppLayout component which provides Header and TabNavigation. The landing page renders without layout for a clean, focused entry experience.
 
 ### Role-Based View System
-The application provides three distinct user experiences with automatic filtering, scoped data display, and navigation control:
+The application provides four distinct user experiences with automatic filtering, scoped data display, and navigation control:
 
 **👤 Requester View** (Demo user: Jessica Martinez)
 - **Navigation**: Dashboard → New Request
@@ -288,12 +395,34 @@ The application provides three distinct user experiences with automatic filterin
   - Standard request counts (by stage and priority)
 - **Widget Visibility**: TeamCapacityWidget is hidden (not relevant to requesters)
 - **Table Columns**: "Requester" column hidden (viewing only own requests)
-- **Capabilities**: Submit requests, generate documents, review completed work
+- **Capabilities**: Submit new requests, view status of submitted requests (read-only after submission)
+- **Access Restrictions**: Cannot generate documents or approve documents (Product Owner responsibility)
+- **Auto-navigation**: Switches to Dashboard when view changes
+
+**📋 Product Owner View** (Demo user: Alex Rivera)
+- **Navigation**: Dashboard → Kanban Board → Analytics
+- **Request Filtering**: Shows only requests in "Scoping" stage (PO work queue)
+- **Stats Display**:
+  - "Pending Review" shows Scoping requests without approved documents
+  - "Approved Today" shows requests moved to Ready for Dev today
+  - "Needs Attention" shows alerts only for Scoping requests
+- **Widget Visibility**: TeamCapacityWidget displayed (to understand dev capacity before approval)
+- **Table Columns**: "Requester" column visible (shows request origins for context)
+- **Kanban Cards**: Display `submittedBy` for context
+- **Capabilities**:
+  - Generate BRD/FSD/Tech Spec documents (exclusive right during Scoping)
+  - Approve all three documents (quality gates)
+  - Move requests from Scoping → Ready for Dev (after all docs approved)
+  - Refine documents based on stakeholder feedback
+- **Access Restrictions**:
+  - Can only see/modify requests in Scoping stage
+  - Cannot access requests in Ready for Dev, In Progress, Review, or Completed stages
+  - Cannot perform developer actions (assign work, update implementation status)
 - **Auto-navigation**: Switches to Dashboard when view changes
 
 **💻 Developer View** (Demo user: Sarah Chen)
 - **Navigation**: Dashboard → Kanban Board → Analytics
-- **Request Filtering**: Shows assigned requests + "Ready for Dev" stage requests (available work pool)
+- **Request Filtering**: Shows "Ready for Dev" + assigned requests (available work pool)
 - **Stats Display**:
   - "My Active Requests" shows currently assigned work
   - "My Completed Today" shows requests completed today
@@ -301,43 +430,91 @@ The application provides three distinct user experiences with automatic filterin
 - **Widget Visibility**: TeamCapacityWidget displayed
 - **Table Columns**: "Requester" column visible (shows request origins)
 - **Kanban Cards**: Display `submittedBy` for context
-- **Capabilities**: Accept work, update status, complete requests
+- **Capabilities**:
+  - Pick up work from "Ready for Dev" pool
+  - Update status (Ready for Dev → In Progress → Review → Completed)
+  - View approved documents (BRD/FSD/Tech Spec are read-only)
+  - Complete implementation work
+- **Access Restrictions**:
+  - Cannot see requests in "Scoping" stage (Product Owner responsibility)
+  - Cannot generate or approve documents (Product Owner responsibility)
+  - Can only work on requests after PO has approved all documents
 - **Auto-navigation**: Switches to Dashboard when view changes
+- **Automatic Assignment**: When transitioning request to "In Progress" stage, `owner` field automatically updates to developer, ensuring request remains visible in dev view filtering
 
 **📊 Management View** (Full oversight)
 - **Navigation**: Dashboard → Kanban Board → Analytics
-- **Request Filtering**: Shows ALL requests (no filtering)
+- **Request Filtering**: Shows ALL requests across all stages (no filtering)
 - **Stats Display**:
   - "Needs Attention" shows all alerts across portfolio
-  - Full portfolio statistics
+  - Full portfolio statistics (all stages, all priorities)
 - **Widget Visibility**: TeamCapacityWidget displayed
 - **Table Columns**: "Requester" column visible (full transparency)
 - **Kanban Cards**: Display `submittedBy` for context
-- **Capabilities**: Read-only oversight, team capacity monitoring, SLA tracking
+- **Capabilities**:
+  - Read-only oversight of entire workflow
+  - View all requests regardless of stage
+  - Monitor team capacity and SLA compliance
+  - Access analytics and portfolio metrics
+- **Access Restrictions**:
+  - Cannot modify requests (read-only)
+  - Cannot generate, approve, or update documents
+  - Cannot change request stages or assignments
 - **Auto-navigation**: Switches to Dashboard when view changes
 
 **Implementation Details**:
 - View state managed in `AppContext` (src/contexts/AppContext.tsx)
+- Permission logic centralized in `src/utils/permissions.ts`:
+  - `canGenerateDocuments(view, stage)` - Controls document generation access
+  - `canApproveDocuments(view, stage)` - Controls document approval access
+  - `canUpdateStage(view, fromStage, toStage)` - Controls stage transition permissions
+  - `isReadOnly(view, stage)` - Determines if view has read-only access
 - Filtering logic in `DashboardPage.tsx`, `KanbanPage.tsx`, and `App.tsx`
 - Request count updates dynamically based on filtered results
 - StatsBar component adapts displayed metrics based on `view` prop
 - TeamCapacityWidget conditionally rendered based on view type
 - RequestTable adjusts column visibility based on view context
+- RequestDetailPage enforces permissions using `permissions.ts` utilities
 - Stage badges use `whitespace-nowrap` to prevent text wrapping
 
 Features lazy loading with code splitting, error boundaries, skeleton loaders, and toast notifications for optimal performance and UX.
 
 ## Key Functions
 
+**API Service Layer** (`src/services/api.ts`):
 - `startConversation()`: Initiates new request with AI
 - `continueConversation()`: Handles multi-turn conversation with strict prompt engineering for bullet-point options
+- `calculateImpactScore(conversationHistory, requestData)`: AI-powered impact assessment returning 0-100 score with tier and breakdown
 - `generateRequirements(mode)`: Creates all three specification documents sequentially based on user experience level
 - `refineDocument()`: Updates documents based on user feedback
+
+**Request Management**:
 - `viewRequestDetail(request)`: Opens request detail view (resets generation state)
-- `updateRequestStage(requestId, newStage, note)`: Manages request workflow transitions
+- `updateRequestStage(requestId, newStage, note)`: Manages request workflow transitions (enforces permission checks)
+- `submitRequest()`: Submits new request with parallel impact scoring and routing
+
+**Document Workflow**:
+- `approveDocument(docType, approver, approverRole)`: Approves a document with role tracking for audit trail
+- `areAllDocsApproved()`: Checks if all three documents are approved before allowing Product Owner to move request to "Ready for Dev"
+- `isDocumentLocked(docType, generatedDocs)`: Sequential approval helper - FSD locked until BRD approved, Tech Spec locked until FSD approved
+
+**RevOps & Analytics**:
 - `calculateSLA(request)`: Calculates SLA status based on complexity and creation date
-- `approveDocument(docType, approver)`: Approves a document and enables stage transitions
-- `areAllDocsApproved()`: Checks if all three documents are approved before allowing "Ready for Dev"
+
+**Impact Assessment Utilities** (`src/utils/impactValidation.ts`):
+- `validateImpactScore(assessment)`: Validates impact score breakdown (tolerance ±1)
+- `getImpactScore(request)`: Null-safe getter returning score or 0
+- `getImpactTier(request)`: Null-safe tier getter
+- `hasImpactAssessment(request)`: Type guard for requests with assessments
+- `getImpactBadgeVariant(score)`: Maps score to badge variant (high/medium/low/none)
+- `isQuickWin(request)`: Identifies high-impact + low-complexity requests
+- `sortByImpactScore(requests)`: Sorts with assessed requests first, then by score descending
+
+**Permission Utilities** (`src/utils/permissions.ts`):
+- `canGenerateDocuments(view, stage)`: Returns true only for Product Owner in Scoping stage
+- `canApproveDocuments(view, stage)`: Returns true only for Product Owner in Scoping stage
+- `canUpdateStage(view, fromStage, toStage)`: Validates role-based stage transition permissions (PO: Scoping → Ready for Dev; Dev: Ready for Dev → Completed)
+- `isReadOnly(view, stage)`: Returns true for Management (always read-only), Requester (always read-only after submission), and roles outside their workflow ownership
 
 ## Prompt Engineering Notes
 
@@ -371,11 +548,16 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - Console.log statements exist for debugging
 - API responses are parsed in the service layer (`api.ts`)
 - Documents are stored as markdown strings in state
+- Impact assessments are optional fields on Request objects (nullable)
+- Dashboard sorting prioritizes impact-assessed requests first, then sorts by score descending
+- **Modal component** (`src/components/ui/Modal.tsx`) replaces native `prompt()` dialogs with dark mode support, textarea input, keyboard shortcuts (⌘+Enter), and proper validation
+- **Sequential document approval**: Documents are locked in order (FSD until BRD approved, Tech Spec until FSD approved) using `isDocumentLocked()` helper
+- **Automatic dev assignment**: When request transitions to "In Progress", owner field automatically updates to current developer to maintain view filtering
 - Error boundary wraps the entire application for graceful error handling
 - Backend proxy server handles API authentication, frontend handles all application state
 - No database (state is stored client-side only)
 - Lazy loading with Suspense for code splitting
-- Test coverage for UI components and features (20 test files)
+- Test coverage for UI components and features (23 test files, 101 tests for impact assessment alone)
 - ESLint configuration with TypeScript and React hooks rules (.eslintrc.json)
 - Prettier configuration for code formatting (.prettierrc.json)
 
@@ -402,10 +584,10 @@ The application follows strict architectural patterns. **Detailed documentation*
 - Composed in `AppContext`, no external state libraries
 
 **Component Locations**:
-- `src/components/ui/` → Generic, no business logic
-- `src/components/layout/` → App-wide structure
-- `src/features/[feature]/components/` → Feature-specific
-- `src/pages/` → Route-level composition
+- `src/components/ui/` → Generic, no business logic (Button, Card, Modal, Input, Badge, etc.)
+- `src/components/layout/` → App-wide structure (Header, TabNavigation, AppLayout)
+- `src/features/[feature]/components/` → Feature-specific (ModeSelector, DocumentViewer, ChatMessage, etc.)
+- `src/pages/` → Route-level composition (LandingPage, DashboardPage, RequestDetailPage, etc.)
 
 **Testing**:
 - Co-locate: `Component.test.tsx` next to `Component.tsx`

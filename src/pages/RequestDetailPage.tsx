@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -7,8 +7,10 @@ import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
 import { ModeSelector } from '../features/documents/components/ModeSelector';
 import { DocumentViewer } from '../features/documents/components/DocumentViewer';
 import { DocumentChat } from '../features/documents/components/DocumentChat';
-import { SLABadge } from '../components/ui';
+import { SLABadge, Modal } from '../components/ui';
 import { calculateSLA } from '../utils/slaCalculator';
+import { canGenerateDocuments, canUpdateStage } from '../utils/permissions';
+import { getCurrentUser } from '../utils/requestFilters';
 import type { RequestStage, DocType } from '../types';
 
 export function RequestDetailPage() {
@@ -16,6 +18,19 @@ export function RequestDetailPage() {
   const navigate = useNavigate();
   const { view, requests: requestsHook, documents } = useAppContext();
   const documentsRef = useRef<HTMLDivElement>(null);
+
+  // Modal state for rejection/status/feedback inputs
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    placeholder: string;
+    onSubmit: (value: string) => void;
+  }>({
+    isOpen: false,
+    title: '',
+    placeholder: '',
+    onSubmit: () => {}
+  });
 
   const {
     requests,
@@ -88,7 +103,7 @@ export function RequestDetailPage() {
   };
 
   const handleUpdateRequestStage = (requestId: string, newStage: RequestStage, note: string) => {
-    const user = view === 'dev' && selectedRequest ? selectedRequest.owner : 'Product Owner';
+    const user = getCurrentUser(view) || 'User';
     updateRequestStage(requestId, newStage, note, user);
   };
 
@@ -108,7 +123,12 @@ export function RequestDetailPage() {
   };
 
   const handleApprove = (docType: DocType) => {
-    approveDocument(docType, 'Product Owner');
+    const currentUser = getCurrentUser(view);
+    if (!currentUser) {
+      toast.error('Unable to approve: Current user not identified');
+      return;
+    }
+    approveDocument(docType, currentUser, view);
   };
 
   const allDocsApproved = areAllDocsApproved();
@@ -219,13 +239,17 @@ export function RequestDetailPage() {
               </button>
               <button
                 onClick={() => {
-                  const reason = prompt('Why are you rejecting this request?');
-                  if (reason) {
-                    handleUpdateRequestStage(selectedRequest.id, 'Scoping', `Dev rejected: ${reason}`);
-                    toast('Request sent back to Product Owner for clarification', {
-                      icon: '↩️',
-                    });
-                  }
+                  setModalState({
+                    isOpen: true,
+                    title: 'Reject Request',
+                    placeholder: 'Why are you rejecting this request? (e.g., "Needs more technical details" or "Requirements unclear")',
+                    onSubmit: (reason) => {
+                      handleUpdateRequestStage(selectedRequest.id, 'Scoping', `Dev rejected: ${reason}`);
+                      toast('Request sent back to Product Owner for clarification', {
+                        icon: '↩️',
+                      });
+                    }
+                  });
                 }}
                 className="px-4 py-2 bg-white text-blue-700 border border-blue-300 rounded-lg hover:bg-blue-50"
               >
@@ -241,10 +265,14 @@ export function RequestDetailPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  const update = prompt('Status update (e.g., "70% complete - testing phase")');
-                  if (update) {
-                    handleUpdateRequestStage(selectedRequest.id, 'In Progress', update);
-                  }
+                  setModalState({
+                    isOpen: true,
+                    title: 'Add Status Update',
+                    placeholder: 'Status update (e.g., "70% complete - testing phase")',
+                    onSubmit: (update) => {
+                      handleUpdateRequestStage(selectedRequest.id, 'In Progress', update);
+                    }
+                  });
                 }}
                 className="px-4 py-2 bg-white text-purple-700 border border-purple-300 rounded-lg hover:bg-purple-50"
               >
@@ -283,13 +311,17 @@ export function RequestDetailPage() {
               </button>
               <button
                 onClick={() => {
-                  const feedback = prompt('What needs to be changed?');
-                  if (feedback) {
-                    handleUpdateRequestStage(selectedRequest.id, 'In Progress', `Feedback from review: ${feedback}`);
-                    toast('Feedback sent to dev. Status changed back to "In Progress"', {
-                      icon: '💬',
-                    });
-                  }
+                  setModalState({
+                    isOpen: true,
+                    title: 'Request Changes',
+                    placeholder: 'What needs to be changed? (e.g., "Add error handling in user authentication flow")',
+                    onSubmit: (feedback) => {
+                      handleUpdateRequestStage(selectedRequest.id, 'In Progress', `Feedback from review: ${feedback}`);
+                      toast('Feedback sent to dev. Status changed back to "In Progress"', {
+                        icon: '💬',
+                      });
+                    }
+                  });
                 }}
                 className="px-4 py-2 bg-white text-green-700 border border-green-300 rounded-lg hover:bg-green-50"
               >
@@ -315,7 +347,27 @@ export function RequestDetailPage() {
         </div>
       </div>
 
-      {selectedRequest.stage === 'Scoping' && view === 'requester' && (
+      {/* Read-only banner for requesters viewing Scoping requests */}
+      {view === 'requester' && selectedRequest.stage === 'Scoping' && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mt-6">
+          <div className="flex gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
+                Pending Product Owner Review
+              </h4>
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                Your request is currently being reviewed by {selectedRequest.owner}. Requirements documents
+                (BRD, FSD, Tech Spec) will be generated and approved before moving to development.
+                You'll be notified when this is ready for the development team.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document generation and approval - only for Product Owner in Scoping stage */}
+      {canGenerateDocuments(view, selectedRequest.stage) && (
         <div ref={documentsRef}>
           {isGenerating ? (
             <LoadingIndicator streamingText={streamingText} />
@@ -339,30 +391,32 @@ export function RequestDetailPage() {
                 isProcessing={docIsProcessing}
               />
 
-              {/* Move to Ready for Dev button */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6 mt-4">
-                <h4 className="font-semibold text-gray-800 dark:text-slate-100 mb-3">Ready to hand off to development?</h4>
-                {!allDocsApproved ? (
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mb-4">
-                    <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                      ⚠️ All documents must be approved before moving to development
-                    </p>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      handleUpdateRequestStage(selectedRequest.id, 'Ready for Dev', 'All documents approved - ready for development');
-                      toast.success('Request moved to "Ready for Dev". Developers will be notified.', {
-                        icon: '🚀',
-                        duration: 4000,
-                      });
-                    }}
-                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
-                  >
-                    Move to Ready for Dev
-                  </button>
-                )}
-              </div>
+              {/* Move to Ready for Dev button - only for Product Owner */}
+              {canUpdateStage(view, selectedRequest.stage, 'Ready for Dev') && (
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6 mt-4">
+                  <h4 className="font-semibold text-gray-800 dark:text-slate-100 mb-3">Ready to hand off to development?</h4>
+                  {!allDocsApproved ? (
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mb-4">
+                      <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                        ⚠️ All documents must be approved before moving to development
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        handleUpdateRequestStage(selectedRequest.id, 'Ready for Dev', 'All documents approved - ready for development');
+                        toast.success('Request moved to "Ready for Dev". Developers will be notified.', {
+                          icon: '🚀',
+                          duration: 4000,
+                        });
+                      }}
+                      className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+                    >
+                      Move to Ready for Dev
+                    </button>
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <ModeSelector
@@ -394,6 +448,14 @@ export function RequestDetailPage() {
           />
         </>
       )}
+
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ ...modalState, isOpen: false })}
+        onSubmit={modalState.onSubmit}
+        title={modalState.title}
+        placeholder={modalState.placeholder}
+      />
     </div>
   );
 }

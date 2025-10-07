@@ -1,4 +1,4 @@
-import type { ChatMessage, RequestData, Request, UserMode, DocType, RoutingInfo, ClaudeApiResponse } from '../types';
+import type { ChatMessage, RequestData, Request, UserMode, DocType, RoutingInfo, ClaudeApiResponse, ImpactAssessment } from '../types';
 
 const API_URL = 'http://localhost:3001/api/chat';
 const MODEL = 'claude-sonnet-4-5-20250929';
@@ -508,5 +508,265 @@ Include all sections, not just the changed parts.`;
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 3000
     });
+  },
+
+  /**
+   * Validate inputs for impact scoring (security requirement)
+   */
+  validateScoringInputs: (
+    conversation: ChatMessage[],
+    requestData: RequestData
+  ): void => {
+    // Conversation validation
+    if (!conversation || conversation.length === 0) {
+      throw new Error('Conversation is required for impact scoring');
+    }
+
+    if (conversation.length > 50) {
+      throw new Error('Conversation too long (max 50 messages)');
+    }
+
+    if (conversation.length < 2) {
+      throw new Error('Conversation too short (min 2 messages)');
+    }
+
+    // Message content validation
+    conversation.forEach((msg, idx) => {
+      if (!msg.content || typeof msg.content !== 'string') {
+        throw new Error(`Invalid message at index ${idx}`);
+      }
+
+      if (msg.content.length > 5000) {
+        throw new Error(`Message ${idx} exceeds 5000 characters`);
+      }
+
+      if (!/^(user|assistant)$/.test(msg.role)) {
+        throw new Error(`Invalid role "${msg.role}" at message ${idx}`);
+      }
+    });
+
+    // RequestData validation
+    if (!requestData) {
+      throw new Error('RequestData is required for impact scoring');
+    }
+
+    if (requestData.title && requestData.title.length > 200) {
+      throw new Error('Request title too long (max 200 chars)');
+    }
+
+    if (requestData.problem && requestData.problem.length > 5000) {
+      throw new Error('Problem description too long (max 5000 chars)');
+    }
+  },
+
+  /**
+   * Validate parsed impact assessment structure and ranges
+   */
+  validateImpactAssessment: (parsed: ImpactAssessment): void => {
+    // Structure validation
+    if (!parsed.totalScore || !parsed.breakdown || !parsed.tier) {
+      throw new Error('Invalid impact assessment structure');
+    }
+
+    // Total score range
+    if (parsed.totalScore < 0 || parsed.totalScore > 100) {
+      throw new Error(`Impact totalScore out of range: ${parsed.totalScore} (expected 0-100)`);
+    }
+
+    // Breakdown component ranges
+    const { breakdown } = parsed;
+
+    if (breakdown.revenueImpact < 0 || breakdown.revenueImpact > 30) {
+      throw new Error(`revenueImpact out of range: ${breakdown.revenueImpact} (expected 0-30)`);
+    }
+
+    if (breakdown.userReach < 0 || breakdown.userReach > 25) {
+      throw new Error(`userReach out of range: ${breakdown.userReach} (expected 0-25)`);
+    }
+
+    if (breakdown.strategicAlignment < 0 || breakdown.strategicAlignment > 20) {
+      throw new Error(`strategicAlignment out of range: ${breakdown.strategicAlignment} (expected 0-20)`);
+    }
+
+    if (breakdown.urgency < 0 || breakdown.urgency > 15) {
+      throw new Error(`urgency out of range: ${breakdown.urgency} (expected 0-15)`);
+    }
+
+    if (breakdown.quickWinBonus < 0 || breakdown.quickWinBonus > 10) {
+      throw new Error(`quickWinBonus out of range: ${breakdown.quickWinBonus} (expected 0-10)`);
+    }
+
+    // Tier validation
+    if (![1, 2, 3].includes(parsed.tier)) {
+      throw new Error(`Invalid tier: ${parsed.tier} (expected 1, 2, or 3)`);
+    }
+  },
+
+  /**
+   * Calculate impact assessment score for a request
+   */
+  calculateImpactScore: async (
+    conversationHistory: ChatMessage[],
+    requestData: RequestData
+  ): Promise<ImpactAssessment> => {
+    // Security: Validate inputs before processing
+    api.validateScoringInputs(conversationHistory, requestData);
+    const prompt = `You are an expert RevOps analyst calculating the business impact score for a workflow request.
+
+TASK: Analyze the conversation and request data, then assign a 0-100 impact score with breakdown.
+
+CONVERSATION TRANSCRIPT:
+${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
+
+REQUEST DATA:
+${JSON.stringify(requestData, null, 2)}
+
+SCORING RUBRIC (0-100 points total):
+
+1. REVENUE IMPACT (0-30 points)
+   Analyze revenue signals from conversation:
+
+   Direct Revenue (20-30 pts):
+   - "close deals faster", "increase sales", "pricing optimization"
+   - "upsell", "cross-sell", "new revenue stream"
+
+   Revenue Protection (10-20 pts):
+   - "customers churning", "retention issue", "compliance risk"
+   - "contract renewal", "avoiding penalties"
+
+   Efficiency Gains (5-15 pts):
+   - "5+ hours per week" → estimate hourly rate × time saved
+   - "automation", "eliminate manual work"
+   - Default: 100/hr × hours saved per week × 52 weeks / 12 months
+
+   No Revenue Impact (0-5 pts):
+   - "nice to have", "cosmetic", "minor improvement"
+
+2. USER REACH (0-25 points)
+   Extract user signals from conversation:
+
+   User Count:
+   - 50+ users → 20-25 pts
+   - 10-49 users → 15-20 pts
+   - 2-9 users → 5-15 pts
+   - 1 user → 0-5 pts
+
+   Keywords: "team of X", "all sales reps", "entire department", "just me"
+
+   Frequency Bonus:
+   - "daily", "every morning", "constantly" → +5 pts
+   - "weekly", "regularly" → +3 pts
+   - "monthly" → +1 pt
+
+   User Type Multiplier:
+   - "executive", "VP", "C-level" → +5 pts
+   - "manager", "lead", "senior" → +3 pts
+
+3. STRATEGIC ALIGNMENT (0-20 points)
+   Look for strategy keywords:
+
+   Explicit Strategy (15-20 pts):
+   - "OKR", "Q1 goal", "company initiative"
+   - "board requested", "strategic priority"
+
+   Competitive (10-15 pts):
+   - "competitor has this", "market differentiation"
+   - "customer expectation", "industry standard"
+
+   Technical Debt (5-10 pts):
+   - "blocking other work", "enables future features"
+   - "platform upgrade", "scalability"
+
+   No Strategy (0-5 pts):
+   - No mention of goals or strategy
+
+4. URGENCY/TIME SENSITIVITY (0-15 points)
+   Extract deadline signals:
+
+   Hard Deadlines (10-15 pts):
+   - Dates: "by Friday", "before Q2", "next week"
+   - Compliance: "regulatory", "audit", "legal requirement"
+
+   Opportunity Windows (5-10 pts):
+   - "product launch", "campaign", "seasonal"
+   - "before competitor", "market timing"
+
+   Escalation Risk (3-7 pts):
+   - "executive asking", "escalated", "critical"
+   - Urgency words: "urgent", "ASAP", "immediately"
+
+   No Time Pressure (0-3 pts):
+   - "when you can", "someday", "no rush"
+
+5. QUICK WIN BONUS (0-10 points)
+   Calculate: (Potential Impact / Effort) × 2
+
+   Extract complexity from requestData.complexity or conversation:
+   - "simple", "quick fix", "small change" → 1-3 days
+   - "medium", "moderate" → 4-10 days
+   - "complex", "big project", "major change" → >10 days
+
+   Formula:
+   - Simple (<3 days) + High Impact (>60) → 8-10 pts
+   - Simple + Medium Impact (40-60) → 5-7 pts
+   - Medium (4-10 days) + High Impact → 3-5 pts
+   - All others → 0-2 pts
+
+INFERENCE GUIDELINES:
+- Users rarely state impact explicitly - infer from pain points
+- "Spending hours on X" → calculate efficiency gains
+- "Blocking work" → high urgency, high impact
+- "Just me" vs "team" → user reach estimation
+- Vague complexity → default to "medium" (5 days)
+- Missing stakeholders → default to 5 users
+- If conversation is minimal (<3 exchanges), be conservative with scores
+
+OUTPUT FORMAT (RESPOND ONLY WITH VALID JSON):
+{
+  "totalScore": 72,
+  "breakdown": {
+    "revenueImpact": 22,
+    "userReach": 18,
+    "strategicAlignment": 15,
+    "urgency": 12,
+    "quickWinBonus": 5
+  },
+  "tier": 1,
+  "assessedAt": "${new Date().toISOString()}",
+  "assessedBy": "AI",
+  "justification": "2-3 sentence summary explaining the score. Mention key factors: revenue impact type, user count, deadlines, and strategic context."
+}
+
+VALIDATION:
+- totalScore MUST equal sum of breakdown (within 0.01 tolerance)
+- All breakdown values must be within their max ranges
+- justification must reference specific conversation details
+- Be consistent: same inputs should produce same scores
+
+NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
+
+    const response = await callClaude({
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1000
+    });
+
+    try {
+      const cleanedResponse = cleanJsonResponse(response);
+      const parsed = JSON.parse(cleanedResponse) as ImpactAssessment;
+
+      // Validate structure and ranges
+      api.validateImpactAssessment(parsed);
+
+      // Validation: ensure breakdown sums to totalScore
+      const sum = Object.values(parsed.breakdown).reduce((a, b) => a + b, 0);
+      if (Math.abs(sum - parsed.totalScore) > 0.01) {
+        console.warn(`Impact score validation failed: totalScore=${parsed.totalScore}, sum=${sum}`);
+      }
+
+      return parsed;
+    } catch {
+      console.error('Failed to parse impact assessment');
+      throw new Error('Impact scoring failed - invalid AI response');
+    }
   }
 };

@@ -8,14 +8,18 @@ A modern React application for managing workflow requests with AI-powered assist
 
 - **AI-Powered Intake**: Conversational chatbot collects requirements from users
 - **Smart Routing**: Automatically routes requests to the right team member
+- **AI Impact Assessment**: Automated 0-100 scoring across 5 dimensions (revenue, user reach, strategic alignment, urgency, quick-wins) for data-driven prioritization with 3-tier approval workflow
 - **Requirement Generation**: AI generates BRD, FSD, and Technical Specifications
-- **Dashboard**: Track all requests with status, priority, and clarity scores
+- **Dashboard**: Track all requests with status, priority, clarity scores, and impact scores
 - **Kanban Board**: Visual workflow management across stages
-- **Three-View System**: Requester, Developer, and Management perspectives
+- **Four-View System**: Requester, Product Owner, Developer, and Management perspectives
 - **Analytics Dashboard**: Portfolio funnel, bottleneck detection, cycle time metrics
 - **SLA Tracking**: Visual status badges (on-time/at-risk/overdue)
+- **Sequential Document Approval**: BRD → FSD → Tech Spec workflow with quality gates and locking
+- **Dark Mode**: System preference support with manual toggle, comprehensive styling across all components
+- **Modern UI**: Reusable modal dialogs, toast notifications, smooth transitions
 - **URL-Based Navigation**: Shareable links for any view or request
-- **Comprehensive Testing**: Vitest setup with 11 test files and 119 tests
+- **Comprehensive Testing**: Vitest setup with 23 test files (101 tests for impact assessment alone)
 
 ## Tech Stack
 
@@ -61,12 +65,14 @@ src/
 │   │   ├── Header.tsx
 │   │   ├── TabNavigation.tsx
 │   │   └── index.ts
-│   └── ui/               # Button, Card, Badge, Input, Skeleton, etc.
+│   └── ui/               # Button, Card, Badge, Input, Skeleton, Modal, ImpactBadge, etc.
 │       ├── Button.tsx
 │       ├── Card.tsx
 │       ├── Badge.tsx
 │       ├── Input.tsx
 │       ├── Skeleton.tsx
+│       ├── Modal.tsx
+│       ├── ImpactBadge.tsx
 │       └── index.ts
 ├── features/             # Feature-specific components
 │   ├── chat/             # ChatMessage, OptionSelector, etc.
@@ -84,7 +90,8 @@ src/
 │   └── index.ts
 ├── utils/                # Utility functions
 │   ├── slaCalculator.ts
-│   └── requestFilters.ts
+│   ├── requestFilters.ts
+│   └── impactValidation.ts
 ├── constants/            # Application constants
 │   └── users.ts
 ├── test/                 # Test setup
@@ -228,21 +235,26 @@ describe('Button', () => {
 
 ### From Monolith to Modular
 - **Before**: 1,544-line monolithic component
-- **After**: 17 reusable components, 6 route pages, 3 custom hooks
+- **After**: 18+ reusable components, 6 route pages, 3 custom hooks
 - **Result**: 68% reduction in main component size
 - **Bundle**: 273 KB total (96 KB gzipped), optimized with code splitting
-- **Testing**: 11 test files with 119 comprehensive tests
+- **Testing**: 23 test files with 220+ comprehensive tests (101 for impact assessment)
 - **Build Performance**: 23.13s production build (16% faster after Vite 6 upgrade)
 - **Dev Server**: 2.09s startup (74% faster after Vite 6 upgrade)
+- **Recent Improvements**:
+  - Sequential document approval workflow (BRD → FSD → Tech Spec locking)
+  - Comprehensive dark mode styling (document generation, modals, chat interfaces)
+  - Reusable Modal component replacing native browser prompts
+  - Automatic developer assignment on stage transitions
 
 ### Architecture Benefits
 - ✅ Type-safe with TypeScript
 - ✅ Modular and reusable components
 - ✅ Clean separation of concerns
-- ✅ Testable with Vitest (11 test files, 119 tests)
+- ✅ Testable with Vitest (23 test files, 220+ tests)
 - ✅ URL-based navigation with React Router
 - ✅ State management with React Context
-- ✅ API service layer
+- ✅ API service layer with AI-powered impact assessment
 - ✅ Hot module replacement
 - ✅ Error boundaries for graceful error handling
 - ✅ Lazy loading with code splitting (30% faster initial load)
@@ -251,6 +263,7 @@ describe('Button', () => {
 - ✅ Modern tooling with React 19, Vite 6, Tailwind 4
 - ✅ Extended AI capabilities with MCP servers (browser automation, persistent memory, database)
 - ✅ Performance optimized: 16% faster builds, 74% faster dev server
+- ✅ Data-driven prioritization with AI impact scoring (Phase 1 complete)
 
 ## License
 

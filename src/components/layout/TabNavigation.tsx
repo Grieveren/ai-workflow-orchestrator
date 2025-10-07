@@ -36,8 +36,8 @@ export function TabNavigation({ requestCount, view }: TabNavigationProps) {
         </>
       )}
 
-      {/* Developer and Management Views */}
-      {(view === 'dev' || view === 'management') && (
+      {/* Product Owner, Developer, and Management Views */}
+      {(view === 'product-owner' || view === 'dev' || view === 'management') && (
         <>
           <Link to="/dashboard" className={getClassName('/dashboard')}>
             Dashboard ({requestCount})

@@ -1,5 +1,5 @@
-import { Users, Bot } from 'lucide-react';
-import { StageBadge, SLABadge } from '../../../components/ui';
+import { Users, Bot, ArrowDown } from 'lucide-react';
+import { StageBadge, SLABadge, ImpactBadge } from '../../../components/ui';
 import { calculateSLA } from '../../../utils/slaCalculator';
 import type { Request, ViewType } from '../../../types';
 
@@ -21,6 +21,16 @@ export function RequestTable({ requests, onRequestClick, view }: RequestTablePro
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">ID</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Request</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Stage</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                <div className="flex items-center gap-1.5">
+                  <span>Impact</span>
+                  <ArrowDown
+                    size={14}
+                    className="text-purple-500 dark:text-purple-400"
+                    aria-label="Sorted by impact (high to low)"
+                  />
+                </div>
+              </th>
               {showSubmittedBy && (
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Requester</th>
               )}
@@ -43,6 +53,9 @@ export function RequestTable({ requests, onRequestClick, view }: RequestTablePro
                   <td className="px-6 py-4 text-sm text-gray-800 dark:text-slate-100 font-medium">{req.title}</td>
                   <td className="px-6 py-4">
                     <StageBadge stage={req.stage} />
+                  </td>
+                  <td className="px-6 py-4">
+                    <ImpactBadge request={req} size="sm" />
                   </td>
                   {showSubmittedBy && (
                     <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">

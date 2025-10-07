@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import type { UserMode, DocType, GeneratedDocs, ChatMessage, Request } from '../types';
+import type { UserMode, DocType, GeneratedDocs, ChatMessage, Request, ViewType } from '../types';
 import { api } from '../services/api';
 
 /**
@@ -79,9 +79,15 @@ export function useDocuments() {
 
   /**
    * Approve a document
+   * @param docType - Type of document to approve (brd, fsd, techSpec)
+   * @param approver - Name of the person approving
+   * @param approverRole - Role/view type of the approver (for audit trail)
    */
-  const approveDocument = (docType: DocType, approver: string) => {
-    if (!generatedDocs) return;
+  const approveDocument = (docType: DocType, approver: string, approverRole: ViewType) => {
+    if (!generatedDocs) {
+      console.warn('Cannot approve document: No documents generated');
+      return;
+    }
 
     const updatedApprovals = {
       brd: generatedDocs.approvals?.brd || { approved: false },
@@ -92,6 +98,7 @@ export function useDocuments() {
     updatedApprovals[docType] = {
       approved: true,
       approver,
+      approverRole, // Track which role approved (for audit trail)
       date: new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',

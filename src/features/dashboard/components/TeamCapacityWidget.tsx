@@ -28,11 +28,11 @@ const teamMembers: TeamMember[] = [
   },
   {
     name: 'Alex Rivera',
-    role: 'Systems Specialist',
-    activeRequests: 2,
+    role: 'Product Owner',
+    activeRequests: 1,
     maxCapacity: 5,
-    utilization: 40,
-    skills: ['Integrations', 'APIs', 'Technical Config']
+    utilization: 20,
+    skills: ['Requirements', 'Business Analysis', 'Document Review']
   }
 ];
 

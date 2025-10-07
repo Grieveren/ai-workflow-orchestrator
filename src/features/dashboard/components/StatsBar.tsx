@@ -8,24 +8,39 @@ interface StatsBarProps {
 }
 
 export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
-  const activeRequests = requests.filter(r => r.stage !== 'Completed').length;
-  const completedToday = requests.filter(r => r.stage === 'Completed' && r.lastUpdate === 'Just now').length;
-
-  // Scope "Needs Attention" based on view
+  // Calculate metrics based on view type
+  let activeRequests = 0;
+  let completedToday = 0;
   let needsAttention = 0;
+
   if (view === 'requester') {
-    // Requesters see only their requests with alerts
+    // Requesters see their submitted requests
+    activeRequests = requests.filter(r => r.stage !== 'Completed').length;
+    completedToday = requests.filter(r => r.stage === 'Completed' && r.lastUpdate === 'Just now').length;
     needsAttention = requests.filter(r => r.aiAlert && r.submittedBy === currentUser).length;
+  } else if (view === 'product-owner') {
+    // Product Owners see Scoping stage metrics
+    activeRequests = requests.filter(r => r.stage === 'Scoping').length; // Pending Review
+    completedToday = requests.filter(r => r.stage === 'Ready for Dev' && r.lastUpdate === 'Just now').length; // Approved This Week
+    needsAttention = requests.filter(r => r.stage === 'Scoping' && r.aiAlert).length;
   } else if (view === 'dev') {
-    // Developers see their assigned requests with alerts
+    // Developers see their assigned requests
+    activeRequests = requests.filter(r => r.stage !== 'Completed').length;
+    completedToday = requests.filter(r => r.stage === 'Completed' && r.lastUpdate === 'Just now').length;
     needsAttention = requests.filter(r => r.aiAlert && r.owner === currentUser).length;
   } else {
-    // Management sees all requests with alerts
+    // Management sees all requests
+    activeRequests = requests.filter(r => r.stage !== 'Completed').length;
+    completedToday = requests.filter(r => r.stage === 'Completed' && r.lastUpdate === 'Just now').length;
     needsAttention = requests.filter(r => r.aiAlert).length;
   }
 
   // Determine label text based on view
   const getStatLabel = (baseName: string): string => {
+    if (view === 'product-owner') {
+      if (baseName === 'Active Requests') return 'Pending Review';
+      if (baseName === 'Completed Today') return 'Approved Today';
+    }
     if (view === 'dev' && baseName !== 'Needs Attention') {
       return `My ${baseName}`;
     }

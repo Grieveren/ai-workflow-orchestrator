@@ -32,6 +32,16 @@ export function Header({ view, onViewChange }: HeaderProps) {
               Requester
             </button>
             <button
+              onClick={() => onViewChange('product-owner')}
+              className={`px-4 py-2.5 rounded-lg font-medium transition text-sm ${
+                view === 'product-owner'
+                  ? 'bg-white text-purple-600 shadow-md'
+                  : 'text-white hover:bg-white/10'
+              }`}
+            >
+              Product Owner
+            </button>
+            <button
               onClick={() => onViewChange('dev')}
               className={`px-4 py-2.5 rounded-lg font-medium transition text-sm ${
                 view === 'dev'
