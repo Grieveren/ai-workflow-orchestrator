@@ -17,3 +17,5 @@ export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable } from './Skeleton'
 export { ThemeToggle } from './ThemeToggle';
 
 export { Modal } from './Modal';
+
+export { ImpactAdjustmentModal } from './ImpactAdjustmentModal';

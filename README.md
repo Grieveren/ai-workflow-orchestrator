@@ -8,7 +8,7 @@ A modern React application for managing workflow requests with AI-powered assist
 
 - **AI-Powered Intake**: Conversational chatbot collects requirements from users
 - **Smart Routing**: Automatically routes requests to the right team member
-- **AI Impact Assessment**: Automated 0-100 scoring across 5 dimensions (revenue, user reach, strategic alignment, urgency, quick-wins) for data-driven prioritization with 3-tier approval workflow
+- **AI Impact Assessment**: Automated 0-100 scoring across 5 dimensions (revenue, user reach, strategic alignment, urgency, quick-wins) for data-driven prioritization with 3-tier workflow (AI assessment → Product Owner manual refinement → business case validation)
 - **Requirement Generation**: AI generates BRD, FSD, and Technical Specifications
 - **Dashboard**: Track all requests with status, priority, clarity scores, and impact scores
 - **Kanban Board**: Visual workflow management across stages
@@ -73,6 +73,7 @@ src/
 │       ├── Skeleton.tsx
 │       ├── Modal.tsx
 │       ├── ImpactBadge.tsx
+│       ├── ImpactAdjustmentModal.tsx
 │       └── index.ts
 ├── features/             # Feature-specific components
 │   ├── chat/             # ChatMessage, OptionSelector, etc.

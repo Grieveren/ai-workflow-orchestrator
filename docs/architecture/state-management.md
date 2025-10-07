@@ -128,6 +128,7 @@ const [requestData, setRequestData] = useState<RequestData | null>(null);
 - `viewRequestDetail(request)` - Open detail view
 - `closeRequestDetail()` - Close detail view
 - `updateRequest(id, updates)` - Update request fields
+- `adjustImpactScore(id, assessment, adjustedBy)` - Product Owner manual score refinement (Tier 2)
 
 **Usage example**:
 ```typescript

@@ -175,7 +175,8 @@ src/
 │   │   ├── Input.tsx
 │   │   ├── Skeleton.tsx
 │   │   ├── SLABadge.tsx
-│   │   ├── ImpactBadge.tsx        # Impact score badge component
+│   │   ├── ImpactBadge.tsx        # Impact score badge component with tier indicators
+│   │   ├── ImpactAdjustmentModal.tsx  # Product Owner manual score adjustment UI
 │   │   ├── ThemeToggle.tsx        # Dark mode toggle component
 │   │   ├── Modal.tsx              # Reusable modal dialog with dark mode
 │   │   └── index.ts
@@ -231,10 +232,12 @@ All Claude API interactions are centralized in `src/services/api.ts`:
 - `api.continueConversation()` - Multi-turn conversation
 - `api.extractRequestData()` - Extract structured data from chat
 - `api.routeRequest()` - Route to team member
-- `api.calculateImpactScore()` - AI-powered impact assessment (0-100 scoring across 5 dimensions)
+- `api.calculateImpactScore()` - AI-powered impact assessment (Tier 1: 0-100 scoring across 5 dimensions)
 - `api.generateDocuments()` - Create BRD/FSD/Tech Spec (sequential, 3 separate API calls)
 - `api.generateSingleDocument()` - Create one document (BRD, FSD, or Tech Spec)
 - `api.refineDocument()` - Update documents based on feedback
+
+**Note**: Manual impact score adjustments (Tier 2) are handled client-side via `useRequests.adjustImpactScore()` - no AI call needed.
 
 The service layer handles all HTTP requests to the backend proxy at `http://localhost:3001/api/chat`, which forwards to Claude Sonnet 4.5 (`claude-sonnet-4-5-20250929`).
 
@@ -248,7 +251,7 @@ The service layer handles all HTTP requests to the backend proxy at `http://loca
 ### State Management
 Uses React Context (`AppProvider`, `ThemeProvider`) with custom hooks:
 - **`useChat` hook**: `chatMessages`, `userInput`, `isProcessing`, `currentOptions`
-- **`useRequests` hook**: `requests`, `selectedRequest`, `requestData`
+- **`useRequests` hook**: `requests`, `selectedRequest`, `requestData`, `adjustImpactScore()` (Tier 2 manual adjustments)
 - **`useDocuments` hook**: `generatedDocs`, `userMode`, `isGenerating`, `activeDocTab`, `docChatMessages`
 - **`useTheme` hook**: `theme`, `setTheme`, `toggleTheme` - manages dark/light mode with localStorage persistence
 - **View control**: `view` (requester/product-owner/dev/management) - controls role-based access and filtering
@@ -297,10 +300,10 @@ interface ImpactAssessment {
 - **Urgency (0-15)**: Time sensitivity, regulatory deadlines, or competitive pressure
 - **Quick Win Bonus (0-10)**: High-impact requests with low complexity/effort (accelerator)
 
-**Tier System**:
-- **Tier 1 (0-40 points)**: AI auto-approval, low friction workflow
-- **Tier 2 (41-70 points)**: Manual review by Product Owner required
-- **Tier 3 (71-100 points)**: Full business case and executive approval required
+**Tier System** (3-tier assessment workflow):
+- **Tier 1**: AI-generated assessment (initial scoring from conversation analysis)
+- **Tier 2**: Product Owner manual refinement (insider knowledge adjustments via `ImpactAdjustmentModal`)
+- **Tier 3**: Business case validation (future phase - post-completion outcome tracking)
 
 **API Method**:
 ```typescript
@@ -311,17 +314,23 @@ api.calculateImpactScore(
 ```
 
 **Workflow Integration**:
-- Impact scoring runs automatically during request submission (parallel with routing)
-- Conversation history passed from `LandingPage` → `useRequests` → `api.calculateImpactScore()`
-- Score stored in `request.impactAssessment` field (optional, nullable)
-- Activity log entry created: "AI Impact Score: 85/100 (Tier 1)"
+- **Tier 1 (AI)**: Impact scoring runs automatically during request submission (parallel with routing)
+  - Conversation history passed from `LandingPage` → `useRequests` → `api.calculateImpactScore()`
+  - Score stored in `request.impactAssessment` field (optional, nullable)
+  - Activity log entry created: "AI Impact Score: 85/100 (Tier 1)"
+- **Tier 2 (Manual)**: Product Owner adjusts score via `ImpactAdjustmentModal` (RequestDetailPage)
+  - Edits 5-dimension breakdown with AI scores as reference
+  - Adds manual context (dependencies, risks, customer commitments, competitive intel)
+  - Requires justification for all adjustments
+  - Activity log entry: "Impact score adjusted: 75/100 (Tier 2) by Alex Rivera"
 - Dashboard sorted by impact score (assessed requests first, then by descending score)
 
 **Dashboard Display**:
 - New "Impact" column in `RequestTable` with `ImpactBadge` component
-- Badge displays score (0-100), tier (1-3), and visual variant (high/medium/low/none)
+- Badge displays score (0-100), tier indicator (T1/T2/T3), and visual variant (high/medium/low/none)
 - Visual sort indicator (ArrowDown icon) shows impact-based sorting
 - Small badge size (`sm`) optimized for table cells
+- Tier 2 badges show purple/violet styling to distinguish manual adjustments from AI scores
 
 **Utility Functions** (`src/utils/impactValidation.ts`):
 - `validateImpactScore(assessment)`: Validates breakdown sums to totalScore ±1 tolerance

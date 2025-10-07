@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Request, RequestStage, RequestData, ChatMessage } from '../types';
+import type { Request, RequestStage, RequestData, ChatMessage, ImpactAssessment } from '../types';
 import { api } from '../services/api';
 import { MOCK_USERS } from '../constants/users';
 
@@ -206,6 +206,39 @@ export function useRequests() {
     }
   };
 
+  /**
+   * Adjust impact score (Product Owner manual override)
+   * Creates Tier 2 assessment and logs activity
+   */
+  const adjustImpactScore = (requestId: string, adjustedAssessment: Partial<ImpactAssessment>, adjustedBy: string) => {
+    setRequests(requests.map(req => {
+      if (req.id === requestId) {
+        const activity = [...(req.activity || []), {
+          timestamp: 'Just now',
+          action: `Impact score adjusted: ${adjustedAssessment.totalScore}/100 (Tier 2)`,
+          user: adjustedBy
+        }];
+
+        return {
+          ...req,
+          impactAssessment: adjustedAssessment as ImpactAssessment,
+          activity,
+          lastUpdate: 'Just now'
+        };
+      }
+      return req;
+    }));
+
+    // Also update selectedRequest if it's the one being adjusted
+    if (selectedRequest?.id === requestId) {
+      setSelectedRequest({
+        ...selectedRequest,
+        impactAssessment: adjustedAssessment as ImpactAssessment,
+        lastUpdate: 'Just now'
+      });
+    }
+  };
+
   return {
     // State
     requests,
@@ -221,6 +254,7 @@ export function useRequests() {
     updateRequestStage,
     viewRequestDetail,
     closeRequestDetail,
-    dismissAlert
+    dismissAlert,
+    adjustImpactScore
   };
 }

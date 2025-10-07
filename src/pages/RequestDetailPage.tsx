@@ -7,7 +7,7 @@ import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
 import { ModeSelector } from '../features/documents/components/ModeSelector';
 import { DocumentViewer } from '../features/documents/components/DocumentViewer';
 import { DocumentChat } from '../features/documents/components/DocumentChat';
-import { SLABadge, Modal } from '../components/ui';
+import { SLABadge, Modal, ImpactBadge, ImpactAdjustmentModal } from '../components/ui';
 import { calculateSLA } from '../utils/slaCalculator';
 import { canGenerateDocuments, canUpdateStage } from '../utils/permissions';
 import { getCurrentUser } from '../utils/requestFilters';
@@ -32,12 +32,16 @@ export function RequestDetailPage() {
     onSubmit: () => {}
   });
 
+  // Modal state for impact adjustment
+  const [adjustmentModalOpen, setAdjustmentModalOpen] = useState(false);
+
   const {
     requests,
     selectedRequest,
     updateRequestStage,
     viewRequestDetail,
-    closeRequestDetail
+    closeRequestDetail,
+    adjustImpactScore
   } = requestsHook;
 
   const {
@@ -172,6 +176,9 @@ export function RequestDetailPage() {
                 {selectedRequest.priority}
               </span>
               <SLABadge sla={sla} />
+              {selectedRequest.impactAssessment && (
+                <ImpactBadge request={selectedRequest} size="sm" />
+              )}
             </div>
             <h3 className="text-xl text-gray-700 dark:text-gray-300 mb-2">{selectedRequest.title}</h3>
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -210,6 +217,30 @@ export function RequestDetailPage() {
                       Dismiss
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Product Owner: Impact Score Adjustment */}
+            {view === 'product-owner' && selectedRequest.impactAssessment && (
+              <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-purple-900 dark:text-purple-300 mb-2">
+                      Impact Assessment
+                    </div>
+                    <div className="text-sm text-purple-700 dark:text-purple-400 mb-3">
+                      {selectedRequest.impactAssessment.tier === 1 && 'AI-generated score (Tier 1)'}
+                      {selectedRequest.impactAssessment.tier === 2 && 'Manually adjusted score (Tier 2)'}
+                      {selectedRequest.impactAssessment.tier === 3 && 'Business case validated (Tier 3)'}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setAdjustmentModalOpen(true)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"
+                  >
+                    {selectedRequest.impactAssessment.tier === 1 ? 'Adjust Score' : 'Edit Adjustment'}
+                  </button>
                 </div>
               </div>
             )}
@@ -456,6 +487,22 @@ export function RequestDetailPage() {
         title={modalState.title}
         placeholder={modalState.placeholder}
       />
+
+      {/* Impact Score Adjustment Modal */}
+      {selectedRequest && (
+        <ImpactAdjustmentModal
+          isOpen={adjustmentModalOpen}
+          onClose={() => setAdjustmentModalOpen(false)}
+          onSubmit={(adjustedAssessment) => {
+            const user = getCurrentUser(view) || 'Product Owner';
+            adjustImpactScore(selectedRequest.id, adjustedAssessment, user);
+            toast.success('Impact score adjusted successfully', {
+              icon: '✅',
+            });
+          }}
+          currentAssessment={selectedRequest.impactAssessment}
+        />
+      )}
     </div>
   );
 }
