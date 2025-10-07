@@ -65,6 +65,25 @@ Claude Code MUST proactively invoke specialized agents WITHOUT asking permission
 - **`route-optimizer`**: New routes added or `src/App.tsx` router modified
 - **`prompt-engineer`**: Modifying prompts in `src/services/api.ts`
 
+**Agent Parallelization (Critical for Performance):**
+
+Agents can run **simultaneously** to reduce review time by 50-70%. Use parallel invocation patterns:
+
+**After UI Component Changes:**
+- **Parallel**: `test-writer` + `ux-reviewer` + `security-reviewer` + `code-reviewer` (all 4 run simultaneously)
+- **Sequential**: Then `doc-updater` (after code finalized)
+
+**After API Service Changes:**
+- **Parallel**: `security-reviewer` + `api-integration` + `technical-architect` (all 3 run simultaneously)
+- **Sequential**: Then `prompt-engineer` + `test-writer` + `doc-updater`
+
+**After New Feature Planning:**
+- **Sequential**: `product-owner` (must approve first)
+- **Parallel**: `technical-architect` + `project-manager` + `security-reviewer` (all 3 run after approval)
+- **Sequential**: Implementation phase
+
+**General Rule**: Review agents (test-writer, security-reviewer, ux-reviewer, code-reviewer) can ALWAYS run in parallel post-implementation. They analyze the same code from different perspectives with no dependencies on each other.
+
 **Hook Compliance:**
 - Trust hooks to run automatically (they execute via `.claude/hooks.json`)
 - Address hook feedback immediately - do NOT ignore warnings or errors
@@ -560,6 +579,7 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - Impact assessments are optional fields on Request objects (nullable)
 - Dashboard sorting prioritizes impact-assessed requests first, then sorts by score descending
 - **Modal component** (`src/components/ui/Modal.tsx`) replaces native `prompt()` dialogs with dark mode support, textarea input, keyboard shortcuts (⌘+Enter), and proper validation
+- **Badge component** (`src/components/ui/Badge.tsx`) supports size variants (sm/md/lg) and 6 style variants (default/primary/success/warning/danger/info) with consistent dark mode styling across all badge types
 - **Sequential document approval**: Documents are locked in order (FSD until BRD approved, Tech Spec until FSD approved) using `isDocumentLocked()` helper
 - **Automatic dev assignment**: When request transitions to "In Progress", owner field automatically updates to current developer to maintain view filtering
 - Error boundary wraps the entire application for graceful error handling

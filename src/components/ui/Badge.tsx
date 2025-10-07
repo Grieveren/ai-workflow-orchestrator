@@ -1,15 +1,17 @@
 import { ReactNode } from 'react';
 import type { RequestStage, Priority } from '../../types';
 
-type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type BadgeSize = 'sm' | 'md' | 'lg';
 
-interface BadgeProps {
+export interface BadgeProps {
   children: ReactNode;
   variant?: BadgeVariant;
+  size?: BadgeSize;
   className?: string;
 }
 
-export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
+export function Badge({ children, variant = 'default', size = 'md', className = '' }: BadgeProps) {
   const variantStyles: Record<BadgeVariant, string> = {
     default: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200',
     primary: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
@@ -19,8 +21,14 @@ export function Badge({ children, variant = 'default', className = '' }: BadgePr
     info: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
   };
 
+  const sizeStyles: Record<BadgeSize, string> = {
+    sm: 'px-2 py-0.5 text-xs',
+    md: 'px-3 py-1 text-xs',
+    lg: 'px-4 py-1.5 text-sm'
+  };
+
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-medium ${variantStyles[variant]} ${className}`}>
+    <span className={`rounded-full font-medium ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}>
       {children}
     </span>
   );
