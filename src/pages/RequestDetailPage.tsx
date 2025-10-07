@@ -501,6 +501,7 @@ export function RequestDetailPage() {
             });
           }}
           currentAssessment={selectedRequest.impactAssessment}
+          assessedBy={getCurrentUser(view) || 'Product Owner'}
         />
       )}
     </div>

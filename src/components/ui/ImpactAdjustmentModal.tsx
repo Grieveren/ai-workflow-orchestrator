@@ -8,13 +8,15 @@ interface ImpactAdjustmentModalProps {
   onClose: () => void;
   onSubmit: (adjustedAssessment: Partial<ImpactAssessment>) => void;
   currentAssessment?: ImpactAssessment;
+  assessedBy: string;
 }
 
 export function ImpactAdjustmentModal({
   isOpen,
   onClose,
   onSubmit,
-  currentAssessment
+  currentAssessment,
+  assessedBy
 }: ImpactAdjustmentModalProps) {
   // Initialize with current AI scores or defaults
   const [breakdown, setBreakdown] = useState({
@@ -42,8 +44,8 @@ export function ImpactAdjustmentModal({
   // Calculate total score from breakdown
   const totalScore = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
 
-  const handleBreakdownChange = (dimension: keyof typeof breakdown, value: string) => {
-    const numValue = parseFloat(value) || 0;
+  const handleBreakdownChange = (dimension: keyof typeof breakdown, value: string, max: number) => {
+    const numValue = Math.max(0, Math.min(parseFloat(value) || 0, max));
     setBreakdown(prev => ({ ...prev, [dimension]: numValue }));
   };
 
@@ -58,7 +60,7 @@ export function ImpactAdjustmentModal({
       competitiveIntel: competitiveIntel.trim() || undefined,
       tier: 2, // Manual adjustment
       assessedAt: new Date().toISOString(),
-      assessedBy: 'Product Owner' // TODO: Use actual user from context
+      assessedBy: assessedBy
     };
 
     onSubmit(adjustedAssessment);
@@ -118,35 +120,35 @@ export function ImpactAdjustmentModal({
               <ScoreInput
                 label="Revenue Impact"
                 value={breakdown.revenueImpact}
-                onChange={(val) => handleBreakdownChange('revenueImpact', val)}
+                onChange={(val) => handleBreakdownChange('revenueImpact', val, 30)}
                 max={30}
                 hint="Direct revenue, protection, or efficiency gains"
               />
               <ScoreInput
                 label="User Reach"
                 value={breakdown.userReach}
-                onChange={(val) => handleBreakdownChange('userReach', val)}
+                onChange={(val) => handleBreakdownChange('userReach', val, 25)}
                 max={25}
                 hint="Number of users × frequency × user type"
               />
               <ScoreInput
                 label="Strategic Alignment"
                 value={breakdown.strategicAlignment}
-                onChange={(val) => handleBreakdownChange('strategicAlignment', val)}
+                onChange={(val) => handleBreakdownChange('strategicAlignment', val, 20)}
                 max={20}
                 hint="OKRs, competitive positioning, technical debt"
               />
               <ScoreInput
                 label="Urgency"
                 value={breakdown.urgency}
-                onChange={(val) => handleBreakdownChange('urgency', val)}
+                onChange={(val) => handleBreakdownChange('urgency', val, 15)}
                 max={15}
                 hint="Hard deadlines, regulatory, escalation risk"
               />
               <ScoreInput
                 label="Quick Win Bonus"
                 value={breakdown.quickWinBonus}
-                onChange={(val) => handleBreakdownChange('quickWinBonus', val)}
+                onChange={(val) => handleBreakdownChange('quickWinBonus', val, 10)}
                 max={10}
                 hint="High impact + low effort combination"
               />
@@ -163,6 +165,13 @@ export function ImpactAdjustmentModal({
                 </span>
               </div>
             </div>
+
+            {/* Warning when total score exceeds 100 */}
+            {totalScore > 100 && (
+              <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded text-sm text-red-800 dark:text-red-300">
+                ⚠️ Total score exceeds 100. Please adjust individual dimensions.
+              </div>
+            )}
           </div>
 
           {/* Justification */}
@@ -253,7 +262,7 @@ export function ImpactAdjustmentModal({
           <Button
             onClick={handleSubmit}
             variant="primary"
-            disabled={!justification.trim() || totalScore === 0}
+            disabled={!justification.trim() || totalScore === 0 || totalScore > 100}
           >
             Save Adjustment
           </Button>
