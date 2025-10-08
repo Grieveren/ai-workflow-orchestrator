@@ -239,26 +239,28 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Examples - always visible */}
-        <div className="text-center mb-8 mt-8">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Or try an example:</p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {examples.map((example, index) => (
-              <button
-                key={index}
-                onClick={() => handleExampleClick(example)}
-                className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200
-                         hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300
-                         transition-all duration-200 shadow-xs hover:shadow-md"
-              >
-                {example}
-              </button>
-            ))}
+        {/* Examples - hide after conversation starts */}
+        {chatMessages.length === 0 && !chatIsProcessing && (
+          <div className="text-center mb-8 mt-8">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Or try an example:</p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {examples.map((example, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleExampleClick(example)}
+                  className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200
+                           hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300
+                           transition-all duration-200 shadow-xs hover:shadow-md"
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Dashboard Link - always visible */}
-        <div className="text-center">
+        <div className="text-center mt-8">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200
