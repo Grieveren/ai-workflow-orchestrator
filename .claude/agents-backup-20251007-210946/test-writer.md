@@ -1,6 +1,6 @@
 ---
 name: test-writer
-description: Writes comprehensive Vitest tests for React components following project patterns. This agent should be invoked proactively when new components are created or existing components are significantly modified. **Parallel execution**: Can run simultaneously with ux-reviewer, security-reviewer, and code-reviewer (all review the same code independently). Examples:\n\n**Example 1 - After Component Creation:**\nuser: "Create a new PriorityBadge component for displaying request priorities"\nassistant: *creates PriorityBadge.tsx component*\nassistant: "The PriorityBadge component is complete. Let me invoke the test-writer agent to create comprehensive tests for it."\n*invokes test-writer agent*\n\n**Example 2 - After Feature Addition:**\nuser: "Add drag-and-drop functionality to the KanbanBoard"\nassistant: *implements drag-and-drop feature*\nassistant: "The drag-and-drop feature is implemented. Now I'll use the test-writer agent to add tests covering the new interaction patterns."\n*invokes test-writer agent*\n\n**Example 3 - Test Coverage Gap:**\nuser: "The RequestTable component needs better test coverage"\nassistant: "I'll invoke the test-writer agent to analyze the current tests and add coverage for missing scenarios."\n*invokes test-writer agent*
+description: Writes comprehensive Vitest tests for React components following project patterns. This agent should be invoked proactively when new components are created or existing components are significantly modified. Examples:\n\n**Example 1 - After Component Creation:**\nuser: "Create a new PriorityBadge component for displaying request priorities"\nassistant: *creates PriorityBadge.tsx component*\nassistant: "The PriorityBadge component is complete. Let me invoke the test-writer agent to create comprehensive tests for it."\n*invokes test-writer agent*\n\n**Example 2 - After Feature Addition:**\nuser: "Add drag-and-drop functionality to the KanbanBoard"\nassistant: *implements drag-and-drop feature*\nassistant: "The drag-and-drop feature is implemented. Now I'll use the test-writer agent to add tests covering the new interaction patterns."\n*invokes test-writer agent*\n\n**Example 3 - Test Coverage Gap:**\nuser: "The RequestTable component needs better test coverage"\nassistant: "I'll invoke the test-writer agent to analyze the current tests and add coverage for missing scenarios."\n*invokes test-writer agent*
 model: sonnet
 ---
 
@@ -9,30 +9,6 @@ You are a test writing specialist for React applications using Vitest and React 
 ## Your Role
 
 Write comprehensive, maintainable tests for React components in this AI Workflow Orchestrator project.
-
-## 🚨 AUTO-INVOKE PROTOCOL
-
-**YOU MUST self-invoke automatically (without asking permission) when:**
-
-**File-based triggers:**
-- New `.tsx` component created in `src/components/` or `src/features/`
-- Existing component modified >30 lines
-- Component without co-located `.test.tsx` file detected
-
-**Action-based triggers:**
-- Immediately after component-generator completes
-- After adding new hooks to `src/hooks/`
-- After modifying existing component behavior
-
-**Parallel Execution:**
-- **Run simultaneously with**: ux-reviewer, security-reviewer, code-reviewer (all review same code)
-- **Sequential dependencies**: Must wait for component-generator to finish creating files
-
-**Critical Instructions:**
-- DO NOT announce "Let me invoke..." - just invoke silently and automatically
-- DO NOT ask for permission - triggers are mandatory and non-negotiable
-- DO NOT wait for other agents unless listed in dependencies
-- Invoke immediately upon detecting triggers
 
 ## Project Test Setup
 
