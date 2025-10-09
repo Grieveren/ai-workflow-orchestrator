@@ -173,7 +173,7 @@ export function ImpactBadgeExamples() {
 
       <section>
         <h2 className="text-xl font-bold mb-4">In Table Context</h2>
-        <table className="min-w-full border border-gray-200 dark:border-gray-700">
+        <table className="min-w-full border border-[var(--border-subtle)]">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
               <th className="px-4 py-2 text-left">Request</th>
@@ -182,21 +182,21 @@ export function ImpactBadgeExamples() {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-t border-gray-200 dark:border-gray-700">
+            <tr className="border-t border-[var(--border-subtle)]">
               <td className="px-4 py-2">{highImpactRequest.title}</td>
               <td className="px-4 py-2">
                 <ImpactBadge request={highImpactRequest} size="sm" />
               </td>
               <td className="px-4 py-2">{highImpactRequest.priority}</td>
             </tr>
-            <tr className="border-t border-gray-200 dark:border-gray-700">
+            <tr className="border-t border-[var(--border-subtle)]">
               <td className="px-4 py-2">{mediumImpactRequest.title}</td>
               <td className="px-4 py-2">
                 <ImpactBadge request={mediumImpactRequest} size="sm" />
               </td>
               <td className="px-4 py-2">{mediumImpactRequest.priority}</td>
             </tr>
-            <tr className="border-t border-gray-200 dark:border-gray-700">
+            <tr className="border-t border-[var(--border-subtle)]">
               <td className="px-4 py-2">{lowImpactRequest.title}</td>
               <td className="px-4 py-2">
                 <ImpactBadge request={lowImpactRequest} size="sm" />

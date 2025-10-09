@@ -56,7 +56,7 @@ export function TeamCapacityWidget() {
   const isOverloaded = (utilization: number): boolean => utilization > 85;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
+    <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-slate-100">Team Capacity</h2>
@@ -70,7 +70,7 @@ export function TeamCapacityWidget() {
         {teamMembers.map((member) => (
           <div
             key={member.name}
-            className="pb-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 last:pb-0"
+            className="pb-4 border-b border-[var(--border-subtle)] last:border-b-0 last:pb-0"
           >
             {/* Name and Warning */}
             <div className="flex items-center justify-between mb-1">

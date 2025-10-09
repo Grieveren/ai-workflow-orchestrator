@@ -31,7 +31,7 @@ export function KanbanBoard({ requests, onRequestClick }: KanbanBoardProps) {
                   <div
                     key={req.id}
                     onClick={() => onRequestClick(req)}
-                    className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition cursor-pointer"
+                    className="bg-[var(--surface-elevated)] p-4 rounded-lg border border-[var(--border-subtle)] hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition cursor-pointer"
                   >
                     {req.aiAlert && (
                       <div className="flex items-center gap-1 mb-2 text-xs text-red-600 dark:text-red-400">

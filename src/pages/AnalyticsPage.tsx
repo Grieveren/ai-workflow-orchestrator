@@ -41,7 +41,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 1: Funnel */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-center gap-2 mb-6">
           <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Request Flow</h2>
@@ -77,7 +77,7 @@ export function AnalyticsPage() {
           })}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600 dark:text-gray-400">Total Active Requests</span>
             <span className="font-semibold text-gray-900 dark:text-slate-100">
@@ -88,7 +88,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 2: Bottleneck */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-center gap-2 mb-6">
           <AlertTriangle className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Bottleneck Detection</h2>
@@ -131,7 +131,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Section 3: Cycle Time */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 p-6">
+      <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-center gap-2 mb-6">
           <TrendingDown className="w-6 h-6 text-green-600 dark:text-green-500" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Cycle Time Trends</h2>
@@ -146,7 +146,7 @@ export function AnalyticsPage() {
           </div>
 
           {/* Previous Cycle Time */}
-          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+          <div className="bg-gray-50 dark:bg-gray-900 border border-[var(--border-subtle)] rounded-lg p-4">
             <div className="text-sm text-gray-700 dark:text-gray-400 mb-1">Last Month</div>
             <div className="text-3xl font-bold text-gray-900 dark:text-slate-100">{cycleTime.previous}</div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">days to complete</div>
@@ -170,7 +170,7 @@ export function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <div className="w-2 h-2 bg-green-500 dark:bg-green-600 rounded-full"></div>
             <span>Performance trending positively</span>

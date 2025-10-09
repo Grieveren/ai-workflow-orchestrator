@@ -49,7 +49,7 @@ export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
 
   return (
     <div className="grid grid-cols-3 gap-6 mb-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
+      <div data-testid="stats-card" className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{getStatLabel('Active Requests')}</p>
@@ -61,7 +61,7 @@ export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
+      <div data-testid="stats-card" className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{getStatLabel('Completed Today')}</p>
@@ -73,7 +73,7 @@ export function StatsBar({ requests, view, currentUser }: StatsBarProps) {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 p-6">
+      <div data-testid="stats-card" className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Needs Attention</p>

@@ -93,7 +93,7 @@ export function SubmitPage() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+    <div className="bg-[var(--surface-elevated)] rounded-2xl shadow-xl overflow-hidden">
       <div className="bg-linear-to-r from-purple-500 to-pink-500 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ export function SubmitPage() {
                       <button
                         key={idx}
                         onClick={() => startConversation(example)}
-                        className="w-full text-left px-4 py-3 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-purple-900/20 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 rounded-lg transition text-sm text-gray-700 dark:text-gray-200 hover:text-purple-700 dark:hover:text-purple-300"
+                        className="w-full text-left px-4 py-3 bg-[var(--surface-elevated)] hover:bg-purple-50 dark:hover:bg-purple-900/20 border border-[var(--border-subtle)] hover:border-purple-300 dark:hover:border-purple-500 rounded-lg transition text-sm text-gray-700 dark:text-gray-200 hover:text-purple-700 dark:hover:text-purple-300"
                       >
                         "{example}"
                       </button>

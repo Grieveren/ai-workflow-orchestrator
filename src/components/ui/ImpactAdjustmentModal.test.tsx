@@ -67,7 +67,7 @@ describe('ImpactAdjustmentModal', () => {
       expect(screen.getByText(/AI-Generated Score: 75\/100/)).toBeInTheDocument();
 
       // Check for AI reference card container with blue styling
-      const aiReferenceCard = screen.getByText(/AI-Generated Score:/).closest('.bg-blue-50');
+      const aiReferenceCard = screen.getByTestId('ai-reference-card');
       expect(aiReferenceCard).toBeInTheDocument();
       expect(aiReferenceCard).toHaveTextContent(mockTier1Assessment.justification);
     });
@@ -563,11 +563,12 @@ describe('ImpactAdjustmentModal', () => {
   // Accessibility & Styling
   describe('Accessibility & Styling', () => {
     it('should have dark mode classes', () => {
-      const { container } = render(<ImpactAdjustmentModal {...defaultProps} />);
+      render(<ImpactAdjustmentModal {...defaultProps} />);
 
       // Check for dark: classes in the modal container
-      const modalContent = container.querySelector('.dark\\:bg-gray-800');
-      expect(modalContent).toBeInTheDocument();
+      const modalContent = screen.getByTestId('impact-modal-content');
+      expect(modalContent.className).toContain('bg-[var(--surface-elevated)]');
+      expect(modalContent.className).toContain('border-[var(--border-subtle)]');
     });
 
     it('should display labels for all form fields', () => {

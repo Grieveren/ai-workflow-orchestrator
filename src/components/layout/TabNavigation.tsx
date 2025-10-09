@@ -18,7 +18,7 @@ export function TabNavigation({ requestCount, view }: TabNavigationProps) {
     return `px-6 py-2.5 rounded-xl font-medium transition shadow-xs ${
       isActive(path)
         ? 'bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-md'
-        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+        : 'bg-[var(--surface-elevated)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
     }`;
   };
 

@@ -13,10 +13,10 @@ export function RequestTable({ requests, onRequestClick, view }: RequestTablePro
   const showSubmittedBy = view === 'dev' || view === 'management';
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-[var(--border-subtle)]">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">ID</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Request</th>

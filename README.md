@@ -21,6 +21,12 @@ A modern React application for managing workflow requests with AI-powered assist
 - **URL-Based Navigation**: Shareable links for any view or request
 - **Comprehensive Testing**: Vitest setup with 23 test files (101 tests for impact assessment alone)
 
+### Design System & Theming
+
+- Centralized CSS variables define surface, text, border, and accent colors for both light and dark themes (`src/index.css`).
+- Shared primitives (Button, Card, Input, Modal, Skeleton, ThemeToggle) consume the variables to stay in sync.
+- Feature UIs read the same tokens, giving consistent contrast in dark mode while keeping the purple brand accents.
+
 ## Tech Stack
 
 - **Frontend**: React 19.2.0, TypeScript, Vite 6.3.6, Tailwind CSS 4.1.14

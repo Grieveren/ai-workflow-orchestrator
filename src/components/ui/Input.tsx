@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     autoFocus = false,
     type = 'text'
   }, ref) {
-    const baseStyles = 'px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-purple-400 dark:focus:border-purple-500 focus:bg-white dark:focus:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles = 'px-4 py-3 bg-[var(--surface-control)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-hidden focus:border-[var(--accent)] focus:bg-[var(--surface-elevated)] transition disabled:opacity-50 disabled:cursor-not-allowed';
 
     return (
       <input
@@ -60,7 +60,7 @@ export function Textarea({
   className = '',
   rows = 4
 }: TextareaProps) {
-  const baseStyles = 'w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg font-mono text-sm text-gray-800 dark:text-slate-100 dark:bg-gray-900 focus:outline-hidden focus:border-purple-400 dark:focus:border-purple-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'w-full px-4 py-3 border border-[var(--border-subtle)] rounded-lg font-mono text-sm text-[var(--text-primary)] bg-[var(--surface-control)] focus:outline-hidden focus:border-[var(--accent)] resize-none disabled:opacity-50 disabled:cursor-not-allowed';
 
   return (
     <textarea

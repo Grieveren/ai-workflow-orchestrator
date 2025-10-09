@@ -242,8 +242,8 @@ describe('StatsBar', () => {
 
   describe('Visual Elements', () => {
     it('renders all three stat cards', () => {
-      const { container } = render(<StatsBar requests={mockRequests} view="management" />);
-      const cards = container.querySelectorAll('.bg-white.rounded-xl');
+      render(<StatsBar requests={mockRequests} view="management" />);
+      const cards = screen.getAllByTestId('stats-card');
       expect(cards.length).toBe(3);
     });
 

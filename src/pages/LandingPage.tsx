@@ -134,7 +134,7 @@ export function LandingPage() {
         </div>
 
         {/* Main Chat Container - expands smoothly */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-500">
+        <div className="bg-[var(--surface-elevated)] rounded-2xl shadow-xl overflow-hidden transition-all duration-500">
           <div className="p-0">
             {/* Chat messages area - grows when expanded, only shows when there are messages */}
             <div className={`overflow-y-auto transition-all duration-500 ${
@@ -248,7 +248,7 @@ export function LandingPage() {
                 <button
                   key={index}
                   onClick={() => handleExampleClick(example)}
-                  className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200
+                  className="px-4 py-2 rounded-full bg-[var(--surface-elevated)] border border-[var(--border-subtle)] text-sm text-gray-700 dark:text-gray-200
                            hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300
                            transition-all duration-200 shadow-xs hover:shadow-md"
                 >
@@ -263,7 +263,7 @@ export function LandingPage() {
         <div className="text-center mt-8">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--surface-elevated)] border-2 border-[var(--border-subtle)] text-gray-700 dark:text-gray-200
                      hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300
                      transition-all duration-200 shadow-xs hover:shadow-md font-medium"
           >

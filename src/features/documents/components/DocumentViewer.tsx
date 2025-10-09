@@ -42,10 +42,10 @@ export function DocumentViewer({
   const isLocked = isDocumentLocked(activeTab, documents);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-100 dark:border-gray-700 mb-8">
-      <div className="border-b border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] mb-8">
+      <div className="border-b border-[var(--border-subtle)] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-slate-100">Generated Documents</h3>
+          <h3 className="text-xl font-semibold text-[var(--text-primary)]">Generated Documents</h3>
           <div className="flex gap-2">
             {showApprovalUI && onApprove && (
               <Button
@@ -83,20 +83,20 @@ export function DocumentViewer({
                 key={tab}
                 onClick={() => !tabIsLocked && onTabChange(tab)}
                 disabled={tabIsLocked}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition flex items-center gap-2 border ${
                   tabIsLocked
-                    ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-60'
+                    ? 'text-[var(--text-muted)] border-transparent cursor-not-allowed opacity-60'
                     : activeTab === tab
-                    ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)] shadow-sm'
+                    : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--surface-muted)] hover:border-[var(--border-subtle)]'
                 }`}
               >
                 {tab === 'brd' ? 'BRD' : tab === 'fsd' ? 'FSD' : 'Tech Spec'}
                 {tabIsLocked && (
-                  <Lock size={14} className="text-gray-400 dark:text-gray-600" />
+                  <Lock size={14} className="text-[var(--text-muted)]" />
                 )}
                 {tabIsApproved && !tabIsLocked && (
-                  <Check size={14} className="text-green-600 dark:text-green-400" />
+                  <Check size={14} className="text-green-500" />
                 )}
               </button>
             );
@@ -141,7 +141,7 @@ export function DocumentViewer({
             rows={16}
             className="h-96"
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          <p className="text-xs text-[var(--text-muted)] mt-2">
             💡 You can edit the document directly or use AI to refine it below
           </p>
         </div>

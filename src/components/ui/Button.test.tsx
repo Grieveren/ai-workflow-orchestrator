@@ -33,6 +33,8 @@ describe('Button', () => {
   it('applies secondary variant styles when variant is secondary', () => {
     render(<Button variant="secondary">Secondary Button</Button>);
     const button = screen.getByText('Secondary Button');
-    expect(button).toHaveClass('bg-white');
+    expect(button.className).toContain('bg-[var(--surface-elevated)]');
+    expect(button.className).toContain('text-[var(--text-primary)]');
+    expect(button.className).toContain('border-[var(--border-subtle)]');
   });
 });

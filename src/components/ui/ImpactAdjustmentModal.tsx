@@ -75,19 +75,19 @@ export function ImpactAdjustmentModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-3xl w-full border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-gray-800 flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+      <div data-testid="impact-modal-content" className="bg-[var(--surface-elevated)] rounded-xl shadow-2xl max-w-3xl w-full border border-[var(--border-subtle)] max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-[var(--surface-elevated)] flex items-center justify-between p-6 border-b border-[var(--border-subtle)]">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
               Adjust Impact Score
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
               Override AI scores with insider knowledge
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
+            className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition"
           >
             <X size={20} />
           </button>
@@ -96,14 +96,14 @@ export function ImpactAdjustmentModal({
         <div className="p-6 space-y-6">
           {/* AI Reference Card */}
           {currentAssessment && currentAssessment.tier === 1 && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <div data-testid="ai-reference-card" className="p-4 bg-[var(--accent-soft)] border border-[var(--accent-border)] rounded-lg">
               <div className="flex items-start gap-2">
-                <Info size={18} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                <Info size={18} className="text-[var(--accent)] mt-0.5" />
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                  <div className="text-sm font-medium text-[var(--text-primary)]">
                     AI-Generated Score: {currentAssessment.totalScore}/100
                   </div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">
                     {currentAssessment.justification}
                   </div>
                 </div>
@@ -113,10 +113,10 @@ export function ImpactAdjustmentModal({
 
           {/* Score Breakdown */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-800 dark:text-slate-100 mb-3">
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
               Score Breakdown
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <ScoreInput
                 label="Revenue Impact"
                 value={breakdown.revenueImpact}
@@ -155,12 +155,12 @@ export function ImpactAdjustmentModal({
             </div>
 
             {/* Total Score Display */}
-            <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+            <div className="mt-4 p-3 bg-[var(--accent-soft)] border border-[var(--accent-border)] rounded-lg">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-purple-800 dark:text-purple-300">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   Total Score
                 </span>
-                <span className="text-2xl font-bold text-purple-900 dark:text-purple-200">
+                <span className="text-2xl font-bold text-[var(--accent)]">
                   {totalScore}/100
                 </span>
               </div>
@@ -176,7 +176,7 @@ export function ImpactAdjustmentModal({
 
           {/* Justification */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
               Justification <span className="text-red-500">*</span>
             </label>
             <Textarea
@@ -189,15 +189,15 @@ export function ImpactAdjustmentModal({
           </div>
 
           {/* Manual Fields */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-            <h4 className="text-sm font-semibold text-gray-800 dark:text-slate-100 mb-3">
+          <div className="border-t border-[var(--border-subtle)] pt-6">
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
               Additional Context (Optional)
             </h4>
 
             <div className="space-y-4">
               {/* Dependencies */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Dependencies
                 </label>
                 <Textarea
@@ -211,7 +211,7 @@ export function ImpactAdjustmentModal({
 
               {/* Risks */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Risks
                 </label>
                 <Textarea
@@ -232,7 +232,7 @@ export function ImpactAdjustmentModal({
                     onChange={(e) => setCustomerCommitment(e.target.checked)}
                     className="w-4 h-4"
                   />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-[var(--text-secondary)]">
                     Customer Commitment (promised feature or contractual obligation)
                   </span>
                 </label>
@@ -240,7 +240,7 @@ export function ImpactAdjustmentModal({
 
               {/* Competitive Intel */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Competitive Intelligence
                 </label>
                 <Textarea
@@ -255,7 +255,7 @@ export function ImpactAdjustmentModal({
           </div>
         </div>
 
-        <div className="sticky bottom-0 bg-white dark:bg-gray-800 flex gap-2 justify-end p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="sticky bottom-0 bg-[var(--surface-elevated)] flex gap-2 justify-end p-6 border-t border-[var(--border-subtle)]">
           <Button onClick={handleClose} variant="secondary">
             Cancel
           </Button>
@@ -283,21 +283,21 @@ interface ScoreInputProps {
 
 function ScoreInput({ label, value, onChange, max, hint }: ScoreInputProps) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-6 gap-y-1">
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[var(--text-secondary)]">
           {label}
         </label>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="text-xs text-[var(--text-muted)] leading-relaxed">{hint}</p>
       </div>
-      <div className="w-24">
+      <div className="w-28 justify-self-end flex flex-col items-end gap-1">
         <Input
           type="number"
           value={String(value)}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
           className="text-right"
         />
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-right mt-1">
+        <p className="text-xs text-[var(--text-muted)] text-right">
           0-{max}
         </p>
       </div>
