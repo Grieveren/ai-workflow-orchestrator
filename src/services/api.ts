@@ -768,5 +768,72 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
       console.error('Failed to parse impact assessment');
       throw new Error('Impact scoring failed - invalid AI response');
     }
+  },
+
+  // ===== DATABASE METHODS =====
+
+  /**
+   * Fetch all requests from the database
+   */
+  async getAllRequests(): Promise<Request[]> {
+    const response = await fetch('http://localhost:3001/api/requests');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch requests: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Fetch a single request by ID from the database
+   */
+  async getRequestById(id: string): Promise<Request> {
+    const response = await fetch(`http://localhost:3001/api/requests/${id}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch request: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Create a new request in the database
+   */
+  async createRequest(request: Request): Promise<Request> {
+    const response = await fetch('http://localhost:3001/api/requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to create request: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Update an existing request in the database
+   */
+  async updateRequest(id: string, updates: Partial<Request>): Promise<{ success: boolean }> {
+    const response = await fetch(`http://localhost:3001/api/requests/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to update request: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  /**
+   * Delete a request from the database
+   */
+  async deleteRequest(id: string): Promise<{ success: boolean }> {
+    const response = await fetch(`http://localhost:3001/api/requests/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to delete request: ${response.statusText}`);
+    }
+    return response.json();
   }
 };

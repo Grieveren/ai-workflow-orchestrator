@@ -1,84 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Request, RequestStage, RequestData, ChatMessage, ImpactAssessment } from '../types';
 import { api } from '../services/api';
 import { MOCK_USERS } from '../constants/users';
 
-// Mock initial requests data
-const initialRequests: Request[] = [
-  {
-    id: 'REQ-001',
-    title: 'Lead conversion report by region',
-    status: 'In Progress',
-    owner: 'Sarah Chen',
-    submittedBy: 'Jessica Martinez',
-    priority: 'High',
-    clarityScore: 9,
-    daysOpen: 3,
-    stage: 'In Progress',
-    lastUpdate: '2 hours ago',
-    complexity: 'medium',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    activity: [
-      { timestamp: '3 days ago', action: 'Request submitted', user: 'Jessica Martinez' },
-      { timestamp: '3 days ago', action: 'Auto-routed to Sarah Chen', user: 'AI Agent' },
-      { timestamp: '2 days ago', action: 'Requirements generated', user: 'Sarah Chen' },
-      { timestamp: '2 days ago', action: 'Approved and sent to dev', user: 'Sarah Chen' },
-      { timestamp: '2 hours ago', action: 'Status updated: 60% complete', user: 'Sarah Chen' }
-    ]
-  },
-  {
-    id: 'REQ-002',
-    title: 'Salesforce automation for renewals',
-    status: 'Ready for Dev',
-    owner: 'Mike Torres',
-    submittedBy: 'Tom Wilson',
-    priority: 'Medium',
-    clarityScore: 6,
-    daysOpen: 1,
-    stage: 'Ready for Dev',
-    lastUpdate: '1 day ago',
-    complexity: 'simple',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    activity: [
-      { timestamp: '1 day ago', action: 'Request submitted', user: 'Tom Wilson' },
-      { timestamp: '1 day ago', action: 'Auto-routed to Mike Torres', user: 'AI Agent' },
-      { timestamp: '1 day ago', action: 'Requirements generated', user: 'Mike Torres' }
-    ]
-  },
-  {
-    id: 'REQ-003',
-    title: 'Customer health score dashboard',
-    status: 'Scoping',
-    owner: 'Alex Rivera', // Product Owner for review
-    submittedBy: 'Mark Stevens',
-    priority: 'High',
-    clarityScore: 8,
-    daysOpen: 5,
-    stage: 'Scoping',
-    lastUpdate: '3 days ago',
-    complexity: 'complex',
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    activity: [
-      { timestamp: '5 days ago', action: 'Request submitted', user: 'Mark Stevens' },
-      { timestamp: '5 days ago', action: 'Assigned to Alex Rivera (Product Owner) for review', user: 'AI Agent' },
-      { timestamp: '3 days ago', action: 'AI reminder sent: No activity for 48 hours', user: 'AI Agent' }
-    ],
-    aiAlert: 'No activity for 3 days - may be stalled'
-  }
-];
-
 /**
- * Custom hook for managing requests state and operations
+ * Custom hook for managing requests state and operations with database persistence
  */
 export function useRequests() {
-  const [requests, setRequests] = useState<Request[]>(initialRequests);
+  const [requests, setRequests] = useState<Request[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load requests from database on mount
+  useEffect(() => {
+    const loadRequests = async () => {
+      try {
+        setLoading(true);
+        const data = await api.getAllRequests();
+        setRequests(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load requests:', err);
+        setError('Failed to load requests from database');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRequests();
+  }, []);
 
   /**
-   * Add a new request to the list
+   * Add a new request to the list and persist to database
    */
-  const addRequest = (request: Request) => {
-    setRequests([request, ...requests]);
+  const addRequest = async (request: Request) => {
+    const previousRequests = requests;
+
+    try {
+      // Optimistic update - add to local state immediately
+      setRequests([request, ...requests]);
+
+      // Persist to database
+      await api.createRequest(request);
+    } catch (error) {
+      console.error('Failed to create request in database:', error);
+      // Rollback optimistic update on error
+      setRequests(previousRequests);
+    }
   };
 
   /**
@@ -126,7 +95,7 @@ export function useRequests() {
         ]
       };
 
-      addRequest(newRequest);
+      await addRequest(newRequest);
       return newRequest;
     } catch (error) {
       console.error('Routing error:', error);
@@ -135,46 +104,69 @@ export function useRequests() {
   };
 
   /**
-   * Update a request's stage and add activity log entry
+   * Update a request's stage and add activity log entry with database persistence
    * Automatically assigns owner when transitioning to "In Progress"
    */
-  const updateRequestStage = (requestId: string, newStage: RequestStage, note: string, user?: string) => {
-    setRequests(requests.map(req => {
-      if (req.id === requestId) {
-        const activity = [...(req.activity || []), {
+  const updateRequestStage = async (requestId: string, newStage: RequestStage, note: string, user?: string) => {
+    const previousRequests = requests;
+
+    try {
+      // Optimistic update - update local state immediately
+      setRequests(requests.map(req => {
+        if (req.id === requestId) {
+          const activity = [...(req.activity || []), {
+            timestamp: 'Just now',
+            action: note,
+            user: user || 'User'
+          }];
+
+          // When transitioning to "In Progress", assign owner to the user making the transition
+          const updatedOwner = newStage === 'In Progress' && user ? user : req.owner;
+
+          return {
+            ...req,
+            owner: updatedOwner,
+            stage: newStage,
+            lastUpdate: 'Just now',
+            activity,
+            aiAlert: null
+          };
+        }
+        return req;
+      }));
+
+      // Also update selectedRequest if it's the one being updated
+      if (selectedRequest?.id === requestId) {
+        const updated = requests.find(r => r.id === requestId);
+        if (updated) {
+          const updatedOwner = newStage === 'In Progress' && user ? user : updated.owner;
+          setSelectedRequest({
+            ...updated,
+            owner: updatedOwner,
+            stage: newStage,
+            lastUpdate: 'Just now',
+            aiAlert: null
+          });
+        }
+      }
+
+      // Persist to database
+      const updatedOwner = newStage === 'In Progress' && user ? user : requests.find(r => r.id === requestId)?.owner;
+      await api.updateRequest(requestId, {
+        stage: newStage,
+        owner: updatedOwner,
+        lastUpdate: 'Just now',
+        aiAlert: null,
+        activity: [{
           timestamp: 'Just now',
           action: note,
           user: user || 'User'
-        }];
-
-        // When transitioning to "In Progress", assign owner to the user making the transition
-        const updatedOwner = newStage === 'In Progress' && user ? user : req.owner;
-
-        return {
-          ...req,
-          owner: updatedOwner,
-          stage: newStage,
-          lastUpdate: 'Just now',
-          activity,
-          aiAlert: null
-        };
-      }
-      return req;
-    }));
-
-    // Also update selectedRequest if it's the one being updated
-    if (selectedRequest?.id === requestId) {
-      const updated = requests.find(r => r.id === requestId);
-      if (updated) {
-        const updatedOwner = newStage === 'In Progress' && user ? user : updated.owner;
-        setSelectedRequest({
-          ...updated,
-          owner: updatedOwner,
-          stage: newStage,
-          lastUpdate: 'Just now',
-          aiAlert: null
-        });
-      }
+        }]
+      });
+    } catch (error) {
+      console.error('Failed to update request stage:', error);
+      // Rollback optimistic update
+      setRequests(previousRequests);
     }
   };
 
@@ -194,48 +186,80 @@ export function useRequests() {
   };
 
   /**
-   * Dismiss AI alert on a request
+   * Dismiss AI alert on a request with database persistence
    */
-  const dismissAlert = (requestId: string) => {
-    setRequests(requests.map(r =>
-      r.id === requestId ? { ...r, aiAlert: null } : r
-    ));
+  const dismissAlert = async (requestId: string) => {
+    const previousRequests = requests;
 
-    if (selectedRequest?.id === requestId) {
-      setSelectedRequest({ ...selectedRequest, aiAlert: null });
+    try {
+      // Optimistic update
+      setRequests(requests.map(r =>
+        r.id === requestId ? { ...r, aiAlert: null } : r
+      ));
+
+      if (selectedRequest?.id === requestId) {
+        setSelectedRequest({ ...selectedRequest, aiAlert: null });
+      }
+
+      // Persist to database
+      await api.updateRequest(requestId, { aiAlert: null });
+    } catch (error) {
+      console.error('Failed to dismiss alert:', error);
+      // Rollback
+      setRequests(previousRequests);
     }
   };
 
   /**
    * Adjust impact score (Product Owner manual override)
-   * Creates Tier 2 assessment and logs activity
+   * Creates Tier 2 assessment and logs activity with database persistence
    */
-  const adjustImpactScore = (requestId: string, adjustedAssessment: Partial<ImpactAssessment>, adjustedBy: string) => {
-    setRequests(requests.map(req => {
-      if (req.id === requestId) {
-        const activity = [...(req.activity || []), {
+  const adjustImpactScore = async (requestId: string, adjustedAssessment: Partial<ImpactAssessment>, adjustedBy: string) => {
+    const previousRequests = requests;
+
+    try {
+      // Optimistic update - update local state immediately
+      setRequests(requests.map(req => {
+        if (req.id === requestId) {
+          const activity = [...(req.activity || []), {
+            timestamp: 'Just now',
+            action: `Impact score adjusted: ${adjustedAssessment.totalScore}/100 (Tier 2)`,
+            user: adjustedBy
+          }];
+
+          return {
+            ...req,
+            impactAssessment: adjustedAssessment as ImpactAssessment,
+            activity,
+            lastUpdate: 'Just now'
+          };
+        }
+        return req;
+      }));
+
+      // Also update selectedRequest if it's the one being adjusted
+      if (selectedRequest?.id === requestId) {
+        setSelectedRequest({
+          ...selectedRequest,
+          impactAssessment: adjustedAssessment as ImpactAssessment,
+          lastUpdate: 'Just now'
+        });
+      }
+
+      // Persist to database
+      await api.updateRequest(requestId, {
+        impactAssessment: adjustedAssessment as ImpactAssessment,
+        lastUpdate: 'Just now',
+        activity: [{
           timestamp: 'Just now',
           action: `Impact score adjusted: ${adjustedAssessment.totalScore}/100 (Tier 2)`,
           user: adjustedBy
-        }];
-
-        return {
-          ...req,
-          impactAssessment: adjustedAssessment as ImpactAssessment,
-          activity,
-          lastUpdate: 'Just now'
-        };
-      }
-      return req;
-    }));
-
-    // Also update selectedRequest if it's the one being adjusted
-    if (selectedRequest?.id === requestId) {
-      setSelectedRequest({
-        ...selectedRequest,
-        impactAssessment: adjustedAssessment as ImpactAssessment,
-        lastUpdate: 'Just now'
+        }]
       });
+    } catch (error) {
+      console.error('Failed to adjust impact score:', error);
+      // Rollback optimistic update on error
+      setRequests(previousRequests);
     }
   };
 
@@ -243,6 +267,8 @@ export function useRequests() {
     // State
     requests,
     selectedRequest,
+    loading,
+    error,
 
     // Setters
     setRequests,

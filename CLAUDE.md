@@ -11,6 +11,7 @@ This is an AI-powered workflow orchestrator built with React, TypeScript, and th
 - Smart routing to team members based on request type
 - **AI Impact Assessment**: Automated 0-100 scoring based on revenue potential, user reach, strategic alignment, urgency, and quick-win potential for data-driven prioritization
 - Automated generation of Business Requirements Document (BRD), Functional Specification Document (FSD), and Technical Specifications
+- **SQLite Database Persistence**: Server-side data storage with optimistic UI updates for instant responsiveness
 - Dashboard with request tracking, priority levels, clarity scores, impact scores, and workflow stages
 - **Four-view system with role-based access control:**
   - **Requester View**: Submit and track personal requests
@@ -140,7 +141,9 @@ src/
 All types defined in `src/types/index.ts`. See [State Management](docs/architecture/state-management.md#type-system) for details.
 
 ### API Service Layer
-All Claude API interactions are centralized in `src/services/api.ts`:
+All Claude API interactions and database operations are centralized in `src/services/api.ts`:
+
+**AI Methods:**
 - `api.startIntakeConversation()` - Initial request intake
 - `api.continueConversation()` - Multi-turn conversation
 - `api.extractRequestData()` - Extract structured data from chat
@@ -150,9 +153,16 @@ All Claude API interactions are centralized in `src/services/api.ts`:
 - `api.generateSingleDocument()` - Create one document (BRD, FSD, or Tech Spec)
 - `api.refineDocument()` - Update documents based on feedback
 
+**Database Methods:**
+- `api.getAllRequests()` - Fetch all requests from database
+- `api.getRequestById(id)` - Fetch single request with activities and impact assessment
+- `api.createRequest(request)` - Persist new request to database
+- `api.updateRequest(id, updates)` - Update request with transaction support
+- `api.deleteRequest(id)` - Remove request from database
+
 **Note**: Manual impact score adjustments (Tier 2) are handled client-side via `useRequests.adjustImpactScore()` - no AI call needed.
 
-The service layer handles all HTTP requests to the backend proxy at `http://localhost:3001/api/chat`, which forwards to Claude Sonnet 4.5 (`claude-sonnet-4-5-20250929`).
+The service layer handles all HTTP requests to the backend proxy at `http://localhost:3001`, which provides both Claude API forwarding (`/api/chat` → Claude Sonnet 4.5) and REST API endpoints for database operations (`/api/requests`).
 
 **Document Generation Strategy**: Documents are generated sequentially using 3 smaller API calls (1000 tokens each) instead of 1 large call (4000 tokens). This provides:
 - Faster individual responses (~3-5s per document)
@@ -162,14 +172,20 @@ The service layer handles all HTTP requests to the backend proxy at `http://loca
 - Concise, demo-friendly content (<200 words per document)
 
 ### State Management
-Uses React Context (`AppProvider`, `ThemeProvider`) with custom hooks:
+Uses React Context (`AppProvider`, `ThemeProvider`) with custom hooks and **server-side SQLite persistence**:
 - **`useChat` hook**: `chatMessages`, `userInput`, `isProcessing`, `currentOptions`
 - **`useRequests` hook**: `requests`, `selectedRequest`, `requestData`, `adjustImpactScore()` (Tier 2 manual adjustments)
+  - **Database integration**: All CRUD operations persist to SQLite via REST API
+  - **Optimistic updates**: UI updates immediately while database operations run async
+  - **Error handling**: Automatic rollback to previous state on database failures
+  - **Loading state**: `loading` and `error` states for database operations
 - **`useDocuments` hook**: `generatedDocs`, `userMode`, `isGenerating`, `activeDocTab`, `docChatMessages`
 - **`useTheme` hook**: `theme`, `setTheme`, `toggleTheme` - manages dark/light mode with localStorage persistence
 - **View control**: `view` (requester/product-owner/dev/management) - controls role-based access and filtering
 - **Navigation**: React Router DOM for URL-based routing with auto-navigation on view change
 - **Permission checks**: Centralized in `src/utils/permissions.ts` for role-based feature access
+
+**Database Persistence**: All request data (requests, impact assessments, activities) stored in SQLite database (`./workflow.db`). The `useRequests` hook implements optimistic updates: UI changes apply immediately, database operations execute asynchronously, and changes rollback automatically if persistence fails.
 
 **Theme Persistence**: The `ThemeProvider` stores user preference in localStorage and detects system preference (`prefers-color-scheme: dark`) as fallback. Theme state applies the `.dark` class to `<html>` element for Tailwind CSS dark mode.
 
@@ -252,6 +268,7 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - **Lucide React** for icons
 - **React Hot Toast** for modern toast notifications
 - **Express.js** backend proxy server (runs on port 3001)
+- **better-sqlite3** for server-side database persistence
 - **React Context** for state management with custom hooks
 - **Vitest** for testing with React Testing Library
 - **ESLint 9** with TypeScript plugin for code quality (zero warnings policy)
@@ -269,6 +286,9 @@ The system includes specific instructions to ensure options are ANSWERS (e.g., "
 - **SessionStorage exception**: `pendingExample` uses sessionStorage for navigation handoff (acceptable exception)
 - **Impact assessments**: Optional/nullable field on Request objects
 - **Dashboard sorting**: Impact-assessed requests first, then descending by score
+- **Optimistic updates**: `useRequests` hook captures previous state before mutations, rolls back on database errors
+- **Database transactions**: All PATCH operations wrapped in `db.transaction()` for atomicity
+- **N+1 query prevention**: Batch-fetch all activities once, group in memory by request_id
 
 ## Critical Architecture Patterns
 

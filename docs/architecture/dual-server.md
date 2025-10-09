@@ -16,17 +16,21 @@ The application uses a dual-server architecture to keep the Anthropic API key se
 │  - API Service Layer (src/services/api.ts)                   │
 └──────────────────────┬──────────────────────────────────────┘
                        │
-                       │ HTTP POST /api/chat
-                       │ (No API key exposed)
-                       ▼
+                  ┌────┴─────┐
+                  │          │
+     HTTP POST    │          │  HTTP GET/POST/PATCH/DELETE
+     /api/chat    │          │  /api/requests
+     (AI calls)   │          │  (Database operations)
+                  │          │
+                  ▼          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Backend Proxy (port 3001)                       │
 │                                                              │
 │  Express.js Server (server.js)                               │
-│  - Injects API key from process.env.ANTHROPIC_API_KEY       │
-│  - Injects model name (claude-sonnet-4-5-20250929)          │
-│  - Forwards to Anthropic API                                 │
-│  - Returns response to frontend                              │
+│  - Claude API forwarding (injects API key)                   │
+│  - SQLite database (./workflow.db)                           │
+│  - REST API endpoints for CRUD operations                    │
+│  - Optimistic update support                                 │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        │ HTTPS
@@ -157,6 +161,43 @@ app.listen(PORT, () => {
 - Forwards all request body parameters
 - Handles errors and returns appropriate status codes
 - CORS enabled for localhost:3000
+
+### Database REST Endpoints
+
+The backend also provides REST API endpoints for persistent data storage using SQLite.
+
+**Endpoints**:
+
+```javascript
+// Fetch all requests
+GET /api/requests
+Response: Request[] with activities and impact assessments
+
+// Fetch single request
+GET /api/requests/:id
+Response: Request object with full details
+
+// Create new request
+POST /api/requests
+Body: Request object
+Response: Created request
+
+// Update request (partial updates)
+PATCH /api/requests/:id
+Body: Partial<Request> (only fields to update)
+Response: { success: true }
+
+// Delete request
+DELETE /api/requests/:id
+Response: { success: true }
+```
+
+**Performance Optimizations**:
+- N+1 prevention: Batch-fetches all activities in GET /api/requests
+- Transaction support: PATCH operations wrapped in `db.transaction()` for atomicity
+- Indexed queries: Fast lookups on `status`, `owner`, `stage`, `created_at`
+
+**See**: [Database Persistence Documentation](database-persistence.md) for full schema and implementation details.
 
 ## Development Workflow
 

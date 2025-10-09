@@ -11,6 +11,7 @@ The AI Workflow Orchestrator uses a modern, production-ready architecture that e
 ### Core Patterns
 
 - **[Dual-Server Architecture](dual-server.md)** - Backend proxy pattern for secure API key handling
+- **[Database Persistence](database-persistence.md)** - SQLite storage with optimistic updates
 - **[State Management](state-management.md)** - React Context with composable custom hooks
 - **[Component Strategy](component-strategy.md)** - Component location rules and organization
 - **[Testing Philosophy](testing.md)** - Testing approach and patterns
@@ -31,6 +32,7 @@ The AI Workflow Orchestrator uses a modern, production-ready architecture that e
 - **Styling**: Tailwind CSS 4.1.14
 - **Icons**: Lucide React
 - **Backend**: Express.js proxy server
+- **Database**: SQLite (better-sqlite3)
 - **AI**: Claude Sonnet 4.5
 - **Testing**: Vitest + React Testing Library
 
