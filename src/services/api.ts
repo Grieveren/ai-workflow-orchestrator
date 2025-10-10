@@ -1,4 +1,14 @@
-import type { ChatMessage, RequestData, Request, UserMode, DocType, RoutingInfo, ClaudeApiResponse, ImpactAssessment } from '../types';
+import type {
+  ChatMessage,
+  RequestData,
+  Request,
+  UserMode,
+  DocType,
+  RoutingInfo,
+  ClaudeApiResponse,
+  ImpactAssessment,
+  GeneratedDocs
+} from '../types';
 
 const API_URL = 'http://localhost:3001/api/chat';
 const MODEL = 'claude-sonnet-4-5-20250929';
@@ -835,5 +845,51 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
       throw new Error(`Failed to delete request: ${response.statusText}`);
     }
     return response.json();
+  },
+
+  /**
+   * Persist generated documents and approvals for a request
+   */
+  async saveDocuments(requestId: string, docs: GeneratedDocs): Promise<void> {
+    const response = await fetch(`http://localhost:3001/api/requests/${requestId}/documents`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(docs)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to save documents: ${response.statusText}`);
+    }
+  },
+
+  /**
+   * Fetch persisted documents for a request (if available)
+   */
+  async getDocuments(requestId: string): Promise<GeneratedDocs | null> {
+    const response = await fetch(`http://localhost:3001/api/requests/${requestId}/documents`);
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch documents: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data as GeneratedDocs;
+  },
+
+  /**
+   * Delete persisted documents for a request
+   */
+  async clearDocuments(requestId: string): Promise<void> {
+    const response = await fetch(`http://localhost:3001/api/requests/${requestId}/documents`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete documents: ${response.statusText}`);
+    }
   }
 };

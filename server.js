@@ -7,6 +7,7 @@ dotenv.config();
 
 const app = express();
 const PORT = 3001;
+const DOCUMENT_TYPES = ['brd', 'fsd', 'techSpec'];
 
 // Initialize SQLite database
 const dbPath = process.env.NODE_ENV === 'test' ? './workflow.test.db' : './workflow.db';
@@ -331,6 +332,51 @@ function transformRequest(row, activities, impactAssessment) {
 }
 
 /**
+ * Fetch documents for a request and transform into API format
+ */
+function getDocumentsForRequest(requestId) {
+  const rows = db
+    .prepare(
+      `SELECT type, content, approved, approved_by, approved_at
+       FROM documents
+       WHERE request_id = ?`
+    )
+    .all(requestId);
+
+  if (!rows.length) {
+    return null;
+  }
+
+  const docs = {
+    brd: '',
+    fsd: '',
+    techSpec: '',
+    approvals: {
+      brd: { approved: false },
+      fsd: { approved: false },
+      techSpec: { approved: false }
+    }
+  };
+
+  for (const row of rows) {
+    if (!DOCUMENT_TYPES.includes(row.type)) continue;
+    docs[row.type] = row.content;
+    docs.approvals[row.type] = {
+      approved: row.approved === 1,
+      approver: row.approved_by || undefined,
+      date: row.approved_at || undefined
+    };
+  }
+
+  // Ensure all documents have content before returning
+  if (!docs.brd || !docs.fsd || !docs.techSpec) {
+    return null;
+  }
+
+  return docs;
+}
+
+/**
  * Insert activities for a request
  */
 function insertActivities(db, requestId, activities) {
@@ -571,6 +617,92 @@ app.delete('/api/requests/:id', (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Error deleting request:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Persist generated documents for a request
+app.put('/api/requests/:id/documents', (req, res) => {
+  try {
+    const { id } = req.params;
+    const documentsPayload = req.body || {};
+    const { brd, fsd, techSpec, approvals } = documentsPayload;
+
+    for (const [key, value] of [
+      ['brd', brd],
+      ['fsd', fsd],
+      ['techSpec', techSpec]
+    ]) {
+      if (typeof value !== 'string' || value.trim() === '') {
+        return res
+          .status(400)
+          .json({ error: `Document "${key}" must be a non-empty string` });
+      }
+    }
+
+    const timestamp = new Date().toISOString();
+    const deleteStmt = db.prepare(
+      'DELETE FROM documents WHERE request_id = ? AND type = ?'
+    );
+    const insertStmt = db.prepare(`
+      INSERT INTO documents (
+        request_id,
+        type,
+        content,
+        approved,
+        approved_by,
+        approved_at,
+        generated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const saveDocuments = db.transaction(() => {
+      for (const docType of DOCUMENT_TYPES) {
+        const content = documentsPayload[docType];
+        const approval = approvals?.[docType] || {};
+
+        deleteStmt.run(id, docType);
+        insertStmt.run(
+          id,
+          docType,
+          content,
+          approval.approved ? 1 : 0,
+          approval.approver || null,
+          approval.date || null,
+          timestamp
+        );
+      }
+    });
+
+    saveDocuments();
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving documents:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Retrieve generated documents for a request
+app.get('/api/requests/:id/documents', (req, res) => {
+  try {
+    const docs = getDocumentsForRequest(req.params.id);
+    if (!docs) {
+      return res.status(404).json({ error: 'Documents not found' });
+    }
+    res.json(docs);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete generated documents for a request
+app.delete('/api/requests/:id/documents', (req, res) => {
+  try {
+    db.prepare('DELETE FROM documents WHERE request_id = ?').run(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting documents:', error);
     res.status(500).json({ error: error.message });
   }
 });

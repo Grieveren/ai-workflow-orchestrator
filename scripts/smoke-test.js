@@ -64,6 +64,40 @@ async function run() {
   });
 
   try {
+    const seedRequestState = async () => {
+      const safeRequest = async (url, init) => {
+        try {
+          const response = await fetch(url, init);
+          if (!response.ok) {
+            console.warn(`Seed request call failed (${response.status}): ${url}`);
+          }
+        } catch (error) {
+          console.warn(`Seed request call threw for ${url}:`, error);
+        }
+      };
+
+      await Promise.all([
+        safeRequest(`${apiHost}/api/requests/REQ-003`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stage: 'Scoping',
+            owner: 'Alex Rivera',
+            lastUpdate: 'Reset for smoke test',
+            activity: []
+          })
+        }),
+        safeRequest(`${apiHost}/api/requests/REQ-003/documents`, {
+          method: 'DELETE'
+        }),
+        safeRequest(`${apiHost}/api/requests/REQ-002/documents`, {
+          method: 'DELETE'
+        })
+      ]);
+    };
+
+    await seedRequestState();
+
     // --- Step 1: Landing page smoke check ---
     try {
       await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });

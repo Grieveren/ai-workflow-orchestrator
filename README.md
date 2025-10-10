@@ -10,6 +10,7 @@ A modern React application for managing workflow requests with AI-powered assist
 - **Smart Routing**: Automatically routes requests to the right team member
 - **AI Impact Assessment**: Automated 0-100 scoring across 5 dimensions (revenue, user reach, strategic alignment, urgency, quick-wins) for data-driven prioritization with 3-tier workflow (AI assessment → Product Owner manual refinement → business case validation)
 - **Requirement Generation**: AI generates BRD, FSD, and Technical Specifications
+- **Persisted Requirements**: Generated documents (plus approvals/refinements) auto-save to SQLite so Product Owners can revisit drafts and Developers can review specs before accepting work
 - **Dashboard**: Track all requests with status, priority, clarity scores, and impact scores
 - **Kanban Board**: Visual workflow management across stages
 - **Four-View System**: Requester, Product Owner, Developer, and Management perspectives
@@ -204,6 +205,10 @@ The suite covers intake chat, document generation/refinement, dashboards, and a 
 | `/request/:id` | Individual request details |
 
 ## Development
+
+### Document Persistence
+
+Generated BRD, FSD, and Technical Specification documents are now stored in `workflow.db` (table `documents`) every time they’re generated, refined, manually edited, or approved. When you reopen a request—especially from the Developer view—the UI automatically reloads the latest content so specs are reviewable before accepting work. If you want a clean sheet during development, delete the rows or reset the database.
 
 ### Adding New Components
 

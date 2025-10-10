@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import type { UserMode, DocType, GeneratedDocs, ChatMessage, Request, ViewType } from '../types';
 import { api } from '../services/api';
@@ -15,6 +15,27 @@ export function useDocuments() {
   const [docUserInput, setDocUserInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [streamingText, setStreamingText] = useState('');
+  const requestIdRef = useRef<string | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef<GeneratedDocs | null>(null);
+
+  const cancelPendingSave = () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    pendingSaveRef.current = null;
+  };
+
+  const persistDocuments = async (docs: GeneratedDocs, requestId?: string) => {
+    const targetId = requestId ?? requestIdRef.current;
+    if (!targetId) return;
+    try {
+      await api.saveDocuments(targetId, docs);
+    } catch (error) {
+      console.error('Failed to persist documents:', error);
+    }
+  };
 
   /**
    * Generate all requirement documents (BRD, FSD, Tech Spec) - sequential generation
@@ -61,6 +82,9 @@ export function useDocuments() {
       setGeneratedDocs(docsWithApprovals);
       setStreamingText('');
       setIsGenerating(false);
+      requestIdRef.current = request.id;
+      cancelPendingSave();
+      await persistDocuments(docsWithApprovals, request.id);
     } catch (error) {
       console.error('Requirements generation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -83,7 +107,7 @@ export function useDocuments() {
    * @param approver - Name of the person approving
    * @param approverRole - Role/view type of the approver (for audit trail)
    */
-  const approveDocument = (docType: DocType, approver: string, approverRole: ViewType) => {
+  const approveDocument = async (docType: DocType, approver: string, approverRole: ViewType) => {
     if (!generatedDocs) {
       console.warn('Cannot approve document: No documents generated');
       return;
@@ -108,10 +132,14 @@ export function useDocuments() {
       })
     };
 
-    setGeneratedDocs({
+    const nextDocs: GeneratedDocs = {
       ...generatedDocs,
       approvals: updatedApprovals
-    });
+    };
+
+    setGeneratedDocs(nextDocs);
+    cancelPendingSave();
+    await persistDocuments(nextDocs);
   };
 
   /**
@@ -145,10 +173,14 @@ export function useDocuments() {
         docUserInput
       );
 
-      setGeneratedDocs({
+      const nextDocs: GeneratedDocs = {
         ...generatedDocs,
         [activeDocTab]: updatedDoc
-      });
+      };
+
+      setGeneratedDocs(nextDocs);
+      cancelPendingSave();
+      await persistDocuments(nextDocs);
 
       setDocChatMessages([...updatedMessages, {
         role: 'assistant',
@@ -169,18 +201,52 @@ export function useDocuments() {
    * Update document content directly (for textarea edits)
    */
   const updateDocumentContent = (docType: DocType, content: string) => {
-    if (generatedDocs) {
-      setGeneratedDocs({
-        ...generatedDocs,
-        [docType]: content
-      });
+    if (!generatedDocs) return;
+
+    const nextDocs: GeneratedDocs = {
+      ...generatedDocs,
+      [docType]: content
+    };
+
+    setGeneratedDocs(nextDocs);
+    pendingSaveRef.current = nextDocs;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      saveTimeoutRef.current = null;
+      const docsToPersist = pendingSaveRef.current;
+      pendingSaveRef.current = null;
+      if (!docsToPersist) return;
+      void persistDocuments(docsToPersist);
+    }, 500);
+  };
+
+  /**
+   * Load persisted documents for a request (if available)
+   */
+  const loadDocuments = async (requestId: string): Promise<GeneratedDocs | null> => {
+    try {
+      const docs = await api.getDocuments(requestId);
+      if (docs) {
+        cancelPendingSave();
+        requestIdRef.current = requestId;
+        setGeneratedDocs(docs);
+        return docs;
+      }
+    } catch (error) {
+      console.error('Failed to load persisted documents:', error);
+    }
+    return null;
   };
 
   /**
    * Reset all document-related state
    */
   const resetDocuments = () => {
+    cancelPendingSave();
     setUserMode(null);
     setGeneratedDocs(null);
     setIsGenerating(false);
@@ -188,6 +254,7 @@ export function useDocuments() {
     setDocChatMessages([]);
     setDocUserInput('');
     setIsProcessing(false);
+    requestIdRef.current = null;
   };
 
   /**
@@ -258,6 +325,7 @@ export function useDocuments() {
     exportDocument,
     exportAllDocuments,
     approveDocument,
-    areAllDocsApproved
+    areAllDocsApproved,
+    loadDocuments
   };
 }

@@ -11,7 +11,9 @@ import { SLABadge, Modal, ImpactBadge, ImpactAdjustmentModal } from '../componen
 import { calculateSLA } from '../utils/slaCalculator';
 import { canGenerateDocuments, canUpdateStage } from '../utils/permissions';
 import { getCurrentUser } from '../utils/requestFilters';
-import type { RequestStage, DocType } from '../types';
+import type { RequestStage, DocType, GeneratedDocs } from '../types';
+
+const DOCUMENT_FLOW_ORDER: DocType[] = ['brd', 'fsd', 'techSpec'];
 
 export function RequestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -63,12 +65,16 @@ export function RequestDetailPage() {
     exportAllDocuments,
     refineDocument,
     approveDocument,
-    areAllDocsApproved
+    areAllDocsApproved,
+    loadDocuments
   } = documents;
 
   const resetDocumentsRef = useRef(resetDocuments);
   const viewRequestDetailRef = useRef(viewRequestDetail);
   const closeRequestDetailRef = useRef(closeRequestDetail);
+  const approvalsRef = useRef<GeneratedDocs['approvals']>();
+  const loadDocumentsRef = useRef(loadDocuments);
+  const lastLoadedDocumentsRequestIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     resetDocumentsRef.current = resetDocuments;
@@ -81,6 +87,38 @@ export function RequestDetailPage() {
   useEffect(() => {
     closeRequestDetailRef.current = closeRequestDetail;
   }, [closeRequestDetail]);
+
+  useEffect(() => {
+    loadDocumentsRef.current = loadDocuments;
+  }, [loadDocuments]);
+
+  useEffect(() => {
+    const approvals = generatedDocs?.approvals;
+    const previousApprovals = approvalsRef.current;
+
+    if (!approvals) {
+      approvalsRef.current = undefined;
+      return;
+    }
+
+    if (previousApprovals) {
+      for (let i = 0; i < DOCUMENT_FLOW_ORDER.length; i++) {
+        const docType = DOCUMENT_FLOW_ORDER[i];
+        const wasApproved = previousApprovals[docType]?.approved;
+        const isApproved = approvals[docType]?.approved;
+
+        if (!wasApproved && isApproved) {
+          const nextDoc = DOCUMENT_FLOW_ORDER[i + 1];
+          if (nextDoc) {
+            setActiveDocTab(nextDoc);
+          }
+          break;
+        }
+      }
+    }
+
+    approvalsRef.current = approvals;
+  }, [generatedDocs, setActiveDocTab]);
 
   // Find and set the selected request
   useEffect(() => {
@@ -106,6 +144,24 @@ export function RequestDetailPage() {
       }, 100);
     }
   }, [userMode, isGenerating, generatedDocs]);
+
+  useEffect(() => {
+    if (selectedRequest && !generatedDocs) {
+      const requestId = selectedRequest.id;
+      if (lastLoadedDocumentsRequestIdRef.current === requestId) {
+        return;
+      }
+
+      lastLoadedDocumentsRequestIdRef.current = requestId;
+      loadDocumentsRef
+        .current(requestId)
+        .catch(() => {
+          lastLoadedDocumentsRequestIdRef.current = null;
+        });
+    } else if (!selectedRequest) {
+      lastLoadedDocumentsRequestIdRef.current = null;
+    }
+  }, [selectedRequest, generatedDocs]);
 
   // Cleanup when unmounting
   useEffect(() => {
