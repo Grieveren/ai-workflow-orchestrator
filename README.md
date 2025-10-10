@@ -179,6 +179,19 @@ npm run build
 npm run preview
 ```
 
+### Smoke Tests
+
+Run the automated end-to-end smoke suite (Puppeteer):
+```bash
+npm run smoke:test
+```
+**Prerequisites**
+- `npm run server` and `npm run dev` must be running (the smoke script relies on the local proxy + Vite dev server).
+- `.env` must include a valid `ANTHROPIC_API_KEY`; the tests call the real Claude API.
+- The seeded SQLite database (`workflow.db`) is expected to exist. The script temporarily resets specific requests (for example, it PATCHes `REQ-002` back to “Ready for Dev”) so run against a disposable copy if you’re inspecting historical data.
+
+The suite covers intake chat, document generation/refinement, dashboards, and a developer handoff. It emits pass/fail status plus any console, runtime, or network errors it encounters.
+
 ## Available Routes
 
 | Route | Description |

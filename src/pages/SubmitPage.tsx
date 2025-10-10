@@ -42,24 +42,35 @@ export function SubmitPage() {
   const { submitRequest: submitRequestAction } = requestsHook;
   const { resetDocuments } = documents;
 
-  // Reset document state when SubmitPage mounts AND when unmounting
+  const resetDocumentsRef = useRef(resetDocuments);
+  const startConversationRef = useRef(startConversation);
+
+  useEffect(() => {
+    resetDocumentsRef.current = resetDocuments;
+  }, [resetDocuments]);
+
+  useEffect(() => {
+    startConversationRef.current = startConversation;
+  }, [startConversation]);
+
+  // Reset document state when SubmitPage mounts and keep it in sync if context handlers change
   useEffect(() => {
     // Clear on mount
-    resetDocuments();
+    resetDocumentsRef.current();
 
     // Check for pending example from landing page
     const pendingExample = sessionStorage.getItem('pendingExample');
     if (pendingExample) {
       sessionStorage.removeItem('pendingExample'); // Clean up immediately to prevent stale state
-      startConversation(pendingExample);
+      startConversationRef.current(pendingExample);
     }
 
     // Also clear on unmount to prevent flash when navigating away
     return () => {
-      resetDocuments();
+      resetDocumentsRef.current();
     };
      
-  }, []); // Only run once on mount/unmount
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

@@ -66,21 +66,37 @@ export function RequestDetailPage() {
     areAllDocsApproved
   } = documents;
 
+  const resetDocumentsRef = useRef(resetDocuments);
+  const viewRequestDetailRef = useRef(viewRequestDetail);
+  const closeRequestDetailRef = useRef(closeRequestDetail);
+
+  useEffect(() => {
+    resetDocumentsRef.current = resetDocuments;
+  }, [resetDocuments]);
+
+  useEffect(() => {
+    viewRequestDetailRef.current = viewRequestDetail;
+  }, [viewRequestDetail]);
+
+  useEffect(() => {
+    closeRequestDetailRef.current = closeRequestDetail;
+  }, [closeRequestDetail]);
+
   // Find and set the selected request
   useEffect(() => {
     if (id) {
       const request = requests.find(r => r.id === id);
       if (request) {
         // Reset documents when switching to a different request
-        resetDocuments();
-        viewRequestDetail(request);
+        resetDocumentsRef.current();
+        viewRequestDetailRef.current(request);
       } else {
         console.error('Request not found:', id);
         navigate('/dashboard');
       }
     }
      
-  }, [id, requests]);
+  }, [id, requests, navigate]);
 
   // Auto-scroll to documents section when mode is selected or docs are generated
   useEffect(() => {
@@ -94,8 +110,8 @@ export function RequestDetailPage() {
   // Cleanup when unmounting
   useEffect(() => {
     return () => {
-      closeRequestDetail();
-      resetDocuments();
+      closeRequestDetailRef.current();
+      resetDocumentsRef.current();
     };
      
   }, []);

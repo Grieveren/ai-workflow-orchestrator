@@ -1,5 +1,5 @@
 import { Bot, CheckCircle2, Circle, Loader2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 
 interface LoadingIndicatorProps {
   streamingText?: string;
@@ -36,20 +36,22 @@ export function LoadingIndicator({ streamingText }: LoadingIndicatorProps) {
     if (streamingText.startsWith('step:')) {
       const stepIndex = parseInt(streamingText.split(':')[1], 10);
 
-      setSteps(prevSteps => {
-        const newSteps = [...prevSteps];
+      startTransition(() => {
+        setSteps(prevSteps => {
+          const newSteps = [...prevSteps];
 
-        // Mark all previous steps as complete
-        for (let i = 0; i < stepIndex; i++) {
-          newSteps[i].status = 'complete';
-        }
+          // Mark all previous steps as complete
+          for (let i = 0; i < stepIndex; i++) {
+            newSteps[i].status = 'complete';
+          }
 
-        // Mark current step as active
-        if (stepIndex < newSteps.length) {
-          newSteps[stepIndex].status = 'active';
-        }
+          // Mark current step as active
+          if (stepIndex < newSteps.length) {
+            newSteps[stepIndex].status = 'active';
+          }
 
-        return newSteps;
+          return newSteps;
+        });
       });
     }
   }, [streamingText]);
