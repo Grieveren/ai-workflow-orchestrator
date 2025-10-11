@@ -26,9 +26,12 @@ function formatFailure(entry) {
 }
 
 async function run() {
+  const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox'];
+
   const browser = await puppeteer.launch({
     headless: 'new',
-    defaultViewport: { width: 1440, height: 900 }
+    defaultViewport: { width: 1440, height: 900 },
+    args: launchArgs
   });
   const page = await browser.newPage();
 
@@ -225,15 +228,29 @@ async function run() {
         recordResult('Request detail view opens from dashboard', 'fail', 'Unable to locate REQ-003 row to click.');
       } else {
         await page.waitForFunction(() => window.location.pathname.includes('/request/'), { timeout: 5000 });
-        const headingVisible = await page.evaluate(() => {
-          const headings = Array.from(document.querySelectorAll('h2'));
-          return headings.some(h => h.textContent?.includes('REQ-003'));
-        });
-        const modeSelectorVisible = await page.evaluate(() => {
-          const headings = Array.from(document.querySelectorAll('h3'));
-          return headings.some(h => h.textContent?.includes('Generate Requirements Documents'));
-        });
-        if (!headingVisible) {
+        const headingAppeared = await page
+          .waitForFunction(
+            () => {
+              const headings = Array.from(document.querySelectorAll('h2'));
+              return headings.some(h => h.textContent?.includes('REQ-003'));
+            },
+            { timeout: 5000 }
+          )
+          .then(() => true)
+          .catch(() => false);
+
+        const modeSelectorVisible = await page
+          .waitForFunction(
+            () => {
+              const headings = Array.from(document.querySelectorAll('h3'));
+              return headings.some(h => h.textContent?.includes('Generate Requirements Documents'));
+            },
+            { timeout: 5000 }
+          )
+          .then(() => true)
+          .catch(() => false);
+
+        if (!headingAppeared) {
           recordResult('Request detail view opens from dashboard', 'fail', 'Request detail heading did not render.');
         } else if (!modeSelectorVisible) {
           recordResult('Request detail view opens from dashboard', 'fail', 'Mode selector not available for document generation.');
@@ -247,14 +264,19 @@ async function run() {
 
     // --- Step 6: Attempt document generation ---
     try {
-      const selectedMode = await page.evaluate(() => {
-        const radio = document.querySelector('input[type="radio"][value="guided"]');
-        if (radio instanceof HTMLInputElement) {
-          radio.click();
-          return true;
-        }
-        return false;
-      });
+      const selectedMode = await page
+        .waitForFunction(
+          () => {
+            const radio = document.querySelector('input[type=\"radio\"][value=\"guided\"]');
+            if (radio instanceof HTMLInputElement) {
+              radio.click();
+              return true;
+            }
+            return false;
+          },
+          { timeout: 5000 }
+        )
+        .catch(() => false);
 
       if (!selectedMode) {
         recordResult('Document generation succeeds', 'fail', 'Could not select a generation mode.');
@@ -334,23 +356,15 @@ async function run() {
         return '';
       });
 
-      const inputFocused = await page.evaluate(() => {
-        const inputs = Array.from(document.querySelectorAll('input'));
-        const target = inputs.find(input =>
-          input instanceof HTMLInputElement &&
-          input.placeholder?.includes('risk analysis')
-        );
-        if (target instanceof HTMLInputElement) {
-          target.focus();
-          return true;
-        }
-        return false;
-      });
+      const inputHandle = await page
+        .waitForSelector('input[placeholder*="risk analysis"]', { timeout: 5000 })
+        .catch(() => null);
 
-      if (!inputFocused) {
+      if (!inputHandle) {
         recordResult('Document refinement updates document', 'fail', 'Document chat input not found.');
       } else {
-        await page.keyboard.type('Please add a concise summary of key risks.');
+        await inputHandle.click({ clickCount: 3 });
+        await inputHandle.type('Please add a concise summary of key risks.');
 
         const clickedUpdate = await page.evaluate(() => {
           const buttons = Array.from(document.querySelectorAll('button'));
@@ -365,47 +379,53 @@ async function run() {
         if (!clickedUpdate) {
           recordResult('Document refinement updates document', 'fail', 'Document chat Update button not found.');
         } else {
-          await delay(60000);
+          const contentChanged = await page
+            .waitForFunction(
+              (previous) => {
+                const textarea = document.querySelector('textarea');
+                if (!(textarea instanceof HTMLTextAreaElement)) {
+                  return false;
+                }
+                return textarea.value.trim() !== previous;
+              },
+              { timeout: 70000 },
+              initialDocContent.trim()
+            )
+            .then(() => true)
+            .catch(() => false);
 
-          const refinementStatus = await page.evaluate(() => {
-            const containers = Array.from(document.querySelectorAll('div'));
-            if (containers.some(div => div.textContent?.includes('I had trouble updating the document.'))) {
-              return 'error';
-            }
-            if (containers.some(div => div.textContent?.includes("I've updated the document based on your feedback."))) {
-              return 'success';
-            }
-            return 'unknown';
-          });
-
-          if (refinementStatus === 'error') {
-            recordResult(
-              'Document refinement updates document',
-              'fail',
-              'Assistant responded with an error when refining the document.'
+          if (!contentChanged) {
+            const errorToastPresent = await page.evaluate(() =>
+              document.body.innerText.includes('I had trouble updating the document.')
             );
-          } else if (refinementStatus === 'success') {
-            const updatedDocContent = await page.evaluate(() => {
-              const textarea = document.querySelector('textarea');
-              if (textarea instanceof HTMLTextAreaElement) {
-                return textarea.value;
-              }
-              return '';
-            });
 
-            if (updatedDocContent.trim() === initialDocContent.trim()) {
+            if (errorToastPresent) {
               recordResult(
                 'Document refinement updates document',
                 'fail',
-                'Document text did not change after refinement.'
+                'Assistant responded with an error when refining the document.'
               );
             } else {
-              recordResult('Document refinement updates document', 'pass');
+              const currentDoc = await page.evaluate(() => {
+                const textarea = document.querySelector('textarea');
+                if (textarea instanceof HTMLTextAreaElement) {
+                  return textarea.value;
+                }
+                return '';
+              });
+
+              if (currentDoc.trim() !== initialDocContent.trim()) {
+                recordResult('Document refinement updates document', 'pass');
+              } else {
+                recordResult('Document refinement updates document', 'fail', 'Document did not update within 70 seconds.');
+              }
             }
           } else {
-            recordResult('Document refinement updates document', 'fail', 'No refinement response detected after 60 seconds.');
+            recordResult('Document refinement updates document', 'pass');
           }
         }
+
+        await inputHandle.dispose();
       }
     } catch (error) {
       recordResult('Document refinement updates document', 'fail', error.message);

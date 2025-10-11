@@ -4,33 +4,33 @@ import { AnalyticsPage } from './AnalyticsPage';
 import { AppProvider } from '../contexts/AppContext';
 
 describe('AnalyticsPage', () => {
-  it('renders portfolio analytics heading', () => {
+  it('renders portfolio analytics heading', async () => {
     render(
       <AppProvider>
         <AnalyticsPage />
       </AppProvider>
     );
-    expect(screen.getByText('Portfolio Analytics')).toBeInTheDocument();
+    expect(await screen.findByText('Portfolio Analytics')).toBeInTheDocument();
   });
 
-  it('renders all three main sections', () => {
+  it('renders all primary sections', async () => {
     render(
       <AppProvider>
         <AnalyticsPage />
       </AppProvider>
     );
-    expect(screen.getByText('Request Flow')).toBeInTheDocument();
+    expect(await screen.findByText('Request Flow')).toBeInTheDocument();
     expect(screen.getByText('Bottleneck Detection')).toBeInTheDocument();
-    expect(screen.getByText('Cycle Time Trends')).toBeInTheDocument();
+    expect(screen.getByText('Operational Metrics')).toBeInTheDocument();
   });
 
-  it('displays funnel stages', () => {
+  it('displays funnel stages', async () => {
     render(
       <AppProvider>
         <AnalyticsPage />
       </AppProvider>
     );
-    expect(screen.getByText('Intake')).toBeInTheDocument();
+    expect(await screen.findByText('Intake')).toBeInTheDocument();
     expect(screen.getByText('Scoping')).toBeInTheDocument();
     expect(screen.getByText('Ready for Dev')).toBeInTheDocument();
     expect(screen.getByText('In Progress')).toBeInTheDocument();
@@ -38,24 +38,26 @@ describe('AnalyticsPage', () => {
     expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
-  it('shows bottleneck alert', () => {
+  it('shows bottleneck fallback message when there is no data', async () => {
     render(
       <AppProvider>
         <AnalyticsPage />
       </AppProvider>
     );
-    expect(screen.getByText(/Bottleneck Alert/)).toBeInTheDocument();
+    expect(
+      await screen.findByText('All stages are currently clear — no bottlenecks detected.')
+    ).toBeInTheDocument();
   });
 
-  it('displays cycle time metrics', () => {
+  it('displays operational metric cards', async () => {
     render(
       <AppProvider>
         <AnalyticsPage />
       </AppProvider>
     );
-    expect(screen.getByText('Current Average')).toBeInTheDocument();
-    expect(screen.getByText('Last Month')).toBeInTheDocument();
-    expect(screen.getByText('Improvement')).toBeInTheDocument();
+    expect(await screen.findByText('Average completion time')).toBeInTheDocument();
+    expect(screen.getByText('Average active age')).toBeInTheDocument();
+    expect(screen.getByText('Completed vs total')).toBeInTheDocument();
     expect(screen.getByText('SLA Adherence')).toBeInTheDocument();
   });
 });

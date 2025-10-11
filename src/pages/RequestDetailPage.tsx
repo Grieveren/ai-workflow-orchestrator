@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAppContext } from '../contexts/AppContext';
 import { LoadingIndicator } from '../features/chat/components/LoadingIndicator';
@@ -233,6 +233,13 @@ export function RequestDetailPage() {
 
   return (
     <div className="space-y-4">
+      <button
+        onClick={handleClose}
+        className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition"
+      >
+        <ArrowLeft size={16} />
+        Back to Dashboard
+      </button>
       <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">

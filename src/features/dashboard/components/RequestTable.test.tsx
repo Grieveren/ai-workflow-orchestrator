@@ -46,6 +46,10 @@ describe('RequestTable', () => {
 
   const mockOnRequestClick = vi.fn();
 
+  beforeEach(() => {
+    mockOnRequestClick.mockClear();
+  });
+
   describe('Requester Column Visibility', () => {
     it('shows Requester column in dev view', () => {
       render(
@@ -239,6 +243,25 @@ describe('RequestTable', () => {
         expect(row).toHaveClass('cursor-pointer');
       });
     });
+
+    it('supports keyboard activation on rows', async () => {
+      const user = userEvent.setup();
+      render(
+        <RequestTable
+          requests={mockRequests}
+          onRequestClick={mockOnRequestClick}
+          view="management"
+        />
+      );
+
+      const firstRow = screen.getByText('Salesforce Automation').closest('tr');
+      expect(firstRow).toHaveAttribute('tabindex', '0');
+      if (firstRow) {
+        firstRow.focus();
+        await user.keyboard('{Enter}');
+        expect(mockOnRequestClick).toHaveBeenCalledWith(mockRequests[0]);
+      }
+    });
   });
 
   describe('Priority Display', () => {
@@ -308,7 +331,7 @@ describe('RequestTable', () => {
   });
 
   describe('Edge Cases', () => {
-    it('renders empty table when no requests provided', () => {
+    it('renders empty state when no requests provided', () => {
       render(
         <RequestTable
           requests={[]}
@@ -316,8 +339,7 @@ describe('RequestTable', () => {
           view="management"
         />
       );
-      const tbody = screen.getByRole('table').querySelector('tbody');
-      expect(tbody?.children.length).toBe(0);
+      expect(screen.getByText('No requests to display yet.')).toBeInTheDocument();
     });
 
     it('handles requests with undefined optional fields', () => {

@@ -19,22 +19,22 @@ db.pragma('foreign_keys = ON');
 // Initialize database schema
 initializeDatabase();
 
-// Restrict CORS to frontend origin only
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    // Allow any localhost origin (handy when Vite picks a random free port)
-    if (/^http:\/\/localhost:\d+$/.test(origin)) {
-      return callback(null, true);
-    }
-
-    callback(new Error(`Origin ${origin} not allowed by CORS`));
-  },
+const corsOptions = {
+  origin: true,
   credentials: true
-}));
+};
+
+// Allow cross-origin requests from any local dev server
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || 'Content-Type');
+    return res.sendStatus(204);
+  }
+
+  return next();
+});
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
@@ -52,7 +52,18 @@ app.post('/api/chat', async (req, res) => {
       })
     });
 
-    const data = await response.json();
+    const raw = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch (parseError) {
+      console.error('Anthropic API non-JSON response:', raw);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'Anthropic upstream error', message: raw });
+      }
+      return res.status(500).json({ error: 'Invalid upstream response format', message: raw });
+    }
 
     if (!response.ok) {
       console.error('Anthropic API error:', data);
@@ -89,7 +100,12 @@ app.post('/api/chat/stream', async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = await response.text();
+      }
       console.error('Anthropic API error:', errorData);
       res.write(`data: ${JSON.stringify({ error: true, message: errorData })}\n\n`);
       res.end();

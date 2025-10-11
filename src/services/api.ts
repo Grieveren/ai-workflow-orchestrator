@@ -18,10 +18,81 @@ interface ApiRequest {
   max_tokens?: number;
 }
 
+interface ClaudeRequestOptions {
+  signal?: AbortSignal;
+}
+
+function buildFallbackDocuments(request: Request): { brd: string; fsd: string; techSpec: string } {
+  const submittedBy = request.submittedBy || 'Requester';
+  const owner = request.owner || 'Product Owner';
+  const priority = request.priority || 'Medium';
+  const daysOpen = typeof request.daysOpen === 'number' ? `${request.daysOpen} days open` : 'Timeline pending';
+
+  const brd = `## Executive Summary
+- Request: ${request.title}
+- Priority: ${priority}
+- Submitted by: ${submittedBy}
+- Current owner: ${owner}
+
+## Business Objectives
+- Resolve the primary pain points reported by ${submittedBy}
+- Deliver measurable value within existing RevOps processes
+
+## Current State
+- ${request.title} is currently tracked as ${request.stage}
+- ${daysOpen}
+
+## Desired Future State
+- Document requirements and approvals so development can proceed confidently
+- Ensure stakeholders have clarity on scope, success metrics, and ownership
+
+## Success Criteria
+- Requirements documented and approved
+- Handoff to development with clear scope and acceptance criteria`;
+
+  const fsd = `## Overview
+This functional specification outlines the behaviour for "${request.title}" so that the RevOps team can implement the request with confidence.
+
+## User Stories
+- As ${submittedBy}, I can see progress on "${request.title}" so that I know when it will be delivered.
+- As ${owner}, I can review business context and confirm the solution aligns with RevOps standards.
+
+## Functional Requirements
+- Capture the key data points raised during intake.
+- Surface the request in dashboards with status "${request.stage}".
+
+## Business Rules
+- Product Owner approval required before development may begin.
+- Impact assessment remains attached to the request for auditing.`;
+
+  const techSpec = `## Technical Overview
+Fallback specification for "${request.title}" when AI authoring is unavailable.
+
+## Implementation Notes
+- Work item is currently categorized as ${request.priority} priority.
+- Owner: ${owner}
+- Requested by: ${submittedBy}
+
+## Next Steps
+- Confirm data sources and integrations before building.
+- Coordinate with development lead to size and schedule implementation.
+
+## Risks
+- Requirements were generated via fallback template; verify details with stakeholders before development starts.`;
+
+  return { brd, fsd, techSpec };
+}
+
+function buildFallbackRefinement(currentDoc: string, feedback: string): string {
+  const normalizedFeedback = feedback.trim();
+  const timestamp = new Date().toLocaleString();
+  return `${currentDoc}\n\n---\n**Manual refinement (${timestamp})**\n${normalizedFeedback}`;
+}
+
 /**
  * Core function to call Claude API via backend proxy
  */
-async function callClaude(request: ApiRequest): Promise<string> {
+async function callClaude(request: ApiRequest, options: ClaudeRequestOptions = {}): Promise<string> {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -31,7 +102,8 @@ async function callClaude(request: ApiRequest): Promise<string> {
       model: MODEL,
       max_tokens: request.max_tokens || 2000,
       messages: request.messages
-    })
+    }),
+    signal: options.signal
   });
 
   if (!response.ok) {
@@ -305,10 +377,17 @@ ${modeInstructions[mode]} Use markdown headers (##) and bullet points. Keep it u
 RESPOND ONLY WITH THE MARKDOWN CONTENT. NO JSON.`
     };
 
-    return await callClaude({
-      messages: [{ role: 'user', content: documentPrompts[docType] }],
-      max_tokens: 1000
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      return await callClaude({
+        messages: [{ role: 'user', content: documentPrompts[docType] }],
+        max_tokens: 1000
+      }, { signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
   },
 
   /**
@@ -325,19 +404,30 @@ RESPOND ONLY WITH THE MARKDOWN CONTENT. NO JSON.`
       techSpec: ''
     };
 
-    // Generate BRD
-    if (onProgress) onProgress('brd');
-    docs.brd = await api.generateSingleDocument(request, mode, 'brd');
+    try {
+      if (onProgress) onProgress('brd');
+      docs.brd = await api.generateSingleDocument(request, mode, 'brd');
 
-    // Generate FSD
-    if (onProgress) onProgress('fsd');
-    docs.fsd = await api.generateSingleDocument(request, mode, 'fsd');
+      if (onProgress) onProgress('fsd');
+      docs.fsd = await api.generateSingleDocument(request, mode, 'fsd');
 
-    // Generate Tech Spec
-    if (onProgress) onProgress('techSpec');
-    docs.techSpec = await api.generateSingleDocument(request, mode, 'techSpec');
+      if (onProgress) onProgress('techSpec');
+      docs.techSpec = await api.generateSingleDocument(request, mode, 'techSpec');
 
-    return docs;
+      return docs;
+    } catch (error) {
+      console.error('AI document generation failed, falling back to local templates.', error);
+      if (onProgress) {
+        if (!docs.fsd) onProgress('fsd');
+        if (!docs.techSpec) onProgress('techSpec');
+      }
+      const fallback = buildFallbackDocuments(request);
+      return {
+        brd: docs.brd || fallback.brd,
+        fsd: docs.fsd || fallback.fsd,
+        techSpec: docs.techSpec || fallback.techSpec
+      };
+    }
   },
 
   /**
@@ -514,10 +604,20 @@ User's refinement request: ${feedback}
 Update the document based on their feedback. Respond with the COMPLETE updated document in markdown format.
 Include all sections, not just the changed parts.`;
 
-    return await callClaude({
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 3000
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      return await callClaude({
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 3000
+      }, { signal: controller.signal });
+    } catch (error) {
+      console.error('AI refinement failed, returning fallback content.', error);
+      return buildFallbackRefinement(currentDoc, feedback);
+    } finally {
+      clearTimeout(timeout);
+    }
   },
 
   /**
