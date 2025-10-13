@@ -6,7 +6,7 @@ import Database from 'better-sqlite3';
 dotenv.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = Number(process.env.PORT || 3001);
 const DOCUMENT_TYPES = ['brd', 'fsd', 'techSpec'];
 const anthropicConfigured = Boolean(process.env.ANTHROPIC_API_KEY);
 
