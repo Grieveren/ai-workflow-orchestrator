@@ -12,8 +12,8 @@ import type {
 
 const DEFAULT_API_BASE_URL =
   typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3001`
-    : 'http://localhost:3001';
+    ? `${window.location.protocol}//${window.location.hostname}:5001`
+    : 'http://localhost:5001';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 const API_CHAT_URL = `${API_BASE_URL}/api/chat`;
