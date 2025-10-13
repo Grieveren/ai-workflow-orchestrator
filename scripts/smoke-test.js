@@ -6,6 +6,7 @@ import puppeteer from 'puppeteer';
 
 const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
 const apiHost = process.env.API_URL ?? 'http://localhost:3001';
+const anthropicConfigured = Boolean(process.env.ANTHROPIC_API_KEY);
 
 const results = [];
 const consoleErrors = [];
@@ -156,44 +157,52 @@ async function run() {
     }
 
     // --- Step 2: Start conversation from example ---
-    try {
-      const clicked = await page.evaluate(() => {
-        const buttons = Array.from(document.querySelectorAll('button'));
-        const target = buttons.find(btn =>
-          btn.textContent?.includes('Bug: Investigate why the order export job times out after 5 minutes')
-        );
-        if (target instanceof HTMLElement) {
-          target.click();
-          return true;
-        }
-        return false;
-      });
-
-      if (!clicked) {
-        recordResult(
-          'Example intake conversation responds successfully',
-          'fail',
-          'Failed to locate example button on landing page.'
-        );
-      } else {
-        await delay(4000);
-        const errorDetected = await page.evaluate(() => {
-          const bubbles = Array.from(document.querySelectorAll('div'));
-          return bubbles.some(div => div.textContent?.includes('I encountered an error. Please try again or rephrase your request.'));
+    if (!anthropicConfigured) {
+      recordResult(
+        'Example intake conversation responds successfully',
+        'skip',
+        'Skipped because ANTHROPIC_API_KEY is not configured.'
+      );
+    } else {
+      try {
+        const clicked = await page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const target = buttons.find(btn =>
+            btn.textContent?.includes('Bug: Investigate why the order export job times out after 5 minutes')
+          );
+          if (target instanceof HTMLElement) {
+            target.click();
+            return true;
+          }
+          return false;
         });
 
-        if (errorDetected) {
+        if (!clicked) {
           recordResult(
             'Example intake conversation responds successfully',
             'fail',
-            'Assistant returned an error message after starting the conversation.'
+            'Failed to locate example button on landing page.'
           );
         } else {
-          recordResult('Example intake conversation responds successfully', 'pass');
+          await delay(4000);
+          const errorDetected = await page.evaluate(() => {
+            const bubbles = Array.from(document.querySelectorAll('div'));
+            return bubbles.some(div => div.textContent?.includes('I encountered an error. Please try again or rephrase your request.'));
+          });
+
+          if (errorDetected) {
+            recordResult(
+              'Example intake conversation responds successfully',
+              'fail',
+              'Assistant returned an error message after starting the conversation.'
+            );
+          } else {
+            recordResult('Example intake conversation responds successfully', 'pass');
+          }
         }
+      } catch (error) {
+        recordResult('Example intake conversation responds successfully', 'fail', error.message);
       }
-    } catch (error) {
-      recordResult('Example intake conversation responds successfully', 'fail', error.message);
     }
 
     // --- Step 3: Dashboard data loads ---
@@ -658,7 +667,7 @@ async function run() {
     const failures = results.filter(result => result.status === 'fail');
     console.log('--- Smoke Test Results ---');
     for (const result of results) {
-      const statusIcon = result.status === 'pass' ? '✅' : '❌';
+      const statusIcon = result.status === 'pass' ? '✅' : result.status === 'skip' ? '⚪️' : '❌';
       console.log(`${statusIcon} ${result.step}${result.details ? ` – ${result.details}` : ''}`);
     }
 
