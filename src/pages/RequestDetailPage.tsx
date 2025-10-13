@@ -72,7 +72,7 @@ export function RequestDetailPage() {
   const resetDocumentsRef = useRef(resetDocuments);
   const viewRequestDetailRef = useRef(viewRequestDetail);
   const closeRequestDetailRef = useRef(closeRequestDetail);
-  const approvalsRef = useRef<GeneratedDocs['approvals']>();
+  const approvalsRef = useRef<GeneratedDocs['approvals'] | undefined>(undefined);
   const loadDocumentsRef = useRef(loadDocuments);
   const lastLoadedDocumentsRequestIdRef = useRef<string | null>(null);
 

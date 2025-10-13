@@ -10,7 +10,14 @@ import type {
   GeneratedDocs
 } from '../types';
 
-const API_URL = 'http://localhost:3001/api/chat';
+const DEFAULT_API_BASE_URL =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:3001`
+    : 'http://localhost:3001';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+const API_CHAT_URL = `${API_BASE_URL}/api/chat`;
+const API_STREAM_URL = `${API_BASE_URL}/api/chat/stream`;
 const MODEL = 'claude-sonnet-4-5-20250929';
 
 interface ApiRequest {
@@ -93,7 +100,7 @@ function buildFallbackRefinement(currentDoc: string, feedback: string): string {
  * Core function to call Claude API via backend proxy
  */
 async function callClaude(request: ApiRequest, options: ClaudeRequestOptions = {}): Promise<string> {
-  const response = await fetch(API_URL, {
+  const response = await fetch(API_CHAT_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -488,7 +495,7 @@ Output as JSON:
 Keep each document concise but complete. Use markdown headers (##) and bullet points.
 RESPOND ONLY WITH VALID JSON.`;
 
-    const response = await fetch('http://localhost:3001/api/chat/stream', {
+    const response = await fetch(API_STREAM_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -511,6 +518,26 @@ RESPOND ONLY WITH VALID JSON.`;
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let accumulatedText = '';
+    const progressState = {
+      brd: false,
+      fsd: false,
+      techSpec: false
+    } as Record<DocType, boolean>;
+
+    const stepMap: Record<DocType, string> = {
+      brd: 'step:1',
+      fsd: 'step:2',
+      techSpec: 'step:3'
+    };
+
+    const updateProgressMarkers = () => {
+      (Object.keys(stepMap) as DocType[]).forEach(docKey => {
+        if (!progressState[docKey] && accumulatedText.includes(`"${docKey}"`)) {
+          progressState[docKey] = true;
+          onProgress(stepMap[docKey]);
+        }
+      });
+    };
 
     try {
        
@@ -533,7 +560,7 @@ RESPOND ONLY WITH VALID JSON.`;
               // Handle different event types from Claude streaming API
               if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
                 accumulatedText += parsed.delta.text;
-                onProgress(accumulatedText);
+                updateProgressMarkers();
               } else if (parsed.error) {
                 console.error('Streaming error from API:', parsed.error);
                 throw new Error(parsed.error.message || 'Streaming error');
@@ -564,6 +591,8 @@ RESPOND ONLY WITH VALID JSON.`;
       throw new Error('No content received from streaming API');
     }
 
+    updateProgressMarkers();
+
     // console.log('Total accumulated text length:', accumulatedText.length);
     // console.log('First 100 chars:', accumulatedText.substring(0, 100));
     // console.log('Last 100 chars:', accumulatedText.substring(accumulatedText.length - 100));
@@ -575,6 +604,7 @@ RESPOND ONLY WITH VALID JSON.`;
     try {
       const parsed = JSON.parse(cleanedResponse);
       // console.log('Successfully parsed JSON with keys:', Object.keys(parsed));
+      onProgress('step:4');
       return parsed;
     } catch (error) {
       console.error('Failed to parse final response.');
@@ -886,7 +916,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Fetch all requests from the database
    */
   async getAllRequests(): Promise<Request[]> {
-    const response = await fetch('http://localhost:3001/api/requests');
+    const response = await fetch(`${API_BASE_URL}/api/requests`);
     if (!response.ok) {
       throw new Error(`Failed to fetch requests: ${response.statusText}`);
     }
@@ -897,7 +927,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Fetch a single request by ID from the database
    */
   async getRequestById(id: string): Promise<Request> {
-    const response = await fetch(`http://localhost:3001/api/requests/${id}`);
+    const response = await fetch(`${API_BASE_URL}/api/requests/${id}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch request: ${response.statusText}`);
     }
@@ -908,7 +938,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Create a new request in the database
    */
   async createRequest(request: Request): Promise<Request> {
-    const response = await fetch('http://localhost:3001/api/requests', {
+    const response = await fetch(`${API_BASE_URL}/api/requests`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
@@ -923,7 +953,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Update an existing request in the database
    */
   async updateRequest(id: string, updates: Partial<Request>): Promise<{ success: boolean }> {
-    const response = await fetch(`http://localhost:3001/api/requests/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/requests/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
@@ -938,7 +968,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Delete a request from the database
    */
   async deleteRequest(id: string): Promise<{ success: boolean }> {
-    const response = await fetch(`http://localhost:3001/api/requests/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/requests/${id}`, {
       method: 'DELETE',
     });
     if (!response.ok) {
@@ -951,7 +981,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Persist generated documents and approvals for a request
    */
   async saveDocuments(requestId: string, docs: GeneratedDocs): Promise<void> {
-    const response = await fetch(`http://localhost:3001/api/requests/${requestId}/documents`, {
+    const response = await fetch(`${API_BASE_URL}/api/requests/${requestId}/documents`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(docs)
@@ -966,7 +996,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Fetch persisted documents for a request (if available)
    */
   async getDocuments(requestId: string): Promise<GeneratedDocs | null> {
-    const response = await fetch(`http://localhost:3001/api/requests/${requestId}/documents`);
+    const response = await fetch(`${API_BASE_URL}/api/requests/${requestId}/documents`);
 
     if (response.status === 404) {
       return null;
@@ -984,7 +1014,7 @@ NO MARKDOWN CODE BLOCKS. NO EXPLANATIONS. ONLY VALID JSON.`;
    * Delete persisted documents for a request
    */
   async clearDocuments(requestId: string): Promise<void> {
-    const response = await fetch(`http://localhost:3001/api/requests/${requestId}/documents`, {
+    const response = await fetch(`${API_BASE_URL}/api/requests/${requestId}/documents`, {
       method: 'DELETE'
     });
 

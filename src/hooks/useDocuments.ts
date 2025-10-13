@@ -53,20 +53,24 @@ export function useDocuments() {
       setStreamingText('step:0');
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Steps 1-3: Generate each document sequentially with progress updates
-      const docs = await api.generateDocuments(request, mode, (docType) => {
-        // Map docType to step number
-        const stepMap: Record<DocType, number> = {
-          brd: 1,
-          fsd: 2,
-          techSpec: 3
-        };
-        setStreamingText(`step:${stepMap[docType]}`);
-      });
+      const sequentialStepMap: Record<DocType, number> = {
+        brd: 1,
+        fsd: 2,
+        techSpec: 3
+      };
 
-      // Step 4: Initializing approval workflow
+      let docs: { brd: string; fsd: string; techSpec: string };
+
+      try {
+        docs = await api.generateDocumentsStream(request, mode, setStreamingText);
+      } catch (streamError) {
+        console.warn('Streaming document generation failed; falling back to sequential API.', streamError);
+        docs = await api.generateDocuments(request, mode, (docType) => {
+          setStreamingText(`step:${sequentialStepMap[docType]}`);
+        });
+      }
+
       setStreamingText('step:4');
-      // console.log('Documents generated successfully');
 
       // Initialize with approval state
       const docsWithApprovals: GeneratedDocs = {

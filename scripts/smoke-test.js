@@ -1,4 +1,7 @@
 /* global process, console, setTimeout, document, HTMLElement, HTMLInputElement, HTMLTextAreaElement, fetch, window */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 
 const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
@@ -9,6 +12,10 @@ const consoleErrors = [];
 const pageErrors = [];
 const apiFailures = [];
 const requestFailures = [];
+const navigationMetrics = [];
+
+const runStartedAt = new Date().toISOString();
+const reportsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../reports');
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -29,11 +36,42 @@ async function run() {
   const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox'];
 
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: process.env.CI ? true : 'new',
     defaultViewport: { width: 1440, height: 900 },
     args: launchArgs
   });
   const page = await browser.newPage();
+
+  const captureNavigationTiming = async (label) => {
+    try {
+      const navTiming = await page.evaluate(() => {
+        const entries = performance.getEntriesByType('navigation');
+        if (entries.length === 0) {
+          return null;
+        }
+        const latest = entries[entries.length - 1];
+        return {
+          type: latest.type,
+          startTime: latest.startTime,
+          domInteractive: latest.domInteractive,
+          domContentLoaded: latest.domContentLoadedEventEnd,
+          loadEventEnd: latest.loadEventEnd,
+          responseStart: latest.responseStart,
+          requestStart: latest.requestStart,
+          transferSize: latest.transferSize ?? 0
+        };
+      });
+
+      if (navTiming) {
+        navigationMetrics.push({
+          step: label,
+          ...navTiming
+        });
+      }
+    } catch (error) {
+      console.warn(`Failed to capture navigation metrics for "${label}":`, error);
+    }
+  };
 
   page.on('console', msg => {
     if (msg.type() === 'error') {
@@ -104,6 +142,7 @@ async function run() {
     // --- Step 1: Landing page smoke check ---
     try {
       await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+      await captureNavigationTiming('Landing page hero renders');
       const heroSelector = 'h1';
       await page.waitForSelector(heroSelector, { timeout: 5000 });
       const heroText = await page.$eval(heroSelector, el => el.textContent?.trim() ?? '');
@@ -160,6 +199,7 @@ async function run() {
     // --- Step 3: Dashboard data loads ---
     try {
       await page.goto(`${baseUrl}/dashboard`, { waitUntil: 'domcontentloaded' });
+      await captureNavigationTiming('Dashboard request table renders seed data');
       await delay(3000);
       const hasRequest = await page.evaluate(() => {
         const cells = Array.from(document.querySelectorAll('td'));
@@ -228,6 +268,7 @@ async function run() {
         recordResult('Request detail view opens from dashboard', 'fail', 'Unable to locate REQ-003 row to click.');
       } else {
         await page.waitForFunction(() => window.location.pathname.includes('/request/'), { timeout: 5000 });
+        await captureNavigationTiming('Request detail view opens from dashboard');
         const headingAppeared = await page
           .waitForFunction(
             () => {
@@ -434,6 +475,7 @@ async function run() {
     // --- Step 8: Submit page availability ---
     try {
       await page.goto(`${baseUrl}/submit`, { waitUntil: 'domcontentloaded' });
+      await captureNavigationTiming('Submit page renders intake assistant');
       await delay(1500);
       const headingVisible = await page.evaluate(() => {
         const headings = Array.from(document.querySelectorAll('h2'));
@@ -451,6 +493,7 @@ async function run() {
     // --- Step 9: Kanban board renders ---
     try {
       await page.goto(`${baseUrl}/kanban`, { waitUntil: 'domcontentloaded' });
+      await captureNavigationTiming('Kanban board displays stages');
       await delay(2000);
       const columnVisible = await page.evaluate(() => {
         const headings = Array.from(document.querySelectorAll('h3'));
@@ -478,6 +521,7 @@ async function run() {
     // --- Step 10: Analytics dashboard renders ---
     try {
       await page.goto(`${baseUrl}/analytics`, { waitUntil: 'domcontentloaded' });
+      await captureNavigationTiming('Analytics dashboard displays metrics');
       await delay(2000);
       const analyticsHeading = await page.evaluate(() => {
         const headings = Array.from(document.querySelectorAll('h1'));
@@ -518,6 +562,7 @@ async function run() {
     // --- Step 11: Developer can move request to In Progress ---
     try {
       await page.goto(`${baseUrl}/dashboard`, { waitUntil: 'domcontentloaded' });
+      await captureNavigationTiming('Developer can start work on Ready for Dev request');
       await delay(3000);
 
       const switchedDev = await page.evaluate(() => {
@@ -641,6 +686,24 @@ async function run() {
 
     if (failures.length > 0 || consoleErrors.length > 0 || pageErrors.length > 0 || networkIssues.length > 0) {
       process.exitCode = 1;
+    }
+
+    try {
+      mkdirSync(reportsDir, { recursive: true });
+      const reportPath = resolve(reportsDir, 'smoke-metrics.json');
+      const reportPayload = {
+        startedAt: runStartedAt,
+        finishedAt: new Date().toISOString(),
+        results,
+        consoleErrors,
+        pageErrors,
+        apiFailures,
+        requestFailures,
+        navigationMetrics
+      };
+      writeFileSync(reportPath, JSON.stringify(reportPayload, null, 2), 'utf8');
+    } catch (writeError) {
+      console.warn('Failed to write smoke metrics report:', writeError);
     }
   }
 }
