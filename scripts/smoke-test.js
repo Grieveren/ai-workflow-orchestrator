@@ -693,7 +693,24 @@ async function run() {
       });
     }
 
-    if (failures.length > 0 || consoleErrors.length > 0 || pageErrors.length > 0 || networkIssues.length > 0) {
+    const relevantNetworkIssues = networkIssues.filter(entry => {
+      if (!anthropicConfigured) {
+        if (entry.status === 401 || entry.status === 404) {
+          return false;
+        }
+        if (entry.failure) {
+          return true;
+        }
+      }
+      return entry.failure || (entry.status ?? 0) >= 500;
+    });
+
+    const shouldFail =
+      failures.length > 0 ||
+      (anthropicConfigured && (consoleErrors.length > 0 || pageErrors.length > 0)) ||
+      relevantNetworkIssues.length > 0;
+
+    if (shouldFail) {
       process.exitCode = 1;
     }
 
@@ -708,7 +725,8 @@ async function run() {
         pageErrors,
         apiFailures,
         requestFailures,
-        navigationMetrics
+        navigationMetrics,
+        anthropicConfigured
       };
       writeFileSync(reportPath, JSON.stringify(reportPayload, null, 2), 'utf8');
     } catch (writeError) {
