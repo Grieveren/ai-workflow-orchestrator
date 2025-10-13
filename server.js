@@ -8,6 +8,7 @@ dotenv.config();
 const app = express();
 const PORT = 3001;
 const DOCUMENT_TYPES = ['brd', 'fsd', 'techSpec'];
+const anthropicConfigured = Boolean(process.env.ANTHROPIC_API_KEY);
 
 // Initialize SQLite database
 const dbPath = process.env.NODE_ENV === 'test' ? './workflow.test.db' : './workflow.db';
@@ -38,6 +39,16 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
+  if (!anthropicConfigured) {
+    return res.json({
+      content: [
+        {
+          text: 'Mock assistant response. Configure ANTHROPIC_API_KEY for live generations.'
+        }
+      ]
+    });
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -79,6 +90,28 @@ app.post('/api/chat', async (req, res) => {
 
 // Streaming endpoint for document generation
 app.post('/api/chat/stream', async (req, res) => {
+  if (!anthropicConfigured) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const mockDocuments = JSON.stringify({
+      brd: '## Executive Summary\n- Offline mode placeholder content',
+      fsd: '## Overview\n- Offline mode placeholder content',
+      techSpec: '## Implementation Approach\n- Offline mode placeholder content'
+    });
+
+    const payload = JSON.stringify({
+      type: 'content_block_delta',
+      delta: { text: mockDocuments }
+    });
+
+    res.write(`data: ${payload}\n\n`);
+    res.write('data: [DONE]\n\n');
+    res.end();
+    return;
+  }
+
   try {
     // Set up Server-Sent Events headers
     res.setHeader('Content-Type', 'text/event-stream');
