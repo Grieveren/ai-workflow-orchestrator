@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build-test-and-smoke:
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test:run
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run smoke and e2e checks
+        env:
+          NODE_ENV: test
+        run: |
+          rm -f workflow.test.db
+          mkdir -p reports
+
+          NODE_ENV=test npm run server &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
+
+          npx wait-on http://127.0.0.1:3001/api/requests --timeout 60000
+
+          npm run preview -- --host 127.0.0.1 --port 4173 &
+          PREVIEW_PID=$!
+          echo "PREVIEW_PID=$PREVIEW_PID" >> "$GITHUB_ENV"
+
+          npx wait-on http://127.0.0.1:4173 --timeout 60000
+
+          BASE_URL=http://127.0.0.1:4173 API_URL=http://127.0.0.1:3001 node scripts/smoke-test.js
+
+          BASE_URL=http://127.0.0.1:4173 API_URL=http://127.0.0.1:3001 npx playwright test --config=playwright.config.ts --reporter=list
+
+      - name: Upload smoke metrics
+        if: always() && hashFiles('reports/smoke-metrics.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-metrics
+          path: reports/smoke-metrics.json
+
+      - name: Shutdown background services
+        if: always()
+        run: |
+          if [ -n "${SERVER_PID:-}" ]; then kill $SERVER_PID || true; fi
+          if [ -n "${PREVIEW_PID:-}" ]; then kill $PREVIEW_PID || true; fi

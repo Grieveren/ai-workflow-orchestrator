@@ -5,11 +5,13 @@ import { TeamCapacityWidget } from '../features/dashboard/components/TeamCapacit
 import { useNavigate } from 'react-router-dom';
 import { filterRequestsByView, getCurrentUser, sortRequestsByImpact } from '../utils/requestFilters';
 import type { Request } from '../types';
+import { SkeletonCard } from '../components/ui/Skeleton';
+import { Button } from '../components/ui';
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const { view, requests: requestsHook, documents } = useAppContext();
-  const { requests } = requestsHook;
+  const { requests, loading, error, reloadRequests } = requestsHook;
   const { resetDocuments } = documents;
 
   const handleViewRequestDetail = (request: Request) => {
@@ -17,6 +19,28 @@ export function DashboardPage() {
     resetDocuments();
     navigate(`/request/${request.id}`);
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] p-6">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">We couldn&apos;t load your requests</h2>
+        <p className="text-[var(--text-secondary)] mb-4">{error}</p>
+        <Button variant="primary" onClick={() => reloadRequests()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
 
   // Get current user, filter, and sort requests by impact score (with priority fallback)
   const currentUser = getCurrentUser(view);

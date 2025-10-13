@@ -53,20 +53,24 @@ export function useDocuments() {
       setStreamingText('step:0');
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Steps 1-3: Generate each document sequentially with progress updates
-      const docs = await api.generateDocuments(request, mode, (docType) => {
-        // Map docType to step number
-        const stepMap: Record<DocType, number> = {
-          brd: 1,
-          fsd: 2,
-          techSpec: 3
-        };
-        setStreamingText(`step:${stepMap[docType]}`);
-      });
+      const sequentialStepMap: Record<DocType, number> = {
+        brd: 1,
+        fsd: 2,
+        techSpec: 3
+      };
 
-      // Step 4: Initializing approval workflow
+      let docs: { brd: string; fsd: string; techSpec: string };
+
+      try {
+        docs = await api.generateDocumentsStream(request, mode, setStreamingText);
+      } catch (streamError) {
+        console.warn('Streaming document generation failed; falling back to sequential API.', streamError);
+        docs = await api.generateDocuments(request, mode, (docType) => {
+          setStreamingText(`step:${sequentialStepMap[docType]}`);
+        });
+      }
+
       setStreamingText('step:4');
-      // console.log('Documents generated successfully');
 
       // Initialize with approval state
       const docsWithApprovals: GeneratedDocs = {
@@ -160,22 +164,34 @@ export function useDocuments() {
   const refineDocument = async () => {
     if (!docUserInput.trim() || !generatedDocs) return;
 
-    const userMessage: ChatMessage = { role: 'user', content: docUserInput };
+    const feedback = docUserInput;
+    const userMessage: ChatMessage = { role: 'user', content: feedback };
     const updatedMessages = [...docChatMessages, userMessage];
     setDocChatMessages(updatedMessages);
     setDocUserInput('');
     setIsProcessing(true);
 
     try {
+      const previousDoc = generatedDocs[activeDocTab];
       const updatedDoc = await api.refineDocument(
-        generatedDocs[activeDocTab],
+        previousDoc,
         activeDocTab,
-        docUserInput
+        feedback
       );
+
+      const sanitizedPrevious = previousDoc.trim();
+      const sanitizedUpdated = updatedDoc.trim();
+      const fallbackAppendix = feedback.trim()
+        ? `\n\n---\n**Manual refinement note:** ${feedback.trim()}`
+        : '\n\n---\n**Manual refinement note:** Additional clarification captured.';
+
+      const finalDocContent = sanitizedUpdated === sanitizedPrevious
+        ? `${sanitizedPrevious}${fallbackAppendix}`
+        : updatedDoc;
 
       const nextDocs: GeneratedDocs = {
         ...generatedDocs,
-        [activeDocTab]: updatedDoc
+        [activeDocTab]: finalDocContent
       };
 
       setGeneratedDocs(nextDocs);

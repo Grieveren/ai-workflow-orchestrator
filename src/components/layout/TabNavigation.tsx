@@ -11,6 +11,9 @@ export function TabNavigation({ requestCount, view }: TabNavigationProps) {
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard' || location.pathname.startsWith('/request');
+    }
     return location.pathname.startsWith(path);
   };
 
@@ -27,10 +30,18 @@ export function TabNavigation({ requestCount, view }: TabNavigationProps) {
       {/* Requester View: Dashboard first, then New Request */}
       {view === 'requester' && (
         <>
-          <Link to="/dashboard" className={getClassName('/dashboard')}>
+          <Link
+            to="/dashboard"
+            className={getClassName('/dashboard')}
+            aria-current={isActive('/dashboard') ? 'page' : undefined}
+          >
             Dashboard ({requestCount})
           </Link>
-          <Link to="/" className={getClassName('/')}>
+          <Link
+            to="/"
+            className={getClassName('/')}
+            aria-current={isActive('/') ? 'page' : undefined}
+          >
             New Request
           </Link>
         </>
@@ -39,13 +50,25 @@ export function TabNavigation({ requestCount, view }: TabNavigationProps) {
       {/* Product Owner, Developer, and Management Views */}
       {(view === 'product-owner' || view === 'dev' || view === 'management') && (
         <>
-          <Link to="/dashboard" className={getClassName('/dashboard')}>
+          <Link
+            to="/dashboard"
+            className={getClassName('/dashboard')}
+            aria-current={isActive('/dashboard') ? 'page' : undefined}
+          >
             Dashboard ({requestCount})
           </Link>
-          <Link to="/kanban" className={getClassName('/kanban')}>
+          <Link
+            to="/kanban"
+            className={getClassName('/kanban')}
+            aria-current={isActive('/kanban') ? 'page' : undefined}
+          >
             Kanban Board
           </Link>
-          <Link to="/analytics" className={getClassName('/analytics')}>
+          <Link
+            to="/analytics"
+            className={getClassName('/analytics')}
+            aria-current={isActive('/analytics') ? 'page' : undefined}
+          >
             Analytics
           </Link>
         </>

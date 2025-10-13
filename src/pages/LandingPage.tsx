@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 export function LandingPage() {
   const navigate = useNavigate();
   const { view, chat, requests: requestsHook, documents } = useAppContext();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -48,22 +48,25 @@ export function LandingPage() {
   ];
 
   // Auto-scroll to bottom when new messages arrive
+  const isChatActive = chatMessages.length > 0;
+  const isPanelExpanded = isExpanded || isChatActive;
+
   useEffect(() => {
-    if (chatMessages.length > 0 && isExpanded) {
+    if (isPanelExpanded && chatMessages.length > 0) {
       setTimeout(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
-  }, [chatMessages, isExpanded]);
+  }, [isPanelExpanded, chatMessages.length]);
 
   // Auto-focus input when expanded
   useEffect(() => {
-    if (isExpanded && chatMessages.length === 0) {
+    if (isPanelExpanded && chatMessages.length === 0) {
       setTimeout(() => {
         chatInputRef.current?.focus();
       }, 300); // Wait for animation to complete
     }
-  }, [isExpanded, chatMessages.length]);
+  }, [isPanelExpanded, chatMessages.length]);
 
   // Synchronous redirect - no flash, follows React best practices
   if (view !== 'requester') {
@@ -77,6 +80,11 @@ export function LandingPage() {
   const handleExampleClick = (example: string) => {
     setIsExpanded(true);
     startConversation(example);
+  };
+
+  const handleStartConversation = () => {
+    setIsExpanded(true);
+    startConversation();
   };
 
   const submitRequest = async () => {
@@ -138,7 +146,7 @@ export function LandingPage() {
           <div className="p-0">
             {/* Chat messages area - grows when expanded, only shows when there are messages */}
             <div className={`overflow-y-auto transition-all duration-500 ${
-              isExpanded && chatMessages.length > 0
+              isPanelExpanded && chatMessages.length > 0
                 ? 'min-h-[450px] max-h-[450px] opacity-100 bg-gray-50 dark:bg-gray-900 rounded-xl p-6 mx-6 mt-6 mb-4'
                 : 'min-h-0 max-h-0 opacity-0 p-0'
             }`}>
@@ -150,7 +158,7 @@ export function LandingPage() {
             </div>
 
             {/* Input area */}
-            {!isExpanded ? (
+            {!isPanelExpanded ? (
               <div onClick={handleExpand} className="p-6 cursor-pointer">
                 <div className="relative">
                   <input
@@ -176,7 +184,7 @@ export function LandingPage() {
                     onChange={(e) => setUserInput(e.target.value)}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && userInput.trim()) {
-                        startConversation();
+                        handleStartConversation();
                       }
                     }}
                     placeholder="Describe what you need... (e.g. I need a report on sales by region)"
@@ -186,7 +194,7 @@ export function LandingPage() {
                              hover:border-purple-400 dark:hover:border-purple-500 transition-all"
                   />
                   <button
-                    onClick={() => startConversation()}
+                    onClick={handleStartConversation}
                     disabled={chatIsProcessing || !userInput.trim()}
                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition disabled:opacity-50"
                   >

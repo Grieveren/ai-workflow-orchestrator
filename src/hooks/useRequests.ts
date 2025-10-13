@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Request, RequestStage, RequestData, ChatMessage, ImpactAssessment } from '../types';
 import { api } from '../services/api';
 import { MOCK_USERS } from '../constants/users';
@@ -12,24 +12,24 @@ export function useRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadRequests = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await api.getAllRequests();
+      setRequests(data);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to load requests:', err);
+      setError('Failed to load requests from database');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Load requests from database on mount
   useEffect(() => {
-    const loadRequests = async () => {
-      try {
-        setLoading(true);
-        const data = await api.getAllRequests();
-        setRequests(data);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to load requests:', err);
-        setError('Failed to load requests from database');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRequests();
-  }, []);
+    void loadRequests();
+  }, [loadRequests]);
 
   /**
    * Add a new request to the list and persist to database
@@ -281,6 +281,7 @@ export function useRequests() {
     viewRequestDetail,
     closeRequestDetail,
     dismissAlert,
-    adjustImpactScore
+    adjustImpactScore,
+    reloadRequests: loadRequests
   };
 }

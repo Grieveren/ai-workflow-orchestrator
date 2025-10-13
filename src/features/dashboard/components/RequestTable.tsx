@@ -1,4 +1,5 @@
 import { Users, Bot, ArrowDown } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
 import { StageBadge, SLABadge, ImpactBadge } from '../../../components/ui';
 import { calculateSLA } from '../../../utils/slaCalculator';
 import type { Request, ViewType } from '../../../types';
@@ -11,6 +12,14 @@ interface RequestTableProps {
 
 export function RequestTable({ requests, onRequestClick, view }: RequestTableProps) {
   const showSubmittedBy = view === 'dev' || view === 'management';
+  const columnCount = showSubmittedBy ? 9 : 8;
+
+  const handleRowKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, request: Request) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onRequestClick(request);
+    }
+  };
 
   return (
     <div className="bg-[var(--surface-elevated)] rounded-xl shadow-xs border border-[var(--border-subtle)] overflow-hidden">
@@ -47,7 +56,11 @@ export function RequestTable({ requests, onRequestClick, view }: RequestTablePro
                 <tr
                   key={req.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open request ${req.id}: ${req.title}`}
                   onClick={() => onRequestClick(req)}
+                  onKeyDown={(event) => handleRowKeyDown(event, req)}
                 >
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 font-mono">{req.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-800 dark:text-slate-100 font-medium">{req.title}</td>
@@ -90,6 +103,13 @@ export function RequestTable({ requests, onRequestClick, view }: RequestTablePro
                 </tr>
               );
             })}
+            {requests.length === 0 && (
+              <tr>
+                <td colSpan={columnCount} className="px-6 py-8 text-center text-sm text-[var(--text-secondary)]">
+                  No requests to display yet.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

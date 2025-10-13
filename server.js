@@ -6,8 +6,9 @@ import Database from 'better-sqlite3';
 dotenv.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = Number(process.env.PORT || 3001);
 const DOCUMENT_TYPES = ['brd', 'fsd', 'techSpec'];
+const anthropicConfigured = Boolean(process.env.ANTHROPIC_API_KEY);
 
 // Initialize SQLite database
 const dbPath = process.env.NODE_ENV === 'test' ? './workflow.test.db' : './workflow.db';
@@ -19,25 +20,35 @@ db.pragma('foreign_keys = ON');
 // Initialize database schema
 initializeDatabase();
 
-// Restrict CORS to frontend origin only
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    // Allow any localhost origin (handy when Vite picks a random free port)
-    if (/^http:\/\/localhost:\d+$/.test(origin)) {
-      return callback(null, true);
-    }
-
-    callback(new Error(`Origin ${origin} not allowed by CORS`));
-  },
+const corsOptions = {
+  origin: true,
   credentials: true
-}));
+};
+
+// Allow cross-origin requests from any local dev server
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || 'Content-Type');
+    return res.sendStatus(204);
+  }
+
+  return next();
+});
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
+  if (!anthropicConfigured) {
+    return res.json({
+      content: [
+        {
+          text: 'Mock assistant response. Configure ANTHROPIC_API_KEY for live generations.'
+        }
+      ]
+    });
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -52,7 +63,18 @@ app.post('/api/chat', async (req, res) => {
       })
     });
 
-    const data = await response.json();
+    const raw = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      console.error('Anthropic API non-JSON response:', raw);
+      if (!response.ok) {
+        return res.status(response.status).json({ error: 'Anthropic upstream error', message: raw });
+      }
+      return res.status(500).json({ error: 'Invalid upstream response format', message: raw });
+    }
 
     if (!response.ok) {
       console.error('Anthropic API error:', data);
@@ -68,6 +90,28 @@ app.post('/api/chat', async (req, res) => {
 
 // Streaming endpoint for document generation
 app.post('/api/chat/stream', async (req, res) => {
+  if (!anthropicConfigured) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const mockDocuments = JSON.stringify({
+      brd: '## Executive Summary\n- Offline mode placeholder content',
+      fsd: '## Overview\n- Offline mode placeholder content',
+      techSpec: '## Implementation Approach\n- Offline mode placeholder content'
+    });
+
+    const payload = JSON.stringify({
+      type: 'content_block_delta',
+      delta: { text: mockDocuments }
+    });
+
+    res.write(`data: ${payload}\n\n`);
+    res.write('data: [DONE]\n\n');
+    res.end();
+    return;
+  }
+
   try {
     // Set up Server-Sent Events headers
     res.setHeader('Content-Type', 'text/event-stream');
@@ -89,7 +133,12 @@ app.post('/api/chat/stream', async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = await response.text();
+      }
       console.error('Anthropic API error:', errorData);
       res.write(`data: ${JSON.stringify({ error: true, message: errorData })}\n\n`);
       res.end();
