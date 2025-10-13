@@ -57,7 +57,7 @@ app.post('/api/chat', async (req, res) => {
 
     try {
       data = JSON.parse(raw);
-    } catch (parseError) {
+    } catch {
       console.error('Anthropic API non-JSON response:', raw);
       if (!response.ok) {
         return res.status(response.status).json({ error: 'Anthropic upstream error', message: raw });

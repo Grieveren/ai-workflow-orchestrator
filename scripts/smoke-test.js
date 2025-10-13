@@ -1,4 +1,4 @@
-/* global process, console, setTimeout, document, HTMLElement, HTMLInputElement, HTMLTextAreaElement, fetch, window */
+/* global process, console, setTimeout, document, HTMLElement, HTMLInputElement, HTMLTextAreaElement, fetch, window, performance */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -308,7 +308,7 @@ async function run() {
       const selectedMode = await page
         .waitForFunction(
           () => {
-            const radio = document.querySelector('input[type=\"radio\"][value=\"guided\"]');
+            const radio = document.querySelector('input[type="radio"][value="guided"]');
             if (radio instanceof HTMLInputElement) {
               radio.click();
               return true;
