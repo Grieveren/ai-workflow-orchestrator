@@ -6,6 +6,9 @@ const apiUrl = process.env.API_URL ?? 'http://localhost:3001';
 test.describe('Developer handoff workflow', () => {
   test.beforeEach(async ({ request }) => {
     await request.patch(`${apiUrl}/api/requests/REQ-002`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
       data: {
         stage: 'Ready for Dev',
         owner: 'Sarah Chen',
@@ -17,6 +20,9 @@ test.describe('Developer handoff workflow', () => {
 
   test.afterEach(async ({ request }) => {
     await request.patch(`${apiUrl}/api/requests/REQ-002`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
       data: {
         stage: 'Ready for Dev',
         owner: 'Sarah Chen',

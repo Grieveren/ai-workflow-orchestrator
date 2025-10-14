@@ -313,105 +313,120 @@ async function run() {
     }
 
     // --- Step 6: Attempt document generation ---
-    try {
-      const selectedMode = await page
-        .waitForFunction(
-          () => {
-            const radio = document.querySelector('input[type="radio"][value="guided"]');
-            if (radio instanceof HTMLInputElement) {
-              radio.click();
+    if (!anthropicConfigured) {
+      recordResult(
+        'Document generation succeeds',
+        'skip',
+        'Skipped because ANTHROPIC_API_KEY is not configured.'
+      );
+    } else {
+      try {
+        const selectedMode = await page
+          .waitForFunction(
+            () => {
+              const radio = document.querySelector('input[type="radio"][value="guided"]');
+              if (radio instanceof HTMLInputElement) {
+                radio.click();
+                return true;
+              }
+              return false;
+            },
+            { timeout: 5000 }
+          )
+          .catch(() => false);
+
+        if (!selectedMode) {
+          recordResult('Document generation succeeds', 'fail', 'Could not select a generation mode.');
+        } else {
+          const clickedGenerate = await page.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const target = buttons.find(btn => btn.textContent?.includes('Generate Requirements Documents'));
+            if (target instanceof HTMLElement) {
+              target.click();
               return true;
             }
             return false;
-          },
-          { timeout: 5000 }
-        )
-        .catch(() => false);
-
-      if (!selectedMode) {
-        recordResult('Document generation succeeds', 'fail', 'Could not select a generation mode.');
-      } else {
-        const clickedGenerate = await page.evaluate(() => {
-          const buttons = Array.from(document.querySelectorAll('button'));
-          const target = buttons.find(btn => btn.textContent?.includes('Generate Requirements Documents'));
-          if (target instanceof HTMLElement) {
-            target.click();
-            return true;
-          }
-          return false;
-        });
-
-        if (!clickedGenerate) {
-          recordResult('Document generation succeeds', 'fail', 'Generate button not found.');
-        } else {
-          const docsRendered = await page
-            .waitForFunction(
-              () => !!document.querySelector('textarea'),
-              { timeout: 60000 }
-            )
-            .then(() => true)
-            .catch(() => false);
-
-          const errorToastPresent = await page.evaluate(() => {
-            const toasts = Array.from(document.querySelectorAll('div'));
-            return toasts.some(div =>
-              div.textContent?.includes('Failed to generate requirements')
-            );
           });
 
-          if (!docsRendered) {
-            recordResult(
-              'Document generation succeeds',
-              'fail',
-              'Generated documents did not render within 60 seconds.'
-            );
-          } else if (errorToastPresent) {
-            recordResult(
-              'Document generation succeeds',
-              'fail',
-              'Toast reported "Failed to generate requirements" after triggering generation.'
-            );
+          if (!clickedGenerate) {
+            recordResult('Document generation succeeds', 'fail', 'Generate button not found.');
           } else {
-            const docContent = await page.evaluate(() => {
-              const textarea = document.querySelector('textarea');
-              if (textarea instanceof HTMLTextAreaElement) {
-                return textarea.value;
-              }
-              return '';
+            const docsRendered = await page
+              .waitForFunction(
+                () => !!document.querySelector('textarea'),
+                { timeout: 60000 }
+              )
+              .then(() => true)
+              .catch(() => false);
+
+            const errorToastPresent = await page.evaluate(() => {
+              const toasts = Array.from(document.querySelectorAll('div'));
+              return toasts.some(div =>
+                div.textContent?.includes('Failed to generate requirements')
+              );
             });
 
-            if (!docContent.trim()) {
+            if (!docsRendered) {
               recordResult(
                 'Document generation succeeds',
                 'fail',
-                'Document viewer rendered but initial document content was empty.'
+                'Generated documents did not render within 60 seconds.'
+              );
+            } else if (errorToastPresent) {
+              recordResult(
+                'Document generation succeeds',
+                'fail',
+                'Toast reported "Failed to generate requirements" after triggering generation.'
               );
             } else {
-              recordResult('Document generation succeeds', 'pass');
+              const docContent = await page.evaluate(() => {
+                const textarea = document.querySelector('textarea');
+                if (textarea instanceof HTMLTextAreaElement) {
+                  return textarea.value;
+                }
+                return '';
+              });
+
+              if (!docContent.trim()) {
+                recordResult(
+                  'Document generation succeeds',
+                  'fail',
+                  'Document viewer rendered but initial document content was empty.'
+                );
+              } else {
+                recordResult('Document generation succeeds', 'pass');
+              }
             }
           }
         }
+      } catch (error) {
+        recordResult('Document generation succeeds', 'fail', error.message);
       }
-    } catch (error) {
-      recordResult('Document generation succeeds', 'fail', error.message);
     }
 
     // --- Step 7: Document refinement updates document ---
-    try {
-      const initialDocContent = await page.evaluate(() => {
-        const textarea = document.querySelector('textarea');
-        if (textarea instanceof HTMLTextAreaElement) {
-          return textarea.value;
-        }
-        return '';
-      });
+    if (!anthropicConfigured) {
+      recordResult(
+        'Document refinement updates document',
+        'skip',
+        'Skipped because ANTHROPIC_API_KEY is not configured.'
+      );
+    } else {
+      try {
+        const initialDocContent = await page.evaluate(() => {
+          const textarea = document.querySelector('textarea');
+          if (textarea instanceof HTMLTextAreaElement) {
+            return textarea.value;
+          }
+          return '';
+        });
 
-      const inputHandle = await page
-        .waitForSelector('input[placeholder*="risk analysis"]', { timeout: 5000 })
-        .catch(() => null);
+        const inputHandle = await page
+          .waitForSelector('input[placeholder*="risk analysis"]', { timeout: 5000 })
+          .catch(() => null);
 
-      if (!inputHandle) {
-        recordResult('Document refinement updates document', 'fail', 'Document chat input not found.');
+        if (!inputHandle) {
+          recordResult('Document refinement updates document', 'fail', 'Document chat input not found.');
       } else {
         await inputHandle.click({ clickCount: 3 });
         await inputHandle.type('Please add a concise summary of key risks.');
@@ -475,10 +490,11 @@ async function run() {
           }
         }
 
-        await inputHandle.dispose();
+          await inputHandle.dispose();
+        }
+      } catch (error) {
+        recordResult('Document refinement updates document', 'fail', error.message);
       }
-    } catch (error) {
-      recordResult('Document refinement updates document', 'fail', error.message);
     }
 
     // --- Step 8: Submit page availability ---
